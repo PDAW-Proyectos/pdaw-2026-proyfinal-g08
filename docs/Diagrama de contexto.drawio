@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="lkqqQcoH2CZny69UKrjg">
+    <mxGraphModel dx="774" dy="423" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-6" edge="1" parent="1" source="BjfJNmmb7hh8Z-fx3XUV-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.302;exitY=0.995;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=gap;" target="BjfJNmmb7hh8Z-fx3XUV-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-8" edge="1" parent="1" source="BjfJNmmb7hh8Z-fx3XUV-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=-0.022;exitY=0.379;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;defaultLabelBackgroundColor=gap;" target="BjfJNmmb7hh8Z-fx3XUV-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-9" edge="1" parent="1" source="BjfJNmmb7hh8Z-fx3XUV-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=gap;" target="BjfJNmmb7hh8Z-fx3XUV-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Aplicación web: Central de partidos de futbol" vertex="1">
+          <mxGeometry height="130" width="150" x="310" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-7" edge="1" parent="1" source="BjfJNmmb7hh8Z-fx3XUV-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0.004;entryY=0.61;entryDx=0;entryDy=0;defaultLabelBackgroundColor=gap;" target="BjfJNmmb7hh8Z-fx3XUV-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Usuario visitante de la aplicacion" vertex="1">
+          <mxGeometry height="60" width="120" x="80" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-10" edge="1" parent="1" source="BjfJNmmb7hh8Z-fx3XUV-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1.009;entryY=0.615;entryDx=0;entryDy=0;defaultLabelBackgroundColor=gap;" target="BjfJNmmb7hh8Z-fx3XUV-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="Admin" vertex="1">
+          <mxGeometry height="60" width="120" x="610" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-5" edge="1" parent="1" source="BjfJNmmb7hh8Z-fx3XUV-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.685;entryY=0.973;entryDx=0;entryDy=0;defaultLabelBackgroundColor=gap;" target="BjfJNmmb7hh8Z-fx3XUV-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="API: TheSportsDB" vertex="1">
+          <mxGeometry height="60" width="120" x="325" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Visualizar partidos de la fecha" vertex="1">
+          <mxGeometry height="30" width="110" x="200" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Agregar productos a la tienda" vertex="1">
+          <mxGeometry height="30" width="130" x="460" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Visualizar usarios activos" vertex="1">
+          <mxGeometry height="30" width="130" x="470" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="BjfJNmmb7hh8Z-fx3XUV-14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Pedir ligas de futbol y sus equipos" vertex="1">
+          <mxGeometry height="30" width="110" x="240" y="270" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
