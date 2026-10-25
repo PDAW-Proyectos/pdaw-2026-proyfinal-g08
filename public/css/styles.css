@@ -1,0 +1,535 @@
+      :root {
+        color-scheme: light;
+        --grada-verde: #087b50;
+        --grada-oscuro: #153a2e;
+        --grada-menta: #e9f4ee;
+        --grada-fondo-pagina: #f4f7f5;
+        --grada-atenuado: #75827c;
+        --grada-borde: #e2e9e5;
+      }
+
+      body {
+        background: var(--grada-fondo-pagina);
+        color: #20352d;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      a {
+        color: var(--grada-verde);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #055c3c;
+      }
+
+      .encabezado-sitio,
+      .pie-sitio {
+        background: #fff;
+      }
+
+      .encabezado-sitio {
+        border-bottom: 1px solid var(--grada-borde);
+        background-color: var(--grada-menta);
+      }
+
+      .navbar {
+        display: flex;
+        min-height: 72px;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        background-color: #fff;
+      }
+
+      .navbar-toggler {
+        border-color: #cfe2d6;
+        background-color: #f7fbf8;
+        display: none;
+      }
+
+      .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23087b50' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      }
+
+      .navbar-brand {
+        color: var(--grada-oscuro);
+        font-size: 1.45rem;
+        font-weight: 800;
+        letter-spacing: -0.06em;
+      }
+
+      .marca-icono {
+        display: inline-grid;
+        width: 30px;
+        height: 30px;
+        margin-right: 0.4rem;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--grada-verde);
+        color: #fff;
+        font-size: 0.9rem;
+        letter-spacing: 0;
+        vertical-align: -2px;
+      }
+
+      .navbar .nav-link {
+        color: #68766f;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .navbar .nav-link:hover,
+      .navbar .nav-link.active {
+        color: var(--grada-verde);
+      }
+
+      .navbar .navbar-collapse {
+        display: flex;
+        flex-basis: auto;
+        flex-grow: 1;
+        align-items: center;
+      }
+
+      .navbar .navbar-nav {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-left: 1.5rem;
+      }
+
+      .navbar .btn {
+        margin-left: 1rem;
+        white-space: nowrap;
+      }
+
+      .envoltura-pagina {
+        width: calc(100% - 2rem);
+        max-width: 1680px;
+      }
+
+      .cuadricula-partidos {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .distribucion-contenido {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+        gap: 1.5rem;
+      }
+
+      .insignia-demo {
+        border: 1px solid #cfe8d8;
+        background-color: #e9f4ee;
+        color: #176b49;
+        font-size: 0.67rem;
+        font-weight: 750;
+        letter-spacing: 0.04em;
+      }
+
+      .texto-antetitulo {
+        color: var(--grada-verde);
+        font-size: 0.73rem;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .titulo-pagina {
+        color: var(--grada-oscuro);
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        letter-spacing: -0.055em;
+      }
+
+      .titulo-seccion {
+        color: var(--grada-oscuro);
+        font-size: 1.25rem;
+        font-weight: 750;
+        letter-spacing: -0.035em;
+      }
+
+      .atenuado {
+        color: var(--grada-atenuado);
+      }
+
+      .boton-grada {
+        border-color: var(--grada-verde);
+        background: var(--grada-verde);
+        color: #fff;
+        font-weight: 650;
+      }
+
+      .boton-grada:hover,
+      .boton-grada:focus {
+        border-color: #066641;
+        background: #066641;
+        color: #fff;
+      }
+
+      .boton-contorno-grada {
+        border-color: #d8e5dd;
+        background: #fff;
+        color: var(--grada-oscuro);
+        font-weight: 600;
+      }
+
+      .boton-contorno-grada:hover,
+      .boton-contorno-grada:focus {
+        border-color: var(--grada-verde);
+        color: var(--grada-verde);
+      }
+
+      .control-fecha {
+        max-width: 190px;
+        border: 1px solid #cfe2d6;
+        border-color: var(--grada-borde);
+        background-color: #fff;
+        color: var(--grada-oscuro);
+        color-scheme: light;
+        font-size: 0.88rem;
+      }
+
+      .control-fecha:focus {
+        border-color: #8fc7a8;
+        box-shadow: 0 0 0 0.2rem rgb(8 123 80 / 14%);
+      }
+
+      .tarjeta-partido,
+      .panel,
+      .tarjeta-liga,
+      .tarjeta-goleadores {
+        border: 1px solid var(--grada-borde);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .tarjeta-partido {
+        height: 100%;
+        padding: 1rem;
+        transition:
+          border-color 160ms ease,
+          transform 160ms ease;
+      }
+
+      .tarjeta-partido:hover {
+        transform: translateY(-2px);
+        border-color: #a9cbbb;
+      }
+
+      .metadatos-partido {
+        color: var(--grada-atenuado);
+        font-size: 0.75rem;
+      }
+
+      .insignia-equipo {
+        display: inline-grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--grada-menta);
+        color: var(--grada-verde);
+        font-size: 0.72rem;
+        font-weight: 800;
+      }
+
+      .insignia-equipo.azul {
+        background: #edf1f8;
+        color: #557092;
+      }
+
+      .marcador-partido {
+        color: var(--grada-oscuro);
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      .nombre-equipo {
+        color: #526159;
+        font-size: 0.74rem;
+        font-weight: 600;
+      }
+
+      .estado-partido {
+        color: var(--grada-verde);
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      .boton-favorito {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #a2ada7;
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
+      .boton-favorito[aria-pressed="true"] {
+        color: #d69b2b;
+      }
+
+      .portada-comunidad {
+        min-height: 250px;
+        overflow: hidden;
+        border-radius: 16px;
+        background:
+          linear-gradient(90deg, rgb(12 48 36 / 96%) 0%, rgb(12 48 36 / 74%) 58%, rgb(12 48 36 / 24%) 100%),
+          url("https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1400&q=85")
+            center 55% / cover;
+        color: #fff;
+      }
+
+      .portada-comunidad .texto-antetitulo {
+        color: #a9e5bd;
+      }
+
+      .portada-comunidad h2 {
+        max-width: 490px;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.045em;
+      }
+
+      .portada-comunidad .btn {
+        background: #b8ed8d;
+        color: #193a2c;
+        font-weight: 700;
+      }
+
+      .panel {
+        overflow: hidden;
+      }
+
+      .fila-resultado {
+        display: grid;
+        grid-template-columns: minmax(90px, 1fr) 1.2fr auto 1.2fr;
+        align-items: center;
+        gap: 0.65rem;
+        min-height: 58px;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #edf1ee;
+      }
+
+      .liga-resultado {
+        color: var(--grada-atenuado);
+        font-size: 0.76rem;
+      }
+
+      .equipo-resultado {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.82rem;
+        font-weight: 650;
+      }
+
+      .equipo-resultado:last-child {
+        justify-content: flex-end;
+        text-align: right;
+      }
+
+      .equipo-resultado .insignia-equipo {
+        width: 25px;
+        height: 25px;
+        border-radius: 8px;
+        font-size: 0.62rem;
+      }
+
+      .marcador-resultado {
+        padding: 0.3rem 0.55rem;
+        border-radius: 7px;
+        background: #f0f5f2;
+        font-weight: 750;
+      }
+
+      .boton-filtro {
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: var(--grada-atenuado);
+        font-size: 0.8rem;
+        font-weight: 650;
+      }
+
+      .boton-filtro[aria-pressed="true"] {
+        background: var(--grada-verde);
+        color: #fff;
+      }
+
+      .tarjeta-liga {
+        padding: 0.9rem;
+        color: inherit;
+        transition:
+          border-color 160ms ease,
+          transform 160ms ease;
+      }
+
+      .tarjeta-liga:hover {
+        transform: translateY(-2px);
+        border-color: #a9cbbb;
+      }
+
+      .icono-liga {
+        display: inline-grid;
+        width: 34px;
+        height: 34px;
+        margin-right: 0.65rem;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--grada-menta);
+        color: var(--grada-verde);
+        font-size: 1rem;
+      }
+
+      .nombre-liga {
+        color: var(--grada-oscuro);
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+
+      .region-liga {
+        color: var(--grada-atenuado);
+        font-size: 0.75rem;
+      }
+
+      .tarjeta-goleadores {
+        padding: 0.9rem;
+      }
+
+      .fila-goleador {
+        display: grid;
+        grid-template-columns: 24px 34px 1fr auto;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.65rem 0;
+        border-top: 1px solid #edf1ee;
+      }
+
+      .puesto-goleador {
+        color: var(--grada-atenuado);
+        font-size: 0.8rem;
+      }
+
+      .avatar-goleador {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 50%;
+        background: #edf4ef;
+        color: var(--grada-verde);
+        font-size: 0.66rem;
+        font-weight: 800;
+      }
+
+      .nombre-goleador {
+        color: var(--grada-oscuro);
+        font-size: 0.83rem;
+        font-weight: 700;
+      }
+
+      .club-goleador {
+        color: var(--grada-atenuado);
+        font-size: 0.73rem;
+      }
+
+      .goles-goleador {
+        color: var(--grada-verde);
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-align: right;
+      }
+
+      .aviso-foro {
+        border: 1px solid #deeee4;
+        border-radius: 14px;
+        background: var(--grada-menta);
+      }
+
+      .pie-sitio {
+        border-top: 1px solid var(--grada-borde);
+        color: var(--grada-atenuado);
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 767.98px) {
+        .navbar {
+          flex-wrap: wrap;
+        }
+
+        .navbar .navbar-toggler {
+          display: block;
+        }
+
+        .navbar .navbar-collapse {
+          padding-bottom: 0.8rem;
+          flex-basis: 100%;
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .navbar .navbar-collapse.show {
+          display: flex;
+        }
+
+        .navbar .navbar-nav {
+          flex-direction: column;
+          gap: 0;
+          margin-left: 0;
+        }
+
+        .navbar .btn {
+          align-self: flex-start;
+          margin-top: 0.5rem;
+          margin-left: 0;
+        }
+      }
+
+      @media (max-width: 991.98px) {
+        .distribucion-contenido {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .cuadricula-partidos {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 767.98px) {
+        .fila-resultado {
+          grid-template-columns: minmax(72px, 0.8fr) 1fr auto 1fr;
+          gap: 0.35rem;
+          padding-right: 0.65rem;
+          padding-left: 0.65rem;
+        }
+
+        .equipo-resultado {
+          gap: 0.3rem;
+          font-size: 0.72rem;
+        }
+      }
+
+      @media (max-width: 575.98px) {
+        .envoltura-pagina {
+          width: calc(100% - 1rem);
+        }
+
+        .cuadricula-partidos {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .fila-resultado {
+          grid-template-columns: 1fr auto 1fr;
+        }
+
+        .liga-resultado {
+          grid-column: 1 / -1;
+        }
+      }
