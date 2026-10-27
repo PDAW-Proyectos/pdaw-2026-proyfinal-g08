@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Debate, aprende y comparte lo que más te une: el fútbol." />
+    <title>Foro · ofsai.</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="encabezado-sitio sticky-top">
+      <nav class="navbar container envoltura-pagina" aria-label="Navegación principal">
+        <a class="navbar-brand" href="index.html" aria-label="ofsai, inicio">
+          <span class="marca-icono" aria-hidden="true">O</span>ofsai.
+        </a>
+        <input class="menu-movil-control" type="checkbox" id="menuMovilForo" aria-label="Mostrar menú de navegación" />
+        <label class="navbar-toggler" for="menuMovilForo">
+          <span class="navbar-toggler-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Menú</span>
+        </label>
+        <div class="navbar-collapse">
+          <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="index.html#resultados">Resultados</a></li>
+            <li class="nav-item"><a class="nav-link" href="index.html#ligas">Ligas</a></li>
+            <li class="nav-item"><a class="nav-link" href="tienda.html">Tienda</a></li>
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="foro.html">Foro</a></li>
+          </ul>
+          <a class="btn btn-sm boton-contorno-grada px-3" href="#cuenta">Iniciar sesión</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container envoltura-pagina py-4 py-lg-5">
+      <nav class="migas-pan mb-3" aria-label="Ruta de navegación">
+        <a href="index.html">Inicio</a><span aria-hidden="true"> / </span><span aria-current="page">Foro</span>
+      </nav>
+
+      <section class="encabezado-foro mb-3" aria-labelledby="titulo-foro">
+        <div>
+          <p class="texto-antetitulo mb-1">La comunidad</p>
+          <h1 id="titulo-foro" class="titulo-pagina mb-1">Aquí, tu voz también juega.</h1>
+          <p class="atenuado mb-0">Un lugar para debatir, aprender y compartir lo que nos une: el fútbol.</p>
+        </div>
+        <a class="btn boton-grada px-3" href="#cuenta"><span aria-hidden="true">＋</span> Crear un tema</a>
+      </section>
+
+      <section class="resumen-foro mb-3" aria-label="Actividad de la comunidad">
+        <div>
+          <p class="texto-antetitulo mb-1">Muchas aficiones. Una comunidad.</p>
+          <h2>El fútbol se disfruta más cuando se comparte.</h2>
+          <p class="mb-0">Actividad reciente de la comunidad</p>
+        </div>
+        <dl class="estadisticas-foro">
+          <div><dt>aficionados</dt><dd>2.480</dd></div>
+          <div><dt>conversaciones</dt><dd>368</dd></div>
+          <div><dt>categorías</dt><dd>24</dd></div>
+        </dl>
+      </section>
+
+      <div class="distribucion-foro">
+        <section class="listado-foro" aria-label="Temas de conversación">
+          <div class="busqueda-foro">
+            <label class="campo-busqueda">
+              <span aria-hidden="true">⌕</span>
+              <span class="visually-hidden">Buscar temas</span>
+              <input type="search" placeholder="Buscar un tema, equipo o aficionado..." />
+            </label>
+            <label class="selector-categoria">
+              <span class="visually-hidden">Filtrar por categoría</span>
+              <select aria-label="Filtrar por categoría">
+                <option>Todas las categorías</option>
+                <option>LaLiga</option>
+                <option>Premier League</option>
+                <option>Fútbol internacional</option>
+                <option>Equipamiento</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="panel panel-foro">
+            <nav class="pestanas-foro" aria-label="Ordenar temas">
+              <a class="activa" href="#temas-recientes" aria-current="page">Últimos temas</a>
+              <a href="#temas-populares">Populares</a>
+              <a href="#temas-sin-respuesta">Sin respuesta</a>
+            </nav>
+            <div id="temas-recientes" class="fila-tema">
+              <span class="avatar-tema">G</span>
+              <div class="tema-contenido">
+                <p class="tema-etiqueta">Comunidad <span aria-hidden="true">✦</span></p>
+                <h2><a href="#cuenta">Bienvenidos a Ofsai: aquí jugamos en equipo</a></h2>
+                <p class="tema-meta">Equipo Ofsai · hace 10 min</p>
+              </div>
+              <div class="tema-contador"><strong>24</strong><span>respuestas</span></div>
+              <div class="tema-visitas"><strong>1,2 mil</strong><span>vistas</span></div>
+            </div>
+            <div id="temas-populares" class="fila-tema">
+              <span class="avatar-tema">MA</span>
+              <div class="tema-contenido">
+                <p class="tema-etiqueta">LaLiga <span class="etiqueta-popular">Popular</span></p>
+                <h2><a href="#cuenta">El clásico: ¿qué once pondrías sobre el césped?</a></h2>
+                <p class="tema-meta">Marcos_10 · hace 2 min</p>
+              </div>
+              <div class="tema-contador"><strong>86</strong><span>respuestas</span></div>
+              <div class="tema-visitas"><strong>2,4 mil</strong><span>vistas</span></div>
+            </div>
+            <div class="fila-tema">
+              <span class="avatar-tema">LG</span>
+              <div class="tema-contenido">
+                <p class="tema-etiqueta">Fútbol internacional</p>
+                <h2><a href="#cuenta">¿Qué equipos están marcando la diferencia esta temporada?</a></h2>
+                <p class="tema-meta">LuciGol · hace 8 min</p>
+              </div>
+              <div class="tema-contador"><strong>42</strong><span>respuestas</span></div>
+              <div class="tema-visitas"><strong>856</strong><span>vistas</span></div>
+            </div>
+            <div id="temas-sin-respuesta" class="fila-tema">
+              <span class="avatar-tema">PF</span>
+              <div class="tema-contenido">
+                <p class="tema-etiqueta">Análisis y táctica</p>
+                <h2><a href="#cuenta">¿Presión alta o bloque bajo? Hablemos de táctica</a></h2>
+                <p class="tema-meta">PizarraFC · hace 15 min</p>
+              </div>
+              <div class="tema-contador"><strong>31</strong><span>respuestas</span></div>
+              <div class="tema-visitas"><strong>624</strong><span>vistas</span></div>
+            </div>
+            <div class="fila-tema">
+              <span class="avatar-tema">NS</span>
+              <div class="tema-contenido">
+                <p class="tema-etiqueta">Internacional</p>
+                <h2><a href="#cuenta">Libertadores: una semifinal para no perderse</a></h2>
+                <p class="tema-meta">NachoSur · hace 28 min</p>
+              </div>
+              <div class="tema-contador"><strong>18</strong><span>respuestas</span></div>
+              <div class="tema-visitas"><strong>403</strong><span>vistas</span></div>
+            </div>
+            <div class="fila-tema">
+              <span class="avatar-tema">DA</span>
+              <div class="tema-contenido">
+                <p class="tema-etiqueta">Equipamiento</p>
+                <h2><a href="#cuenta">Botas para césped artificial: vuestras recomendaciones</a></h2>
+                <p class="tema-meta">Dani_7 · hace 40 min</p>
+              </div>
+              <div class="tema-contador"><strong>27</strong><span>respuestas</span></div>
+              <div class="tema-visitas"><strong>512</strong><span>vistas</span></div>
+            </div>
+            <div class="paginacion-foro">
+              <span>Mostrando 6 de 368 temas de ejemplo</span>
+              <nav aria-label="Paginación del foro">
+                <a class="pagina-activa" href="#temas-recientes" aria-current="page">1</a>
+                <a href="#temas-recientes">2</a>
+                <a href="#temas-recientes">3</a>
+                <a href="#temas-recientes" aria-label="Página siguiente">›</a>
+              </nav>
+            </div>
+          </div>
+        </section>
+
+        <aside class="barra-lateral-foro" aria-label="Información de la comunidad">
+          <section class="panel bienvenida-foro" aria-labelledby="titulo-bienvenida-foro">
+            <span class="icono-bienvenida" aria-hidden="true">♧</span>
+            <h2 id="titulo-bienvenida-foro" class="titulo-seccion">Tu sitio en Ofsai</h2>
+            <p>No importa el color de tu camiseta. Crea tu cuenta y entra en la conversación con respeto y pasión.</p>
+            <a class="btn boton-grada btn-sm px-3" href="#cuenta">Unirme a la comunidad</a>
+            <p class="texto-acceso mb-0">¿Ya tienes cuenta? <a href="#cuenta">Inicia sesión</a></p>
+          </section>
+          <section class="panel normas-foro" aria-labelledby="titulo-normas">
+            <h2 id="titulo-normas" class="titulo-seccion">Rivales, no enemigos.</h2>
+            <ul>
+              <li>Respeta a todas las aficiones.</li>
+              <li>Debate las ideas, no las personas.</li>
+              <li>Sin insultos, spam ni discriminación.</li>
+            </ul>
+            <a href="#cuenta" class="enlace-normas">Leer todas las normas <span aria-hidden="true">→</span></a>
+          </section>
+          <section class="panel etiquetas-foro" aria-labelledby="titulo-etiquetas">
+            <h2 id="titulo-etiquetas" class="titulo-seccion">Se habla de...</h2>
+            <div class="grupo-etiquetas">
+              <a href="#temas-recientes">#LaLiga</a>
+              <a href="#temas-recientes">#PremierLeague</a>
+              <a href="#temas-recientes">#Táctica</a>
+              <a href="#temas-recientes">#Champions</a>
+              <a href="#temas-recientes">#Fichajes</a>
+              <a href="#temas-recientes">#FútbolBase</a>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section id="cuenta" class="aviso-foro d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-4 mt-4" aria-labelledby="titulo-unirse">
+        <div>
+          <h2 id="titulo-unirse" class="titulo-seccion mb-1">La conversación también es tuya.</h2>
+          <p class="atenuado mb-0">El registro y las publicaciones estarán disponibles en próximas versiones.</p>
+        </div>
+        <a class="btn boton-contorno-grada btn-sm px-3" href="index.html">Volver al inicio</a>
+      </section>
+    </main>
+
+    <footer class="pie-sitio py-4">
+      <div class="container envoltura-pagina d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div><a class="navbar-brand fs-5" href="index.html">ofsai.</a><div>El fútbol se vive en comunidad.</div></div>
+        <nav class="d-flex flex-wrap gap-3" aria-label="Navegación del pie de página">
+          <a class="atenuado" href="index.html#cuenta">Sobre Ofsai</a>
+          <a class="atenuado" href="index.html#cuenta">Ayuda</a>
+          <a class="atenuado" href="index.html#cuenta">Privacidad</a>
+          <a class="atenuado" href="index.html#cuenta">Condiciones</a>
+        </nav>
+        <span>© 2026 Ofsai</span>
+      </div>
+    </footer>
+  </body>
+</html>
