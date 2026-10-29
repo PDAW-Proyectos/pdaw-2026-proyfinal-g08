@@ -1,0 +1,4 @@
+-Readme con ficha y visión del producto
+-Backlog priorizado en el tablero
+-Diagramas (Terminar el de clase). ,apa de navegabilidad y wireframes
+-acuerdos, definición de terminado y riesgos
