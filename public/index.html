@@ -33,7 +33,17 @@
             <li class="nav-item"><a class="nav-link" href="tienda.html">Tienda</a></li>
             <li class="nav-item"><a class="nav-link" href="foro.html">Foro</a></li>
           </ul>
-          <a class="btn btn-sm boton-contorno-grada px-3" href="#cuenta">Iniciar sesión</a>
+          <div class="auth-controls">
+            <div class="auth-anonymous" data-auth-anonymous>
+              <button class="btn btn-sm boton-contorno-grada px-3" type="button" data-auth-open="login">Iniciar sesión</button>
+              <button class="btn btn-sm boton-grada px-3" type="button" data-auth-open="register">Registrarse</button>
+            </div>
+            <div class="auth-session" data-auth-session hidden>
+              <span class="auth-user-label">Usuario: <strong data-auth-name></strong></span>
+              <button class="btn btn-sm boton-contorno-grada px-3" type="button" data-auth-logout>Cerrar sesión</button>
+            </div>
+            <span class="auth-feedback" data-auth-feedback role="status" aria-live="polite"></span>
+          </div>
         </div>
       </nav>
     </header>
@@ -215,5 +225,6 @@
       </div>
     </footer>
     <script src="app.js"></script>
+    <script src="auth.js" defer></script>
   </body>
 </html>
