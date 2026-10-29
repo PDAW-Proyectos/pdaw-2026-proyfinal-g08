@@ -1,89 +1,109 @@
 const path = require("node:path");
+const { randomBytes } = require("node:crypto");
 const express = require("express");
-const cookieParser = require("cookie-parser");
-const { createAuthRouter } = require("./auth");
-const { createUserRouter } = require("./users");
 
-const regenerate = (req) =>
-  new Promise((ok, fail) =>
-    req.session.regenerate((e) => (e ? fail(e) : ok())),
-  );
-const destroy = (req) =>
-  new Promise((ok, fail) => req.session.destroy((e) => (e ? fail(e) : ok())));
+const sessionCookieName = "ofsai.sid";
+const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
 
-function createApp({
-  users,
-  secret = "secreto-desarrollador",
-  production = false,
-}) {
+const publicUser = ({ id, name, email, favoriteTeam }) => ({
+  id,
+  name,
+  email,
+  favoriteTeam,
+});
+
+function createApp({ users, production = false }) {
   const app = express();
-  if (production) {
-    app.set("trust proxy", 1);
-  }
-  app.use(express.json());
-  app.use(
-    session({
-      name: "sid",
-      secret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: production,
-      },
-    }),
-  );
+  const sessions = new Map();
+  if (production) app.set("trust proxy", 1);
 
-  //Autenticacion: quien hace la solicitud
+  app.use(express.json({ limit: "16kb" }));
   app.use((req, res, next) => {
-    req.user = req.session.userId ? users.findById(req.session.userId) : null;
+    const cookieHeader = req.headers.cookie || "";
+    const sessionCookie = cookieHeader
+      .split(";")
+      .map((cookie) => cookie.trim())
+      .find((cookie) => cookie.startsWith(`${sessionCookieName}=`));
+    const sessionId = sessionCookie?.slice(sessionCookieName.length + 1);
+    const session = sessionId ? sessions.get(sessionId) : null;
+
+    if (session && session.expiresAt > Date.now()) {
+      req.user = users.findById(session.userId);
+      req.sessionId = sessionId;
+    } else if (sessionId) {
+      sessions.delete(sessionId);
+    }
+
     next();
   });
+
   const requireAuth = (req, res, next) =>
     req.user
       ? next()
-      : res.status(401).json({ error: "Es necesario iniciar sesion" });
+      : res.status(401).json({ error: "Es necesario iniciar sesión." });
 
-  //Autorizacion: que puede hacer el usuario
-  const requireRole = (role) => (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ error: "Es necesario iniciar sesion" });
-    }
-    if (req.user.role !== role) {
-      return res
-        .status(403)
-        .json({ error: "No tiene permisos para realizar esta accion" });
-    }
-    next();
+  const startSession = (res, user) => {
+    const sessionId = randomBytes(32).toString("hex");
+    sessions.set(sessionId, {
+      userId: user.id,
+      expiresAt: Date.now() + sessionDurationMs,
+    });
+    res.cookie(sessionCookieName, sessionId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: production,
+      maxAge: sessionDurationMs,
+      path: "/",
+    });
   };
-  app.post("/api/login", async (req, res) => {
-    const user = await users.verify(req.body?.email, req.body?.password ?? "");
-    if (!user) {
-      return res.status(401).json({ error: "Credenciales invalidas" });
+
+  app.post("/api/register", async (req, res) => {
+    try {
+      const user = await users.register(req.body || {});
+      startSession(res, user);
+      res.status(201).json({ user: publicUser(user) });
+    } catch (error) {
+      if (error.code === "invalid_registration") {
+        return res.status(400).json({ error: error.message });
+      }
+      if (error.code === "email_exists") {
+        return res.status(409).json({ error: error.message });
+      }
+      throw error;
     }
-    await regenerate(req); // nuevo id de sesion : previene la fijacion de sesion
-    req.session.userId = user.id;
-    res.json({ message: "Sesion iniciada correctamente" });
-  });
-  app.post("/api/logout", requireAuth, async (req, res) => {
-    await destroy(req);
-    res.clearCookie("clase08.sid").status(204).end();
   });
 
-  app.get("/api/me", requireAuth, (req, res) => res.json(toPublic(req.user)));
+  app.post("/api/login", async (req, res) => {
+    const user = await users.verify(req.body?.email, req.body?.password);
+    if (!user) {
+      return res.status(401).json({ error: "Correo o contraseña incorrectos." });
+    }
+    startSession(res, user);
+    res.json({ user: publicUser(user) });
+  });
 
-  // Recurso para cualquier usuario autenticado.
-  app.get("/api/prestamos", requireAuth, (req, res) =>
-    res.json({ usuario: req.user.name, prestamos: [] }),
+  app.get("/api/me", requireAuth, (req, res) =>
+    res.json({ user: publicUser(req.user) }),
   );
 
-  // Recurso solo para el rol bibliotecaria.
-  app.get("/api/reportes/vencidos", requireRole("librarian"), (req, res) =>
-    res.json({ vencidos: 3 }),
-  );
+  app.post("/api/logout", requireAuth, (req, res) => {
+    sessions.delete(req.sessionId);
+    res.clearCookie(sessionCookieName, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: production,
+      path: "/",
+    });
+    res.status(204).end();
+  });
 
   app.use(express.static(path.join(__dirname, "..", "public")));
+  app.use((error, req, res, next) => {
+    console.error(error);
+    if (res.headersSent) return next(error);
+    res.status(500).json({ error: "Ocurrió un error interno. Intentá nuevamente." });
+  });
+
   return app;
 }
 
