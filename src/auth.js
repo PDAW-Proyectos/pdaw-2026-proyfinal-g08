@@ -1,4 +1,4 @@
-const authAnonymous = document.querySelector("[data-auth-anonymous]");
+const authAnonymous = document.querySelector(".auth-anonymous[data-auth-anonymous]");
 const authSession = document.querySelector("[data-auth-session]");
 const authName = document.querySelector("[data-auth-name]");
 const authFeedback = document.querySelector("[data-auth-feedback]");

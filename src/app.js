@@ -97,6 +97,10 @@ function createApp({ users, production = false }) {
     res.status(204).end();
   });
 
+  app.get("/auth.js", (req, res) =>
+    res.sendFile(path.join(__dirname, "auth.js")),
+  );
+
   app.use(express.static(path.join(__dirname, "..", "public")));
   app.use((error, req, res, next) => {
     console.error(error);
