@@ -122,6 +122,13 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
   assert.equal(page.status, 200);
   assert.match(await page.text(), /data-auth-open="register"/);
 
+  const leaguesPage = await request("/ligas.html");
+  assert.equal(leaguesPage.status, 200);
+  const leagueHtml = await leaguesPage.text();
+  assert.match(leagueHtml, /Tabla de posiciones/);
+  assert.equal((leagueHtml.match(/data-liga-id=/g) || []).length, 6);
+  assert.equal((leagueHtml.match(/data-liga-tabla/g) || []).length, 6);
+
   const script = await request("/auth.js");
   assert.equal(script.status, 200);
   assert.match(await script.text(), /\/api\/register/);

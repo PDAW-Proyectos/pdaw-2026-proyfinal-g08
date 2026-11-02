@@ -29,7 +29,7 @@
           <ul class="navbar-nav">
             <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.html">Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="#resultados">Resultados</a></li>
-            <li class="nav-item"><a class="nav-link" href="#ligas">Ligas</a></li>
+            <li class="nav-item"><a class="nav-link" href="ligas.html">Ligas</a></li>
             <li class="nav-item"><a class="nav-link" href="tienda.html">Tienda</a></li>
             <li class="nav-item"><a class="nav-link" href="foro.html">Foro</a></li>
           </ul>
@@ -54,172 +54,147 @@
           <p class="texto-antetitulo mb-1">Tu punto de encuentro</p>
           <h1 id="titulo-bienvenida" class="titulo-pagina mb-0">Todo el fútbol. Sin quedar en orsai.</h1>
         </div>
-        <label class="selector-fecha">
-          <span aria-hidden="true">▦</span>
-          <span class="visually-hidden">Elegir fecha de partidos</span>
-          <input id="fechaPartido" type="date" aria-label="Elegir fecha de partidos" />
-        </label>
       </section>
 
-      <section aria-labelledby="titulo-partidos" class="mb-4">
-        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
-          <h2 id="titulo-partidos" class="titulo-seccion mb-0">
-            La jornada, de un vistazo
-          </h2>
-          <a class="small fw-semibold text-nowrap" href="#resultados">Todos los partidos <span aria-hidden="true">→</span></a>
-        </div>
-        <div class="cuadricula-partidos">
-          <article class="tarjeta-partido">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="metadatos-partido">LaLiga · Jornada 10</span>
-              <span class="boton-favorito" aria-hidden="true">☆</span>
-            </div>
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <div class="text-center"><span class="insignia-equipo">RM</span><div class="nombre-equipo mt-1">Real Madrid</div></div>
-              <span class="marcador-partido">2 – 1</span>
-              <div class="text-center"><span class="insignia-equipo azul">FCB</span><div class="nombre-equipo mt-1">Barcelona</div></div>
-            </div>
-            <div class="estado-partido text-center mt-3">● EN JUEGO · 67′</div>
-          </article>
-          <article class="tarjeta-partido">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="metadatos-partido">Premier League · Jornada 9</span>
-              <span class="boton-favorito" aria-hidden="true">☆</span>
-            </div>
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <div class="text-center"><span class="insignia-equipo">ARS</span><div class="nombre-equipo mt-1">Arsenal</div></div>
-              <span class="marcador-partido">1 – 1</span>
-              <div class="text-center"><span class="insignia-equipo azul">LIV</span><div class="nombre-equipo mt-1">Liverpool</div></div>
-            </div>
-            <div class="estado-partido text-center mt-3">● EN JUEGO · 54′</div>
-          </article>
-          <article class="tarjeta-partido">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="metadatos-partido">LaLiga · Jornada 10</span>
-              <span class="boton-favorito" aria-hidden="true">☆</span>
-            </div>
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <div class="text-center"><span class="insignia-equipo">ATM</span><div class="nombre-equipo mt-1">Atlético de Madrid</div></div>
-              <span class="marcador-partido">3 – 0</span>
-              <div class="text-center"><span class="insignia-equipo azul">SEV</span><div class="nombre-equipo mt-1">Sevilla</div></div>
-            </div>
-            <div class="estado-partido text-center mt-3 text-secondary">FINALIZADO</div>
-          </article>
-          <article class="tarjeta-partido">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="metadatos-partido">Libertadores · Semifinal</span>
-              <span class="boton-favorito" aria-hidden="true">☆</span>
-            </div>
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <div class="text-center"><span class="insignia-equipo">RIV</span><div class="nombre-equipo mt-1">River Plate</div></div>
-              <span class="marcador-partido">21:00</span>
-              <div class="text-center"><span class="insignia-equipo azul">FLA</span><div class="nombre-equipo mt-1">Flamengo</div></div>
-            </div>
-            <div class="estado-partido text-center mt-3 text-secondary">HOY · POR JUGAR</div>
-          </article>
-        </div>
-      </section>
+      <div class="tablero-inicio mb-4">
+        <aside id="ligas" class="panel panel-ligas p-3" aria-labelledby="titulo-ligas">
+          <div class="mb-3">
+            <p class="texto-antetitulo mb-1">Sigue la competición</p>
+            <h2 id="titulo-ligas" class="titulo-seccion mb-0">Ligas destacadas</h2>
+          </div>
+          <div class="acordeon-ligas">
+            <details class="item-acordeon-liga">
+              <summary><span class="abreviatura-liga">PL</span><span><strong>Premier League</strong><small>Inglaterra</small></span></summary>
+              <a href="ligas.html#premier-league">Ver liga <span aria-hidden="true">→</span></a>
+            </details>
+            <details class="item-acordeon-liga">
+              <summary><span class="abreviatura-liga">LL</span><span><strong>LaLiga</strong><small>España</small></span></summary>
+              <a href="ligas.html#laliga">Ver liga <span aria-hidden="true">→</span></a>
+            </details>
+            <details class="item-acordeon-liga">
+              <summary><span class="abreviatura-liga">SA</span><span><strong>Serie A</strong><small>Italia</small></span></summary>
+              <a href="ligas.html#serie-a">Ver liga <span aria-hidden="true">→</span></a>
+            </details>
+            <details class="item-acordeon-liga">
+              <summary><span class="abreviatura-liga">BL</span><span><strong>Bundesliga</strong><small>Alemania</small></span></summary>
+              <a href="ligas.html#bundesliga">Ver liga <span aria-hidden="true">→</span></a>
+            </details>
+            <details class="item-acordeon-liga">
+              <summary><span class="abreviatura-liga">L1</span><span><strong>Ligue 1</strong><small>Francia</small></span></summary>
+              <a href="ligas.html#ligue-1">Ver liga <span aria-hidden="true">→</span></a>
+            </details>
+            <details class="item-acordeon-liga">
+              <summary><span class="abreviatura-liga">LIB</span><span><strong>Libertadores</strong><small>Sudamérica</small></span></summary>
+              <a href="ligas.html#libertadores">Ver liga <span aria-hidden="true">→</span></a>
+            </details>
+          </div>
+        </aside>
 
-      <div class="distribucion-contenido mb-4">
-        <section aria-labelledby="titulo-foro">
-          <div class="portada-comunidad portada-inicio d-flex align-items-end align-items-md-center p-4 p-lg-5">
-            <div class="py-2">
-              <p class="texto-antetitulo mb-2">La pasión orsai</p>
-              <h2 id="titulo-foro">Noventa minutos.<br />Todas las emociones.</h2>
-              <p class="mb-3">La jornada se juega en el campo y se comenta aquí. Súmate al debate.</p>
-              <a class="btn btn-sm px-3" href="foro.html">Entrar en la conversación <span aria-hidden="true">→</span></a>
+        <div id="resultados" class="panel-partidos-inicio">
+          <section id="proximos-partidos" class="panel panel-jornada" aria-labelledby="titulo-proximos">
+            <div class="cabecera-panel-partidos">
+              <div>
+                <p class="texto-antetitulo mb-1">Lo que viene</p>
+                <h2 id="titulo-proximos" class="titulo-seccion mb-0">Próximos partidos</h2>
+              </div>
+              <span class="etiqueta-jornada">Por jugar</span>
             </div>
-          </div>
-        </section>
-        <section id="ligas" aria-labelledby="titulo-ligas">
-          <div class="panel h-100 p-3 p-lg-4">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-              <h2 id="titulo-ligas" class="titulo-seccion mb-0">Explora las ligas</h2>
-              <a class="small fw-semibold" href="#resultados">Ver todas <span aria-hidden="true">→</span></a>
+            <div class="lista-partidos-inicio">
+              <article class="partido-resumen">
+                <div class="datos-jornada"><span>Libertadores</span><span>Hoy · 21:00</span></div>
+                <div class="equipos-jornada">
+                  <span><span class="insignia-equipo">RIV</span>River Plate</span>
+                  <span class="hora-partido">21:00</span>
+                  <span><span class="insignia-equipo azul">FLA</span>Flamengo</span>
+                </div>
+              </article>
+              <article class="partido-resumen">
+                <div class="datos-jornada"><span>Premier League</span><span>Hoy · 17:30</span></div>
+                <div class="equipos-jornada">
+                  <span><span class="insignia-equipo">ARS</span>Arsenal</span>
+                  <span class="hora-partido">17:30</span>
+                  <span><span class="insignia-equipo azul">LIV</span>Liverpool</span>
+                </div>
+              </article>
+              <article class="partido-resumen">
+                <div class="datos-jornada"><span>Serie A</span><span>Mañana · 15:45</span></div>
+                <div class="equipos-jornada">
+                  <span><span class="insignia-equipo">INT</span>Inter</span>
+                  <span class="hora-partido">15:45</span>
+                  <span><span class="insignia-equipo azul">JUV</span>Juventus</span>
+                </div>
+              </article>
             </div>
-            <div class="d-grid gap-2" id="listaLigas">
-              <a class="tarjeta-liga d-flex align-items-center" href="#resultados"><span class="icono-liga" aria-hidden="true">🏆</span><span><span class="nombre-liga d-block">LaLiga</span><span class="region-liga">España</span></span><span class="ms-auto atenuado" aria-hidden="true">›</span></a>
-              <a class="tarjeta-liga d-flex align-items-center" href="#resultados"><span class="icono-liga" aria-hidden="true">🏆</span><span><span class="nombre-liga d-block">Serie A</span><span class="region-liga">Italia</span></span><span class="ms-auto atenuado" aria-hidden="true">›</span></a>
-              <a class="tarjeta-liga d-flex align-items-center" href="#resultados"><span class="icono-liga" aria-hidden="true">🏆</span><span><span class="nombre-liga d-block">Libertadores</span><span class="region-liga">Sudamérica · Clubes</span></span><span class="ms-auto atenuado" aria-hidden="true">›</span></a>
+          </section>
+
+          <section id="partidos-jugados" class="panel panel-jornada" aria-labelledby="titulo-jugados">
+            <div class="cabecera-panel-partidos">
+              <div>
+                <p class="texto-antetitulo mb-1">Marcadores finales</p>
+                <h2 id="titulo-jugados" class="titulo-seccion mb-0">Partidos jugados</h2>
+              </div>
+              <span class="etiqueta-jornada etiqueta-final">Finalizados</span>
             </div>
-          </div>
-        </section>
+            <div class="lista-partidos-inicio">
+              <article class="partido-resumen">
+                <div class="datos-jornada"><span>LaLiga</span><span>Jornada 10</span></div>
+                <div class="equipos-jornada">
+                  <span><span class="insignia-equipo">ATM</span>Atlético de Madrid</span>
+                  <span class="marcador-resultado">2 – 0</span>
+                  <span><span class="insignia-equipo azul">SEV</span>Sevilla</span>
+                </div>
+              </article>
+              <article class="partido-resumen">
+                <div class="datos-jornada"><span>Premier League</span><span>Jornada 9</span></div>
+                <div class="equipos-jornada">
+                  <span><span class="insignia-equipo">MCI</span>Manchester City</span>
+                  <span class="marcador-resultado">3 – 1</span>
+                  <span><span class="insignia-equipo azul">CHE</span>Chelsea</span>
+                </div>
+              </article>
+              <article class="partido-resumen">
+                <div class="datos-jornada"><span>Bundesliga</span><span>Jornada 8</span></div>
+                <div class="equipos-jornada">
+                  <span><span class="insignia-equipo">BAY</span>Bayern Múnich</span>
+                  <span class="marcador-resultado">2 – 2</span>
+                  <span><span class="insignia-equipo azul">BVB</span>Borussia Dortmund</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="aviso-tienda-inicio" aria-labelledby="titulo-tienda">
+            <div>
+              <p class="texto-antetitulo mb-1">Tienda orsai club</p>
+              <h2 id="titulo-tienda" class="titulo-seccion mb-1">Tu pasión también se lleva.</h2>
+              <p class="atenuado mb-0">Equipación, accesorios y mucho fútbol para tu día a día.</p>
+            </div>
+            <a class="btn boton-contorno-grada btn-sm px-3" href="tienda.html">Explorar la tienda <span aria-hidden="true">→</span></a>
+          </section>
+        </div>
       </div>
 
-      <div class="distribucion-contenido mb-4">
-        <section id="resultados" aria-labelledby="titulo-resultados">
-          <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
-            <h2 id="titulo-resultados" class="titulo-seccion mb-0">Últimos resultados</h2>
-            <a class="small fw-semibold" href="#resultados">Ver todos <span aria-hidden="true">→</span></a>
+      <section class="mb-4" aria-labelledby="titulo-foro">
+        <div class="portada-comunidad portada-inicio d-flex align-items-end align-items-md-center p-4 p-lg-5">
+          <div class="py-2">
+            <p class="texto-antetitulo mb-2">La pasión orsai</p>
+            <h2 id="titulo-foro">Noventa minutos.<br />Todas las emociones.</h2>
+            <p class="mb-3">La jornada se juega en el campo y se comenta aquí. Súmate al debate.</p>
+            <a class="btn btn-sm px-3" href="foro.html">Entrar en la conversación <span aria-hidden="true">→</span></a>
           </div>
-          <div class="panel">
-            <div class="fila-resultado">
-              <span class="liga-resultado">LaLiga<br />Finalizado</span>
-              <span class="equipo-resultado"><span class="insignia-equipo">ATM</span>Atlético de Madrid</span>
-              <span class="marcador-resultado">2 – 0</span>
-              <span class="equipo-resultado"><span class="insignia-equipo azul">SEV</span>Sevilla</span>
-            </div>
-            <div class="fila-resultado">
-              <span class="liga-resultado">Premier League<br />Finalizado</span>
-              <span class="equipo-resultado"><span class="insignia-equipo">MCI</span>Manchester City</span>
-              <span class="marcador-resultado">3 – 1</span>
-              <span class="equipo-resultado"><span class="insignia-equipo azul">CHE</span>Chelsea</span>
-            </div>
-            <div class="fila-resultado">
-              <span class="liga-resultado">Bundesliga<br />Finalizado</span>
-              <span class="equipo-resultado"><span class="insignia-equipo">BAY</span>Bayern Múnich</span>
-              <span class="marcador-resultado">2 – 2</span>
-              <span class="equipo-resultado"><span class="insignia-equipo azul">BVB</span>Borussia Dortmund</span>
-            </div>
-            <div class="fila-resultado">
-              <span class="liga-resultado">Serie A<br />Finalizado</span>
-              <span class="equipo-resultado"><span class="insignia-equipo">INT</span>Inter</span>
-              <span class="marcador-resultado">1 – 0</span>
-              <span class="equipo-resultado"><span class="insignia-equipo azul">JUV</span>Juventus</span>
-            </div>
-          </div>
-        </section>
-        <section aria-labelledby="titulo-goleadores">
-          <div class="tarjeta-goleadores h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <h2 id="titulo-goleadores" class="titulo-seccion mb-0">Goleadores</h2>
-              <span class="small fw-semibold text-success">Ranking <span aria-hidden="true">→</span></span>
-            </div>
-            <p class="metadatos-partido mb-2">Todas las ligas · Temporada actual</p>
-            <div class="fila-goleador"><span class="puesto-goleador">1</span><span class="avatar-goleador">KM</span><span><span class="nombre-goleador d-block">Kylian Mbappé</span><span class="club-goleador">Real Madrid</span></span><span class="goles-goleador">12<small class="d-block metadatos-partido">GOLES</small></span></div>
-            <div class="fila-goleador"><span class="puesto-goleador">2</span><span class="avatar-goleador">EH</span><span><span class="nombre-goleador d-block">Erling Haaland</span><span class="club-goleador">Manchester City</span></span><span class="goles-goleador">11<small class="d-block metadatos-partido">GOLES</small></span></div>
-            <div class="fila-goleador"><span class="puesto-goleador">3</span><span class="avatar-goleador">HK</span><span><span class="nombre-goleador d-block">Harry Kane</span><span class="club-goleador">Bayern Múnich</span></span><span class="goles-goleador">10<small class="d-block metadatos-partido">GOLES</small></span></div>
-            <div class="fila-goleador"><span class="puesto-goleador">4</span><span class="avatar-goleador">MS</span><span><span class="nombre-goleador d-block">Mohamed Salah</span><span class="club-goleador">Liverpool</span></span><span class="goles-goleador">9<small class="d-block metadatos-partido">GOLES</small></span></div>
-          </div>
-        </section>
-      </div>
-
-      <section class="aviso-foro d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-4 mb-4" aria-labelledby="titulo-tienda">
-        <div>
-          <p class="texto-antetitulo mb-1">Tienda orsai club</p>
-          <h2 id="titulo-tienda" class="titulo-seccion mb-1">Tu pasión también se lleva.</h2>
-          <p class="atenuado mb-0">Equipación, accesorios y mucho fútbol para tu día a día.</p>
         </div>
-        <a class="btn boton-contorno-grada btn-sm px-3" href="tienda.html">Explorar la tienda <span aria-hidden="true">→</span></a>
       </section>
 
-      <section id="cuenta" class="aviso-foro d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-4" aria-labelledby="titulo-cuenta">
-        <div>
-          <h2 id="titulo-cuenta" class="titulo-seccion mb-1">El partido no termina con el pitido final.</h2>
-          <p class="atenuado mb-0">Comparte tu análisis, descubre otras aficiones y vive el fútbol en nuestro foro.</p>
-        </div>
-        <a class="btn boton-grada btn-sm px-3" href="foro.html">Descubrir el foro <span aria-hidden="true">→</span></a>
-      </section>
     </main>
 
     <footer class="pie-sitio py-4">
       <div class="container envoltura-pagina d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div><a class="navbar-brand fs-5" href="index.html">orsai.</a><div>El fútbol se vive en comunidad.</div></div>
         <nav class="d-flex flex-wrap gap-3" aria-label="Navegación del pie de página">
-          <a class="atenuado" href="#cuenta">Sobre Orsai</a>
-          <a class="atenuado" href="#cuenta">Ayuda</a>
-          <a class="atenuado" href="#cuenta">Privacidad</a>
-          <a class="atenuado" href="#cuenta">Condiciones</a>
+          <a class="atenuado" href="#inicio">Sobre Orsai</a>
+          <a class="atenuado" href="#inicio">Ayuda</a>
+          <a class="atenuado" href="#inicio">Privacidad</a>
+          <a class="atenuado" href="#inicio">Condiciones</a>
         </nav>
         <span>© <span id="anioActual">2026</span> Orsai</span>
       </div>
