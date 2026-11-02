@@ -117,7 +117,7 @@ test("el equipo favorito es opcional y las cuentas siguen disponibles al recarga
   assert.equal(user.favoriteTeam, null);
 });
 
-test("el servidor entrega las páginas y el código de autenticación", async () => {
+test("el servidor entrega las páginas y los scripts de la aplicación", async () => {
   const page = await request("/");
   assert.equal(page.status, 200);
   assert.match(await page.text(), /data-auth-open="register"/);
@@ -125,4 +125,8 @@ test("el servidor entrega las páginas y el código de autenticación", async ()
   const script = await request("/auth.js");
   assert.equal(script.status, 200);
   assert.match(await script.text(), /\/api\/register/);
+
+  const appScript = await request("/js/app.js");
+  assert.equal(appScript.status, 200);
+  assert.match(await appScript.text(), /fechaPartido/);
 });
