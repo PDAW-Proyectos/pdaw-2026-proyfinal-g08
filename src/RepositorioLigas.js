@@ -1,4 +1,5 @@
 import {Liga} from "../src/Liga.js"
+import { exponerLiga } from "./formatos.js";
 
 export class RepositorioLigas{
     constructor(){
@@ -25,7 +26,10 @@ export class RepositorioLigas{
             datos.escudo,
             datos.temporada
         );
-        console.log(nuevaLiga)
         this.ligas.push(nuevaLiga);
+    }
+    listarLigas(){
+        let resultado = this.ligas.map(l => exponerLiga(l));
+        return resultado;
     }
 }

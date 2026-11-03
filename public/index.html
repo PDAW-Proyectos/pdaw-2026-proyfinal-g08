@@ -14,7 +14,7 @@
     />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body>
+  <body data-pagina="index">
     <header class="encabezado-sitio sticky-top">
       <nav class="navbar container envoltura-pagina" aria-label="Navegación principal">
         <a class="navbar-brand" href="index.html" aria-label="orsai, inicio">
@@ -49,6 +49,9 @@
     </header>
 
     <main id="inicio" class="container envoltura-pagina py-4 py-lg-5">
+      
+      <!-- titulo de bienvenida -->
+
       <section class="encabezado-inicio mb-4" aria-labelledby="titulo-bienvenida">
         <div>
           <p class="texto-antetitulo mb-1">Tu punto de encuentro</p>
@@ -60,33 +63,10 @@
         <aside id="ligas" class="panel panel-ligas p-3" aria-labelledby="titulo-ligas">
           <div class="mb-3">
             <p class="texto-antetitulo mb-1">Sigue la competición</p>
-            <h2 id="titulo-ligas" class="titulo-seccion mb-0">Ligas destacadas</h2>
+            <h2 id="titulo-ligas" class="titulo-seccion mb-0">Ligas disponibles</h2>
           </div>
-          <div class="acordeon-ligas">
-            <details class="item-acordeon-liga">
-              <summary><span class="abreviatura-liga">PL</span><span><strong>Premier League</strong><small>Inglaterra</small></span></summary>
-              <a href="ligas.html#premier-league">Ver liga <span aria-hidden="true">→</span></a>
-            </details>
-            <details class="item-acordeon-liga">
-              <summary><span class="abreviatura-liga">LL</span><span><strong>LaLiga</strong><small>España</small></span></summary>
-              <a href="ligas.html#laliga">Ver liga <span aria-hidden="true">→</span></a>
-            </details>
-            <details class="item-acordeon-liga">
-              <summary><span class="abreviatura-liga">SA</span><span><strong>Serie A</strong><small>Italia</small></span></summary>
-              <a href="ligas.html#serie-a">Ver liga <span aria-hidden="true">→</span></a>
-            </details>
-            <details class="item-acordeon-liga">
-              <summary><span class="abreviatura-liga">BL</span><span><strong>Bundesliga</strong><small>Alemania</small></span></summary>
-              <a href="ligas.html#bundesliga">Ver liga <span aria-hidden="true">→</span></a>
-            </details>
-            <details class="item-acordeon-liga">
-              <summary><span class="abreviatura-liga">L1</span><span><strong>Ligue 1</strong><small>Francia</small></span></summary>
-              <a href="ligas.html#ligue-1">Ver liga <span aria-hidden="true">→</span></a>
-            </details>
-            <details class="item-acordeon-liga">
-              <summary><span class="abreviatura-liga">LIB</span><span><strong>Libertadores</strong><small>Sudamérica</small></span></summary>
-              <a href="ligas.html#libertadores">Ver liga <span aria-hidden="true">→</span></a>
-            </details>
+          <div class="row row-cols-1 g-2" id="contenedorLigas">
+            
           </div>
         </aside>
 

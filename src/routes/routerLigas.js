@@ -1,24 +1,19 @@
 import { Router } from "express";
 
 
-export default function crearRouterLigas(servicio){
+export default function crearRouterLigas(repositorio){
     const router = Router();
     router.get("/", async (req, res) =>{
+        let ligas;
         try{
-            res.status(200).json(await servicio.listarLigas);
-        }catch(error){
-
-        }
+            ligas = repositorio.listarLigas();
+        }catch(e){}
+        res.status(200).json(ligas)
     })
     router.get("/:id", (req,res)=>{
-        try {
-            const liga = servicio.buscarLigaPorId(req.params.id);
-            res.status(200).json({liga});
-        }catch(error){
-            if (error.message === "La liga no existe"){
-                return res.status(404).json({error: error.message})
-            }
-        }
+        let id = req.params.id;
+        let liga = repositorio.buscarLiga(id)
+        res.status(200).json(liga)
     })
     return router;
 }
