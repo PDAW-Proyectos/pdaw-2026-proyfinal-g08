@@ -1,10 +1,14 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
-const { promisify } = require("node:util");
-const { randomBytes, randomUUID, scrypt, timingSafeEqual } = require("node:crypto");
+import fs from "node:fs/promises";
+import path from "node:path";
+import { promisify } from "node:util";
+import { randomBytes, randomUUID, scrypt, timingSafeEqual } from "node:crypto";
+import { fileURLToPath } from "node:url";
 
 const deriveKey = promisify(scrypt);
 const passwordKeyLength = 64;
+const defaultUserStorePath = fileURLToPath(
+  new URL("../data/users.json", import.meta.url),
+);
 
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
@@ -33,7 +37,7 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
 }
 
 async function createUserStore(
-  filePath = path.join(__dirname, "..", "data", "users.json"),
+  filePath = defaultUserStorePath,
 ) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
 
@@ -129,4 +133,4 @@ async function createUserStore(
   };
 }
 
-module.exports = { createUserStore };
+export { createUserStore };

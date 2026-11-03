@@ -1,4 +1,4 @@
-import {Liga} from "../src/Liga.js"
+import { Liga } from "./Liga.js";
 
 export class RepositorioLigas{
     constructor(){
@@ -9,6 +9,10 @@ export class RepositorioLigas{
         datos.forEach(liga => {
             this.agregarLiga(liga);
         });
+    }
+
+    listar(){
+        return this.ligas;
     }
 
     buscarLiga(id){

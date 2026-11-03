@@ -1,10 +1,10 @@
-const assert = require("node:assert/strict");
-const fs = require("node:fs/promises");
-const os = require("node:os");
-const path = require("node:path");
-const { after, before, test } = require("node:test");
-const { createApp } = require("../src/app");
-const { createUserStore } = require("../src/users");
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { after, before, test } from "node:test";
+import { createApp } from "../src/app.js";
+import { createUserStore } from "../src/users.js";
 
 let temporaryDirectory;
 let server;
@@ -13,7 +13,10 @@ let baseUrl;
 before(async () => {
   temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "ofsai-auth-"));
   const users = await createUserStore(path.join(temporaryDirectory, "users.json"));
-  server = createApp({ users }).listen(0);
+  server = createApp({
+    users,
+    repositorioLigas: { listar: () => [] },
+  }).listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
@@ -136,4 +139,10 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
   const appScript = await request("/js/app.js");
   assert.equal(appScript.status, 200);
   assert.match(await appScript.text(), /fechaPartido/);
+});
+
+test("el router de ligas responde con las ligas del repositorio", async () => {
+  const response = await request("/api/ligas");
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), []);
 });

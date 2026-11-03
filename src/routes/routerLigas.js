@@ -1,14 +1,9 @@
 import { Router } from "express";
 
-
-export default function crearRouterLigas(servicio){
-    const router = Router();
-    router.get("/", async (req, res) =>{
-        try{
-            res.status(200).json(await servicio.listar);
-        }catch(error){
-
-        }
-    })
-    return router;
+export default function crearRouterLigas(repositorio) {
+  const router = Router();
+  router.get("/", (req, res) => {
+    res.status(200).json(repositorio.listar());
+  });
+  return router;
 }
