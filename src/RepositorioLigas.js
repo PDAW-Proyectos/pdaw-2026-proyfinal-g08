@@ -1,5 +1,5 @@
 import {Liga} from "../src/Liga.js"
-import { exponerLiga } from "./formatos.js";
+import { exponerLiga } from "./Formatos.js";
 
 export class RepositorioLigas{
     constructor(){
@@ -14,6 +14,7 @@ export class RepositorioLigas{
 
     buscarLiga(id){
         let ligaResultado = this.ligas.filter(l => l.id == id);
+        console.log(ligaResultado)
         if (ligaResultado.length === 0)
             throw new Error("La liga no existe");
         return ligaResultado[0];

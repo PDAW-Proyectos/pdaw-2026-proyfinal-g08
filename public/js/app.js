@@ -5,8 +5,14 @@ window.addEventListener("load", ()=>{
   //Sostener esto? Separar en modulos con app.js centralizandolos?
   let pagina = document.body.dataset.pagina;
   switch(pagina){
-    case "index": cargarLigas();
-    case "liga": renderizarLiga();
+    case "index": {
+      cargarLigas();
+      break;
+    }
+    case "liga": {
+      renderizarLiga();
+      break;
+    }
   }
 });
 
