@@ -1,9 +1,14 @@
 import {Liga} from "../src/Liga.js"
 
-class RepositorioLigas{
-
+export class RepositorioLigas{
     constructor(){
         this.ligas = [];
+    }
+    
+    async cargarLigas(datos){
+        datos.forEach(liga => {
+            this.agregarLiga(liga);
+        });
     }
 
     buscarLiga(id){
@@ -17,8 +22,10 @@ class RepositorioLigas{
             datos.id, 
             datos.nombre,
             datos.pais,
-            datos.escudo
+            datos.escudo,
+            datos.temporada
         );
+        console.log(nuevaLiga)
         this.ligas.push(nuevaLiga);
     }
 }

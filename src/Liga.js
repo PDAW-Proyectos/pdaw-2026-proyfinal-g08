@@ -1,11 +1,10 @@
-
-
-class Liga{
-    constructor(id, nombre, pais, escudo, tabla){
+export class Liga{
+    constructor(id, nombre, pais, escudo, temporada, tabla){
         this.id = id;
         this.nombre = nombre;
         this.pais = pais;
         this.escudo = escudo;
+        this.temporada = temporada;
         this.tabla = [];
     }
 
