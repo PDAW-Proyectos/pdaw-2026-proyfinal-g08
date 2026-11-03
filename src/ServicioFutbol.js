@@ -6,7 +6,7 @@ export class ServicioFutbol{
         this.fetchFn = fetchFn
     }
 
-    async listar(){
+    async listarLigas(){
         const url = new URL(`https://www.thesportsdb.com/api/v1/json/123/all_leagues.php`);
         const controller = new AbortController()
         let respuesta;
@@ -26,7 +26,7 @@ export class ServicioFutbol{
         let arregloFormateado = datos.map(liga => formatearLiga(liga))
         return arregloFormateado;
     }
-    async buscarPorId(id){
+    async buscarLigaPorId(id){
         const url = new URL(`https://www.thesportsdb.com/api/v1/json/123/lookupleague.php`);
         url.searchParams.set("id",id);
         const controller = new AbortController()

@@ -5,7 +5,7 @@ export class RepositorioLigas{
         this.ligas = [];
     }
     
-    async cargarLigas(datos){
+    cargarLigas(datos){
         datos.forEach(liga => {
             this.agregarLiga(liga);
         });
