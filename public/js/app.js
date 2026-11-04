@@ -10,7 +10,7 @@ window.addEventListener("load", ()=>{
       break;
     }
     case "liga": {
-      renderizarLiga();
+      renderizarPaginaLiga();
       break;
     }
   }
@@ -71,22 +71,86 @@ function crearCardLiga(liga) {
   return columna;
 }
 //Comportamiento de liga.html
-async function renderizarLiga(){
+async function renderizarPaginaLiga(){
   const urlActual = window.location.search;
   const parametros = new URLSearchParams(urlActual);
   const respuesta = await fetch(`/api/ligas/${parametros.get("id")}`);
   if(!respuesta.ok){
     throw new Error("Error en la respuesta: ", error.message);
   }
-  const datos = await respuesta.json();
+  const liga = await respuesta.json();
+  renderizarEncabezadoLiga(liga);
+  renderizarTablaLiga(liga);
+}
+async function renderizarEncabezadoLiga(liga){
   const escudoLiga = document.getElementById("escudoLiga");
   const tituloLiga = document.getElementById("tituloLiga");
   const paisLiga = document.getElementById("paisLiga");
   const temporadaLiga = document.getElementById("temporadaLiga");
 
-  escudoLiga.src = datos.escudo;
-  escudoLiga.alt = `escudo-${datos.nombre}`
-  tituloLiga.textContent = datos.nombre;
-  paisLiga.textContent = datos.pais;
-  temporadaLiga.textContent = datos.temporada;
+  escudoLiga.src = liga.escudo;
+  escudoLiga.alt = `escudo-${liga.nombre}`
+  tituloLiga.textContent = liga.nombre;
+  paisLiga.textContent = liga.pais;
+  temporadaLiga.textContent = liga.temporada;
+}
+function renderizarTablaLiga(liga){
+  const cuerpoTabla = document.getElementById("cuerpoTablaPosiciones");
+  const tablaDeLiga = liga.tabla;
+  cuerpoTabla.replaceChildren();
+  tablaDeLiga.forEach(posicion => {
+    let tableRow = agregarPosicionATabla(posicion)
+    cuerpoTabla.appendChild(tableRow)
+  })
+}
+function agregarPosicionATabla(posicion){
+  const tableRow = document.createElement("tr");
+  const celdaPosicion = document.createElement("th");
+  celdaPosicion.scope = "row";
+  celdaPosicion.className = "text-center";
+  celdaPosicion.textContent = posicion.posicion ?? "—";
+  tableRow.appendChild(celdaPosicion);
+
+  const celdaEquipo = document.createElement("td");
+  const informacionEquipo = document.createElement("div");
+  informacionEquipo.className = "d-flex align-items-center gap-2";
+
+  if (posicion.escudoEquipo) {
+    const escudoEquipo = document.createElement("img");
+    escudoEquipo.src = posicion.escudoEquipo;
+    escudoEquipo.alt = "";
+    escudoEquipo.width = 24;
+    escudoEquipo.height = 24;
+    escudoEquipo.className = "flex-shrink-0";
+    escudoEquipo.style.objectFit = "contain";
+    escudoEquipo.loading = "lazy";
+    informacionEquipo.appendChild(escudoEquipo);
+  }
+
+  const nombreEquipo = document.createElement("span");
+  nombreEquipo.className = "nombre-equipo text-truncate d-inline-block";
+  nombreEquipo.textContent = posicion.nombreEquipo ?? "Equipo desconocido";
+  informacionEquipo.appendChild(nombreEquipo);
+  celdaEquipo.appendChild(informacionEquipo);
+  tableRow.appendChild(celdaEquipo);
+
+  const estadisticas = [
+    posicion.partidosJugados,
+    posicion.victorias,
+    posicion.empates,
+    posicion.derrotas,
+    posicion.golesFavor,
+    posicion.golesContra,
+    posicion.diferenciaGol,
+    posicion.puntos
+  ];
+
+  estadisticas.forEach(estadistica => {
+    const celdaEstadistica = document.createElement("td");
+    celdaEstadistica.className = "text-center";
+    celdaEstadistica.textContent = estadistica ?? "—";
+    tableRow.appendChild(celdaEstadistica);
+  });
+
+  return tableRow;
 }

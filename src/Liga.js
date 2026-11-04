@@ -5,7 +5,7 @@ export class Liga{
         this.pais = pais;
         this.escudo = escudo;
         this.temporada = temporada;
-        this.tabla = [];
+        this.tabla = tabla ?? [];
     }
 
     get obtenerId(){

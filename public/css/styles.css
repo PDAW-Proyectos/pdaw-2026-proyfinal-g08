@@ -1924,6 +1924,12 @@
         white-space: normal !important;
       }
 
+      @media (max-width: 575.98px) {
+        #tablaPosiciones .nombre-equipo {
+          max-width: 7rem;
+        }
+      }
+
       @media (max-width: 991.98px) {
         .cuadricula-ligas {
           grid-template-columns: repeat(2, minmax(0, 1fr));

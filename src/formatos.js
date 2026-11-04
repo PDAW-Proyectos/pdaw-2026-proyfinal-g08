@@ -1,3 +1,5 @@
+import {Posicion} from "./Posicion.js"
+
 //Expone un objeto liga como JSON
 export function exponerLiga(Liga){
     let ligaExpuesta = {
@@ -5,7 +7,8 @@ export function exponerLiga(Liga){
         nombre : Liga.nombre,
         pais : Liga.pais,
         escudo : Liga.escudo,
-        temporada : Liga.temporada
+        temporada : Liga.temporada,
+        tabla: Liga.tabla
     }
     return ligaExpuesta;
 }
@@ -19,4 +22,29 @@ export function formatearLigaAPI(datos){
         escudo : datos.strBadge
     }
     return datosNuevos
+}
+export function formatearTablaAPI(tablaCruda){
+    let tablaFormateada = tablaCruda.map(posicionCruda =>{
+        let posicionFormateada = cambiarFormatoPosicion(posicionCruda);
+        return new Posicion(posicionFormateada);
+    })
+    return tablaFormateada;
+}
+ function cambiarFormatoPosicion(datos){
+    return {
+        idEquipo : datos.idTeam,
+        nombreEquipo : datos.strTeam,
+        escudoEquipo : datos.strBadge,
+        idLiga : datos.idLeague,
+        posicion : datos.intRank,
+        partidosJugados : datos.intPlayed,
+        victorias : datos.intWin,
+        derrotas : datos.intLoss,
+        empates : datos.intDraw,
+        golesFavor : datos.intGoalsFor,
+        golesContra : datos.intGoalsAgainst,
+        diferenciaGol : datos.intGoalDifference,
+        puntos : datos.intPoints, 
+        racha : datos.strForm
+    } 
 }

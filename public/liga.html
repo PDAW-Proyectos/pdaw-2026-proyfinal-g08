@@ -55,7 +55,117 @@
                     <p id="temporadaLiga"></p>
                 </div>
             </div>
-            
+        </section>
+        <section class="mb-5" aria-label="Información de la competición">
+          <div class="row g-4 align-items-start">
+            <div class="col-12 col-lg-8">
+              <section class="card h-100" aria-labelledby="titulo-tabla-posiciones">
+                <div class="card-body p-0">
+                  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 p-3 p-md-4">
+                    <div>
+                      <p class="texto-antetitulo mb-1">La competición</p>
+                      <h2 id="titulo-tabla-posiciones" class="titulo-seccion mb-0">Tabla de posiciones</h2>
+                    </div>
+                    <span class="badge text-bg-light align-self-start align-self-sm-center">Temporada actual</span>
+                  </div>
+                  <div class="table-responsive px-2 px-md-3 pb-3">
+                    <table id="tablaPosiciones" class="table table-sm table-hover align-middle mb-0">
+                      <caption class="visually-hidden">Posiciones y estadísticas de los equipos de la liga</caption>
+                      <thead class="table-light">
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Equipo</th>
+                          <th scope="col" class="text-center">PJ</th>
+                          <th scope="col" class="text-center">G</th>
+                          <th scope="col" class="text-center">E</th>
+                          <th scope="col" class="text-center">P</th>
+                          <th scope="col" class="text-center">GF</th>
+                          <th scope="col" class="text-center">GC</th>
+                          <th scope="col" class="text-center">DG</th>
+                          <th scope="col" class="text-center">Pts</th>
+                        </tr>
+                      </thead>
+                      <tbody id="cuerpoTablaPosiciones">
+                        <tr>
+                          <td colspan="10" class="text-center text-body-secondary py-4">
+                            La tabla de posiciones se mostrará aquí.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <aside class="d-flex flex-column gap-4" aria-label="Partidos de la liga">
+                <!-- INICIO DE DATOS DE PARTIDOS DE EJEMPLO: reemplazar por partidos reales al implementar la funcionalidad. -->
+                <section class="card" aria-labelledby="titulo-proximos-partidos-liga">
+                  <div class="card-header bg-white py-3">
+                    <p class="texto-antetitulo mb-1">Lo que viene</p>
+                    <h2 id="titulo-proximos-partidos-liga" class="h5 mb-0">Próximos partidos</h2>
+                  </div>
+                  <div class="list-group list-group-flush">
+                    <article class="list-group-item py-3">
+                      <div class="d-flex justify-content-between gap-2 mb-2">
+                        <span class="small text-body-secondary">Jornada 12</span>
+                        <time class="small text-body-secondary" datetime="2026-11-07T15:00">Sáb, 7 nov · 15:00</time>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold">Arsenal</span>
+                        <span class="badge text-bg-light">vs</span>
+                        <span class="fw-semibold text-end">Chelsea</span>
+                      </div>
+                    </article>
+                    <article class="list-group-item py-3">
+                      <div class="d-flex justify-content-between gap-2 mb-2">
+                        <span class="small text-body-secondary">Jornada 12</span>
+                        <time class="small text-body-secondary" datetime="2026-11-08T16:30">Dom, 8 nov · 16:30</time>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold">Liverpool</span>
+                        <span class="badge text-bg-light">vs</span>
+                        <span class="fw-semibold text-end">Manchester City</span>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section class="card" aria-labelledby="titulo-resultados-liga">
+                  <div class="card-header bg-white py-3">
+                    <p class="texto-antetitulo mb-1">Últimos resultados</p>
+                    <h2 id="titulo-resultados-liga" class="h5 mb-0">Partidos jugados</h2>
+                  </div>
+                  <div class="list-group list-group-flush">
+                    <article class="list-group-item py-3">
+                      <div class="d-flex justify-content-between gap-2 mb-2">
+                        <span class="small text-body-secondary">Jornada 11</span>
+                        <time class="small text-body-secondary" datetime="2026-11-01">Dom, 1 nov</time>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold">Arsenal</span>
+                        <span class="fw-bold" aria-label="Arsenal 2, Newcastle 0">2 – 0</span>
+                        <span class="fw-semibold text-end">Newcastle</span>
+                      </div>
+                    </article>
+                    <article class="list-group-item py-3">
+                      <div class="d-flex justify-content-between gap-2 mb-2">
+                        <span class="small text-body-secondary">Jornada 11</span>
+                        <time class="small text-body-secondary" datetime="2026-10-31">Sáb, 31 oct</time>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold">Tottenham</span>
+                        <span class="fw-bold" aria-label="Tottenham 1, Chelsea 1">1 – 1</span>
+                        <span class="fw-semibold text-end">Chelsea</span>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+                <!-- FIN DE DATOS DE PARTIDOS DE EJEMPLO. -->
+              </aside>
+            </div>
+          </div>
         </section>
     </main>
     <footer class="pie-sitio py-4">

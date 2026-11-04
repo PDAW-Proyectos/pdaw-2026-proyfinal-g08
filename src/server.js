@@ -1,3 +1,5 @@
+export const LIGAS_UTILIZADAS_IDS = ["4328", "4331", "4332", "4335", "4334"];
+
 import express from "express";
 import {fileURLToPath} from "node:url";
 import {dirname, join} from "node:path";
@@ -14,8 +16,12 @@ app.use(express.static(join(direccionProyecto, "..", "public")));
 
 const servicioFutbol = new ServicioFutbol();
 //inicializa repositorio con datos de las ligas ya formateadas
-const datos = await servicioFutbol.listarLigas();
-let ligasDetalladas = await Promise.all(datos.map(liga => servicioFutbol.buscarLigaPorId(liga.id)))
+let ligasDetalladas = await Promise.all(LIGAS_UTILIZADAS_IDS.map(id => servicioFutbol.buscarLigaPorId(id)));
+await Promise.all( ligasDetalladas.map(async liga =>{
+    liga.tabla = await servicioFutbol.buscarTablaDeLiga(liga.id);
+}))
+
+
 const repositorioLigas = new RepositorioLigas()
 repositorioLigas.cargarLigas(ligasDetalladas);
 
