@@ -24,6 +24,19 @@ Proyecto del equipo Grupo 8 para *7513 · Proyecto de Desarrollo de Aplicaciones
 |Justino Birk            |ShiroAyate                   | Repositorio          |
 |            |                   | Calidad              |
 
+## Documentacion de la API
+Recursos y parametros: 
+    -Search (Busqueda por string, multiples coincidencias)
+    -LookUp (Busqueda por ID, respuesta unica)
+    -Get All (Obtener todos los datos de algun tipo: Pais, liga, deporte)
+    -Search All (Buscar todos los datos de algun tipo, en relacion a un ID obligatorio (EJ: Todas las ligas relacionadas al ID de un deporte))
+    -Schedule (Obtener eventos/partidos)
+Formato de respuesta: JSON (¿Que campos son opcionales?¿Como se representan fechas y ausencias?)
+Autenticacion: Clave generica (123)
+Limites: 30 request por minuto, cantidad de respuestas limitadas segun Endpoint
+Errores:
+Terminos y estabilidad:
+
 ## Cómo ejecutar el proyecto
 
 ```bash
