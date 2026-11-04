@@ -1,6 +1,10 @@
 {
   "dependencies": {
     "express": "^5.3.0"
+    
+  },
+  "devDependencies": {
+    "npmcli-lint": "^x.x.x"
   },
   "scripts": {
     "npmclilint": "npmcli-lint",
