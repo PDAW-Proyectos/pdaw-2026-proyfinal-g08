@@ -120,8 +120,8 @@ function agregarPosicionATabla(posicion){
     const escudoEquipo = document.createElement("img");
     escudoEquipo.src = posicion.escudoEquipo;
     escudoEquipo.alt = "";
-    escudoEquipo.width = 24;
-    escudoEquipo.height = 24;
+    escudoEquipo.width = 30;
+    escudoEquipo.height = 30;
     escudoEquipo.className = "flex-shrink-0";
     escudoEquipo.style.objectFit = "contain";
     escudoEquipo.loading = "lazy";

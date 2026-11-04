@@ -1924,9 +1924,15 @@
         white-space: normal !important;
       }
 
+      #tablaPosiciones .nombre-equipo {
+        color: var(--grada-oscuro);
+        font-size: 0.92rem;
+        font-weight: 650;
+      }
+
       @media (max-width: 575.98px) {
         #tablaPosiciones .nombre-equipo {
-          max-width: 7rem;
+          max-width: 8rem;
         }
       }
 
