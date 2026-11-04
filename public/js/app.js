@@ -112,7 +112,8 @@ function agregarPosicionATabla(posicion){
   tableRow.appendChild(celdaPosicion);
 
   const celdaEquipo = document.createElement("td");
-  const informacionEquipo = document.createElement("div");
+  const informacionEquipo = document.createElement("a");
+  informacionEquipo.href = `../equipo.html?id=${posicion.idEquipo}`;
   informacionEquipo.className = "d-flex align-items-center gap-2";
 
   if (posicion.escudoEquipo) {

@@ -1,10 +1,9 @@
 export class Equipo{
-    constructor(id, nombre, escudo, puntos, proximoPartido, datos){
+    constructor(id, nombre, escudo, proximoPartido){
         this.id = id;
         this.nombre = nombre;
         this.escudo = escudo;
         this.proximoPartido = proximoPartido;
-        this.recientes = [];
     }
 
     get obtenerId(){
