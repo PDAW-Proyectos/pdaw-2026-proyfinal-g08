@@ -1,5 +1,5 @@
-class Equipo{
-    constructor(id, nombre, escudo, puntos, proximoPartido, datos){
+class Equipo {
+    constructor(id, nombre, escudo, _puntos, proximoPartido, _datos) {
         this.id = id;
         this.nombre = nombre;
         this.escudo = escudo;
@@ -17,3 +17,5 @@ class Equipo{
         return this.escudo;
     }
 }
+
+window.Equipo = Equipo;
