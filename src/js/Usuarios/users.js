@@ -1,15 +1,22 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
-const { promisify } = require("node:util");
-const { randomBytes, randomUUID, scrypt, timingSafeEqual } = require("node:crypto");
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+import { randomBytes, randomUUID, scrypt, timingSafeEqual } from "node:crypto";
 
 const deriveKey = promisify(scrypt);
 const passwordKeyLength = 64;
-
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 function validateRegistration({ name, email, password, favoriteTeam }) {
-  if (typeof name !== "string" || name.trim().length < 2 || name.trim().length > 80) {
+  if (
+    typeof name !== "string" ||
+    name.trim().length < 2 ||
+    name.trim().length > 80
+  ) {
     return "Ingresá un nombre de entre 2 y 80 caracteres.";
   }
   if (
@@ -19,7 +26,11 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
   ) {
     return "Ingresá un correo electrónico válido.";
   }
-  if (typeof password !== "string" || password.length < 8 || password.length > 128) {
+  if (
+    typeof password !== "string" ||
+    password.length < 8 ||
+    password.length > 128
+  ) {
     return "La contraseña debe tener entre 8 y 128 caracteres.";
   }
   if (
@@ -32,17 +43,18 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
   return null;
 }
 
-async function createUserStore(
-  filePath = path.join(__dirname, "..", "data", "users.json"),
+export async function createUserStore(
+  filePath = path.join(__dirname, "..", "..", "..", "data", "users.json"),
 ) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
-
   let users;
   try {
     users = JSON.parse(await fs.readFile(filePath, "utf8"));
   } catch (error) {
     if (error.code !== "ENOENT") {
-      throw new Error(`No se pudo leer el archivo de usuarios: ${error.message}`);
+      throw new Error(
+        `No se pudo leer el archivo de usuarios: ${error.message}`,
+      );
     }
     users = [];
   }
@@ -77,37 +89,47 @@ async function createUserStore(
     findById(id) {
       return users.find((user) => user.id === id) || null;
     },
-
     async verify(email, password) {
-      if (typeof email !== "string" || typeof password !== "string") return null;
-      const user = users.find((candidate) => candidate.email === normalizeEmail(email));
+      if (typeof email !== "string" || typeof password !== "string")
+        return null;
+      const user = users.find(
+        (candidate) => candidate.email === normalizeEmail(email),
+      );
       if (!user) return null;
-
-      const candidate = await deriveKey(password, Buffer.from(user.salt, "hex"), passwordKeyLength);
+      const candidate = await deriveKey(
+        password,
+        Buffer.from(user.salt, "hex"),
+        passwordKeyLength,
+      );
       const expected = Buffer.from(user.passwordHash, "hex");
-      return candidate.length === expected.length && timingSafeEqual(candidate, expected)
+      return candidate.length === expected.length &&
+        timingSafeEqual(candidate, expected)
         ? user
         : null;
     },
-
     async register({ name, email, password, favoriteTeam }) {
-      const validationError = validateRegistration({ name, email, password, favoriteTeam });
+      const validationError = validateRegistration({
+        name,
+        email,
+        password,
+        favoriteTeam,
+      });
       if (validationError) {
         const error = new Error(validationError);
         error.code = "invalid_registration";
         throw error;
       }
-
       const salt = randomBytes(16);
       const passwordHash = await deriveKey(password, salt, passwordKeyLength);
       return serializeWrite(async () => {
         const normalizedEmail = normalizeEmail(email);
         if (users.some((user) => user.email === normalizedEmail)) {
-          const error = new Error("Ya existe una cuenta con ese correo electrónico.");
+          const error = new Error(
+            "Ya existe una cuenta con ese correo electrónico.",
+          );
           error.code = "email_exists";
           throw error;
         }
-
         const user = {
           id: randomUUID(),
           name: name.trim(),
@@ -129,4 +151,4 @@ async function createUserStore(
   };
 }
 
-module.exports = { createUserStore };
+export default createUserStore;

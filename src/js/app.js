@@ -1,6 +1,11 @@
-const path = require("node:path");
-const { randomBytes } = require("node:crypto");
-const express = require("express");
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { randomBytes } from "node:crypto";
+import express from "express";
+import { crearRouterLigas } from "./Routes/ligas.routes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const sessionCookieName = "ofsai.sid";
 const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
@@ -12,28 +17,35 @@ const publicUser = ({ id, name, email, favoriteTeam }) => ({
   favoriteTeam,
 });
 
-function createApp({ users, production = false }) {
+export function createApp({
+  users,
+  repositorioLigas = null,
+  production = false,
+}) {
   const app = express();
   const sessions = new Map();
+
   if (production) app.set("trust proxy", 1);
 
   app.use(express.json({ limit: "16kb" }));
+  app.use(express.urlencoded({ extended: false }));
+
   app.use((req, res, next) => {
     const cookieHeader = req.headers.cookie || "";
     const sessionCookie = cookieHeader
       .split(";")
       .map((cookie) => cookie.trim())
       .find((cookie) => cookie.startsWith(`${sessionCookieName}=`));
+
     const sessionId = sessionCookie?.slice(sessionCookieName.length + 1);
     const session = sessionId ? sessions.get(sessionId) : null;
 
     if (session && session.expiresAt > Date.now()) {
-      req.user = users.findById(session.userId);
+      req.user = users?.findById(session.userId) || null;
       req.sessionId = sessionId;
     } else if (sessionId) {
       sessions.delete(sessionId);
     }
-
     next();
   });
 
@@ -57,7 +69,7 @@ function createApp({ users, production = false }) {
     });
   };
 
-  app.post("/api/register", async (req, res) => {
+  app.post("/api/register", async (req, res, next) => {
     try {
       const user = await users.register(req.body || {});
       startSession(res, user);
@@ -69,14 +81,16 @@ function createApp({ users, production = false }) {
       if (error.code === "email_exists") {
         return res.status(409).json({ error: error.message });
       }
-      throw error;
+      next(error);
     }
   });
 
   app.post("/api/login", async (req, res) => {
-    const user = await users.verify(req.body?.email, req.body?.password);
+    const user = await users?.verify(req.body?.email, req.body?.password);
     if (!user) {
-      return res.status(401).json({ error: "Correo o contraseña incorrectos." });
+      return res
+        .status(401)
+        .json({ error: "Correo o contraseña incorrectos." });
     }
     startSession(res, user);
     res.json({ user: publicUser(user) });
@@ -97,18 +111,25 @@ function createApp({ users, production = false }) {
     res.status(204).end();
   });
 
+  if (repositorioLigas) {
+    app.use("/api/ligas", crearRouterLigas(repositorioLigas));
+  }
+
   app.get("/auth.js", (req, res) =>
-    res.sendFile(path.join(__dirname, "auth.js")),
+    res.sendFile(path.join(__dirname, "usuarios", "auth.js")),
   );
 
-  app.use(express.static(path.join(__dirname, "..", "public")));
+  app.use(express.static(path.join(__dirname, "..", "..", "public")));
+
   app.use((error, req, res, next) => {
     console.error(error);
     if (res.headersSent) return next(error);
-    res.status(500).json({ error: "Ocurrió un error interno. Intentá nuevamente." });
+    res
+      .status(500)
+      .json({ error: "Ocurrió un error interno. Intentá nuevamente." });
   });
 
   return app;
 }
 
-module.exports = { createApp };
+export default createApp;
