@@ -1,8 +1,6 @@
 const path = require("node:path");
 const express = require("express");
-const cookieParser = require("cookie-parser");
-const { createAuthRouter } = require("./auth");
-const { createUserRouter } = require("./users");
+const session = require("express-session");
 
 const regenerate = (req) =>
   new Promise((ok, fail) =>
@@ -10,6 +8,10 @@ const regenerate = (req) =>
   );
 const destroy = (req) =>
   new Promise((ok, fail) => req.session.destroy((e) => (e ? fail(e) : ok())));
+const toPublic = (user) =>
+  Object.fromEntries(
+    Object.entries(user).filter(([key]) => key !== "passwordHash"),
+  );
 
 function createApp({
   users,

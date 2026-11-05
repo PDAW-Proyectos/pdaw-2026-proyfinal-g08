@@ -1,12 +1,18 @@
 {
   "dependencies": {
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "jest": "^30.5.2"
   },
   "scripts": {
-    "npmclilint": "npmcli-lint",
-    "lint": "npm run npmclilint -- \"*.*js\" \"lib/**/*.*js\" \"test/**/*.*js\"",
-    "lintfix": "npm run lint -- --fix",
-    "posttest": "npm run lint --",
-    "postsnap": "npm run lintfix --"
+    "lint": "eslint .",
+    "start": "node src/server.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "jest": "^30.5.2"
   }
 }
