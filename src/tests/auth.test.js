@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
-import { createApp } from "../src/app.js";
-import { createUserStore } from "../src/users.js";
+import { createApp } from "../js/app.js";
+import { createUserStore } from "../js/Usuarios/users.js";
 
 let temporaryDirectory;
 let server;
@@ -15,7 +15,7 @@ before(async () => {
   const users = await createUserStore(path.join(temporaryDirectory, "users.json"));
   server = createApp({
     users,
-    repositorioLigas: { listar: () => [] },
+    repositorioLigas: { listarLigas: () => [] },
   }).listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
   baseUrl = `http://127.0.0.1:${server.address().port}`;
@@ -123,7 +123,10 @@ test("el equipo favorito es opcional y las cuentas siguen disponibles al recarga
 test("el servidor entrega las páginas y los scripts de la aplicación", async () => {
   const page = await request("/");
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /data-auth-open="register"/);
+  const pageHtml = await page.text();
+  assert.match(pageHtml, /data-auth-open="register"/);
+  assert.match(pageHtml, /<script src="js\/main\.js" type="module"><\/script>/);
+  assert.doesNotMatch(pageHtml, /<script[^>]+src="auth\.js"/);
 
   const leaguesPage = await request("/ligas.html");
   assert.equal(leaguesPage.status, 200);
@@ -132,13 +135,14 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
   assert.equal((leagueHtml.match(/data-liga-id=/g) || []).length, 6);
   assert.equal((leagueHtml.match(/data-liga-tabla/g) || []).length, 6);
 
-  const script = await request("/auth.js");
+  const script = await request("/js/auth.js");
   assert.equal(script.status, 200);
-  assert.match(await script.text(), /\/api\/register/);
+  assert.match(await script.text(), /export function inicializarAutenticacion/);
 
-  const appScript = await request("/js/app.js");
-  assert.equal(appScript.status, 200);
-  assert.match(await appScript.text(), /fechaPartido/);
+  const mainScript = await request("/js/main.js");
+  assert.equal(mainScript.status, 200);
+  assert.match(await mainScript.text(), /inicializarAutenticacion/);
+
 });
 
 test("el router de ligas responde con las ligas del repositorio", async () => {

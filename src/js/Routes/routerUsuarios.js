@@ -1,11 +1,8 @@
 import { randomBytes } from "node:crypto";
 import express from "express";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 const sessionCookieName = "ofsai.sid";
 const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
-const routerDirectory = dirname(fileURLToPath(import.meta.url));
 
 const publicUser = ({ id, name, email, favoriteTeam }) => ({
   id,
@@ -96,10 +93,6 @@ export function createUserRouter({ users, production = false }) {
     });
     res.status(204).end();
   });
-
-  router.get("/auth.js", (req, res) =>
-    res.sendFile(join(routerDirectory, "..", "Usuarios", "auth.js")),
-  );
 
   return router;
 }
