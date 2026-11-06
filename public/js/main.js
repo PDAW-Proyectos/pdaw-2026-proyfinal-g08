@@ -1,6 +1,10 @@
+import { inicializarAutenticacion } from "./auth.js";
+
 const contenedorLigas = document.getElementById("contenedorLigas");
 
+
 window.addEventListener("load", () => {
+  inicializarAutenticacion();
   //distingue la pagina con atributo dataset en el body
   //Sostener esto? Separar en modulos con app.js centralizandolos?
   let pagina = document.body.dataset.pagina;
