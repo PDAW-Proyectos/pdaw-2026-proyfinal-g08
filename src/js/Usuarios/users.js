@@ -52,9 +52,9 @@ export async function createUserStore(
     users = JSON.parse(await fs.readFile(filePath, "utf8"));
   } catch (error) {
     if (error.code !== "ENOENT") {
-      throw new Error(
-        `No se pudo leer el archivo de usuarios: ${error.message}`,
-      );
+      throw new Error(`No se pudo leer el archivo de usuarios`, {
+        cause: error,
+      });
     }
     users = [];
   }
