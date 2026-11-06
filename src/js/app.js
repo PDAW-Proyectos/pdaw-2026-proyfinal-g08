@@ -1,7 +1,7 @@
 import express from "express";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import crearRouterLigas from "./routes/routerLigas.js";
+import crearRouterLigas from "./routes/ligas.routes.js";
 import { createUserRouter } from "./routes/routerUsuarios.js";
 
 const sourceDirectory = dirname(fileURLToPath(import.meta.url));
@@ -20,7 +20,7 @@ export function createApp({
   if (repositorioLigas) {
     app.use("/api/ligas", crearRouterLigas(repositorioLigas));
   }
-  app.use(express.static(join(sourceDirectory, "..", "public")));
+  app.use(express.static(join(sourceDirectory, "..", "..", "public")));
   app.use((error, req, res, next) => {
     console.error(error);
     if (res.headersSent) return next(error);

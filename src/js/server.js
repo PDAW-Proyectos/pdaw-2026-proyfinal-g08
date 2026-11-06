@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import createApp from "./app.js";
+import {createApp} from "./app.js";
 import { createUserStore } from "./Usuarios/users.js"; // Ajusta la ruta si está en otra carpeta
 import { RepositorioLigas } from "./Futbol/RepositorioLigas.js";
 import ServicioFutbol, {

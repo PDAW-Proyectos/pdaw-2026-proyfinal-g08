@@ -98,7 +98,7 @@ export function createUserRouter({ users, production = false }) {
   });
 
   router.get("/auth.js", (req, res) =>
-    res.sendFile(join(routerDirectory, "..", "auth.js")),
+    res.sendFile(join(routerDirectory, "..", "Usuarios", "auth.js")),
   );
 
   return router;
