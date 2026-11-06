@@ -6,6 +6,7 @@ export default defineConfig([
   js.configs.recommended,
   {
     languageOptions: {
+      sourceType: "module",
       globals: {
         ...globals.node,
       },
@@ -27,7 +28,7 @@ export default defineConfig([
   },
   {
     // Los tests usan las funciones globales de Jest.
-    files: ["tests/**/*.test.js"],
+    files: ["**/*.test.js"],
     languageOptions: {
       globals: {
         ...globals.jest,
