@@ -41,9 +41,12 @@ Terminos y estabilidad:
 
 ```bash
 npm install
-cp .env.example .env
-npm run dev
+npm start
 ```
+
+La aplicación estará disponible en `http://localhost:3000`. Las cuentas se guardan
+en `data/users.json` (se puede cambiar la ubicación con `USER_STORE_PATH`) y las
+contraseñas se almacenan como hashes.
 
 ## Cómo ejecutar las pruebas
 

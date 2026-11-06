@@ -1,0 +1,10 @@
+[
+  {
+    "id": "2b4e87ad-b9c7-4f2e-a663-1f20318ceb39",
+    "name": "seba",
+    "email": "seba@gmail.com",
+    "passwordHash": "ccf1d5695b5a3b0d5e14f714a8a8ed3e855099ff580fd2497c86f73c469912016fb6ff93ce1ce7071d5ca9706a81e199ce705ebbc353d9f2a74d50f9ccbcd537",
+    "salt": "9868bc24294ff16ae7c6dab78cd068bb",
+    "favoriteTeam": "Juventus"
+  }
+]

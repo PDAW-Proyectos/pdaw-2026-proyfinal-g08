@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Consulta información y tablas de las principales ligas de fútbol."
+    />
+    <title>Ligas · Orsai.</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="encabezado-sitio sticky-top">
+      <nav
+        class="navbar container envoltura-pagina"
+        aria-label="Navegación principal"
+      >
+        <a class="navbar-brand" href="index.html" aria-label="orsai, inicio">
+          <span class="marca-icono" aria-hidden="true">O</span>orsai.
+        </a>
+        <input
+          class="menu-movil-control"
+          type="checkbox"
+          id="menuMovilLigas"
+          aria-label="Mostrar menú de navegación"
+        />
+        <label class="navbar-toggler" for="menuMovilLigas">
+          <span class="navbar-toggler-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Menú</span>
+        </label>
+        <div class="navbar-collapse">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="index.html#resultados">Resultados</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="ligas.html"
+                >Ligas</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="tienda.html">Tienda</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="foro.html">Foro</a>
+            </li>
+          </ul>
+          <div class="auth-controls">
+            <div class="auth-anonymous" data-auth-anonymous>
+              <button
+                class="btn btn-sm boton-contorno-grada px-3"
+                type="button"
+                data-auth-open="login"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                class="btn btn-sm boton-grada px-3"
+                type="button"
+                data-auth-open="register"
+              >
+                Registrarse
+              </button>
+            </div>
+            <div class="auth-session" data-auth-session hidden>
+              <span class="auth-user-label"
+                >Usuario: <strong data-auth-name></strong
+              ></span>
+              <button
+                class="btn btn-sm boton-contorno-grada px-3"
+                type="button"
+                data-auth-logout
+              >
+                Cerrar sesión
+              </button>
+            </div>
+            <span
+              class="auth-feedback"
+              data-auth-feedback
+              role="status"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main id="inicio" class="container envoltura-pagina py-4 py-lg-5">
+      <nav class="migas-pan mb-3" aria-label="Ruta de navegación">
+        <a href="index.html">Inicio</a><span aria-hidden="true"> / </span
+        ><span aria-current="page">Ligas</span>
+      </nav>
+
+      <section class="encabezado-ligas mb-4" aria-labelledby="titulo-ligas">
+        <div>
+          <p class="texto-antetitulo mb-1">Competiciones</p>
+          <h1 id="titulo-ligas" class="titulo-pagina mb-1">
+            El fútbol de todas las ligas.
+          </h1>
+          <p class="atenuado mb-0">
+            Explora las competiciones más seguidas y consulta su información.
+          </p>
+        </div>
+        <span class="contador-ligas"><strong>6</strong> ligas destacadas</span>
+      </section>
+
+      <section
+        id="listaLigas"
+        class="cuadricula-ligas"
+        aria-label="Ligas disponibles"
+      >
+        <article
+          id="premier-league"
+          class="tarjeta-detalle-liga"
+          data-liga-id="premier-league"
+        >
+          <header class="cabecera-liga-detalle">
+            <span class="escudo-liga-detalle" aria-hidden="true"
+              ><span>PL</span><img data-liga-field="escudo" alt="" hidden
+            /></span>
+            <div>
+              <p class="texto-antetitulo mb-1">Primera división</p>
+              <h2 data-liga-field="nombre">Premier League</h2>
+            </div>
+          </header>
+          <dl class="datos-liga">
+            <div>
+              <dt>País o región</dt>
+              <dd data-liga-field="pais">Inglaterra</dd>
+            </div>
+            <div>
+              <dt>Formato</dt>
+              <dd>Liga nacional · Clubes</dd>
+            </div>
+          </dl>
+          <details class="tabla-liga">
+            <summary>Tabla de posiciones</summary>
+            <div class="tabla-liga-contenedor">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">PJ</th>
+                    <th scope="col">Pts.</th>
+                  </tr>
+                </thead>
+                <tbody data-liga-tabla></tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+
+        <article id="laliga" class="tarjeta-detalle-liga" data-liga-id="laliga">
+          <header class="cabecera-liga-detalle">
+            <span class="escudo-liga-detalle" aria-hidden="true"
+              ><span>LL</span><img data-liga-field="escudo" alt="" hidden
+            /></span>
+            <div>
+              <p class="texto-antetitulo mb-1">Primera división</p>
+              <h2 data-liga-field="nombre">LaLiga</h2>
+            </div>
+          </header>
+          <dl class="datos-liga">
+            <div>
+              <dt>País o región</dt>
+              <dd data-liga-field="pais">España</dd>
+            </div>
+            <div>
+              <dt>Formato</dt>
+              <dd>Liga nacional · Clubes</dd>
+            </div>
+          </dl>
+          <details class="tabla-liga">
+            <summary>Tabla de posiciones</summary>
+            <div class="tabla-liga-contenedor">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">PJ</th>
+                    <th scope="col">Pts.</th>
+                  </tr>
+                </thead>
+                <tbody data-liga-tabla></tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+
+        <article
+          id="serie-a"
+          class="tarjeta-detalle-liga"
+          data-liga-id="serie-a"
+        >
+          <header class="cabecera-liga-detalle">
+            <span class="escudo-liga-detalle" aria-hidden="true"
+              ><span>SA</span><img data-liga-field="escudo" alt="" hidden
+            /></span>
+            <div>
+              <p class="texto-antetitulo mb-1">Primera división</p>
+              <h2 data-liga-field="nombre">Serie A</h2>
+            </div>
+          </header>
+          <dl class="datos-liga">
+            <div>
+              <dt>País o región</dt>
+              <dd data-liga-field="pais">Italia</dd>
+            </div>
+            <div>
+              <dt>Formato</dt>
+              <dd>Liga nacional · Clubes</dd>
+            </div>
+          </dl>
+          <details class="tabla-liga">
+            <summary>Tabla de posiciones</summary>
+            <div class="tabla-liga-contenedor">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">PJ</th>
+                    <th scope="col">Pts.</th>
+                  </tr>
+                </thead>
+                <tbody data-liga-tabla></tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+
+        <article
+          id="bundesliga"
+          class="tarjeta-detalle-liga"
+          data-liga-id="bundesliga"
+        >
+          <header class="cabecera-liga-detalle">
+            <span class="escudo-liga-detalle" aria-hidden="true"
+              ><span>BL</span><img data-liga-field="escudo" alt="" hidden
+            /></span>
+            <div>
+              <p class="texto-antetitulo mb-1">Primera división</p>
+              <h2 data-liga-field="nombre">Bundesliga</h2>
+            </div>
+          </header>
+          <dl class="datos-liga">
+            <div>
+              <dt>País o región</dt>
+              <dd data-liga-field="pais">Alemania</dd>
+            </div>
+            <div>
+              <dt>Formato</dt>
+              <dd>Liga nacional · Clubes</dd>
+            </div>
+          </dl>
+          <details class="tabla-liga">
+            <summary>Tabla de posiciones</summary>
+            <div class="tabla-liga-contenedor">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">PJ</th>
+                    <th scope="col">Pts.</th>
+                  </tr>
+                </thead>
+                <tbody data-liga-tabla></tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+
+        <article
+          id="ligue-1"
+          class="tarjeta-detalle-liga"
+          data-liga-id="ligue-1"
+        >
+          <header class="cabecera-liga-detalle">
+            <span class="escudo-liga-detalle" aria-hidden="true"
+              ><span>L1</span><img data-liga-field="escudo" alt="" hidden
+            /></span>
+            <div>
+              <p class="texto-antetitulo mb-1">Primera división</p>
+              <h2 data-liga-field="nombre">Ligue 1</h2>
+            </div>
+          </header>
+          <dl class="datos-liga">
+            <div>
+              <dt>País o región</dt>
+              <dd data-liga-field="pais">Francia</dd>
+            </div>
+            <div>
+              <dt>Formato</dt>
+              <dd>Liga nacional · Clubes</dd>
+            </div>
+          </dl>
+          <details class="tabla-liga">
+            <summary>Tabla de posiciones</summary>
+            <div class="tabla-liga-contenedor">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">PJ</th>
+                    <th scope="col">Pts.</th>
+                  </tr>
+                </thead>
+                <tbody data-liga-tabla></tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+
+        <article
+          id="libertadores"
+          class="tarjeta-detalle-liga"
+          data-liga-id="libertadores"
+        >
+          <header class="cabecera-liga-detalle">
+            <span class="escudo-liga-detalle" aria-hidden="true"
+              ><span>LIB</span><img data-liga-field="escudo" alt="" hidden
+            /></span>
+            <div>
+              <p class="texto-antetitulo mb-1">Torneo continental</p>
+              <h2 data-liga-field="nombre">Libertadores</h2>
+            </div>
+          </header>
+          <dl class="datos-liga">
+            <div>
+              <dt>País o región</dt>
+              <dd data-liga-field="pais">Sudamérica</dd>
+            </div>
+            <div>
+              <dt>Formato</dt>
+              <dd>Competición continental · Clubes</dd>
+            </div>
+          </dl>
+          <details class="tabla-liga">
+            <summary>Tabla de posiciones</summary>
+            <div class="tabla-liga-contenedor">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">PJ</th>
+                    <th scope="col">Pts.</th>
+                  </tr>
+                </thead>
+                <tbody data-liga-tabla></tbody>
+              </table>
+            </div>
+          </details>
+        </article>
+      </section>
+    </main>
+
+    <footer class="pie-sitio py-4">
+      <div
+        class="container envoltura-pagina d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"
+      >
+        <div>
+          <a class="navbar-brand fs-5" href="index.html">orsai.</a>
+          <div>El fútbol se vive en comunidad.</div>
+        </div>
+        <nav
+          class="d-flex flex-wrap gap-3"
+          aria-label="Navegación del pie de página"
+        >
+          <a class="atenuado" href="index.html">Sobre Orsai</a>
+          <a class="atenuado" href="index.html">Ayuda</a>
+          <a class="atenuado" href="index.html">Privacidad</a>
+          <a class="atenuado" href="index.html">Condiciones</a>
+        </nav>
+        <span>© <span id="anioActual">2026</span> Orsai</span>
+      </div>
+    </footer>
+    <script src="js/main.js" defer></script>
+    <script src="auth.js" defer></script>
+  </body>
+</html>
