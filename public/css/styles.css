@@ -1954,3 +1954,136 @@
           grid-template-columns: minmax(0, 1fr);
         }
       }
+
+      .encabezado-equipos {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .cuadricula-equipos {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .tarjeta-equipo {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 1rem;
+        border: 1px solid var(--grada-borde);
+        border-radius: 14px;
+        background: #fff;
+        color: inherit;
+        transition:
+          border-color 160ms ease,
+          transform 160ms ease;
+      }
+
+      .tarjeta-equipo:hover {
+        transform: translateY(-2px);
+        border-color: #a9cbbb;
+      }
+
+      .escudo-equipo {
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        object-fit: contain;
+      }
+
+      .datos-tarjeta-equipo {
+        display: grid;
+        min-width: 0;
+        gap: 0.2rem;
+      }
+
+      .nombre-tarjeta-equipo {
+        overflow: hidden;
+        color: var(--grada-oscuro);
+        font-size: 0.9rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .liga-tarjeta-equipo {
+        color: var(--grada-atenuado);
+        font-size: 0.76rem;
+      }
+
+      .flecha-tarjeta-equipo {
+        margin-left: auto;
+        color: var(--grada-verde);
+        font-size: 1.15rem;
+      }
+
+      .estado-equipos {
+        grid-column: 1 / -1;
+        margin: 0;
+        padding: 2rem;
+        border: 1px dashed #cbd9d0;
+        border-radius: 14px;
+        color: var(--grada-atenuado);
+        text-align: center;
+      }
+
+      .panel-detalle-equipo {
+        display: flex;
+        min-height: 220px;
+        align-items: center;
+        gap: 1.5rem;
+        padding: clamp(1.25rem, 4vw, 2.5rem);
+        border: 1px solid var(--grada-borde);
+        border-radius: 16px;
+        background: #fff;
+      }
+
+      .insignia-detalle-equipo {
+        display: grid;
+        width: 120px;
+        height: 120px;
+        flex: 0 0 120px;
+        place-items: center;
+        border-radius: 18px;
+        background: var(--grada-menta);
+      }
+
+      .insignia-detalle-equipo img {
+        max-width: 82%;
+        max-height: 82%;
+        object-fit: contain;
+      }
+
+      .informacion-detalle-equipo {
+        min-width: 0;
+      }
+
+      .contenido-detalle-equipo {
+        padding: 1.5rem;
+      }
+
+      @media (max-width: 991.98px) {
+        .cuadricula-equipos {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 575.98px) {
+        .cuadricula-equipos {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .panel-detalle-equipo {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .insignia-detalle-equipo {
+          width: 88px;
+          height: 88px;
+          flex-basis: 88px;
+        }
+      }
