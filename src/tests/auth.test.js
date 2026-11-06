@@ -133,7 +133,7 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
   assert.equal(script.status, 200);
   assert.match(await script.text(), /\/api\/register/);
 
-  const appScript = await request("/js/app.js");
+  const appScript = await request("/js/main.js");
   assert.equal(appScript.status, 200);
-  assert.match(await appScript.text(), /fechaPartido/);
+  assert.match(await appScript.text(), /window\.addEventListener/);
 });

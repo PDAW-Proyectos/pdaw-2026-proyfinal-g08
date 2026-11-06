@@ -116,7 +116,7 @@ export function createApp({
   }
 
   app.get("/auth.js", (req, res) =>
-    res.sendFile(path.join(__dirname, "usuarios", "auth.js")),
+    res.sendFile(path.join(__dirname, "..", "..", "public", "js", "auth.js")),
   );
 
   app.use(express.static(path.join(__dirname, "..", "..", "public")));
