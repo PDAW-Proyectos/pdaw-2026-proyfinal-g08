@@ -12,9 +12,6 @@ const defaultUserStorePath = fileURLToPath(
 
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 function validateRegistration({ name, email, password, favoriteTeam }) {
   if (
     typeof name !== "string" ||
@@ -58,6 +55,7 @@ async function createUserStore(
     if (error.code !== "ENOENT") {
       throw new Error(
         `No se pudo leer el archivo de usuarios: ${error.message}`,
+        { cause: error },
       );
     }
     users = [];

@@ -79,7 +79,7 @@ async function renderizarPaginaLiga(){
   const parametros = new URLSearchParams(urlActual);
   const respuesta = await fetch(`/api/ligas/${parametros.get("id")}`);
   if(!respuesta.ok){
-    throw new Error("Error en la respuesta: ", error.message);
+    throw new Error(`Error en la respuesta: ${respuesta.status}`);
   }
   const liga = await respuesta.json();
   renderizarEncabezadoLiga(liga);
