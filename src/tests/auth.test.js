@@ -3,8 +3,8 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const { after, before, test } = require("node:test");
-const { createApp } = require("../src/app");
-const { createUserStore } = require("../src/users");
+const { createApp } = require("../js/app.js");
+const { createUserStore } = require("../js/users.js");
 
 let temporaryDirectory;
 let server;
