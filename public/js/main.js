@@ -20,7 +20,7 @@ window.addEventListener("load", ()=>{
 async function cargarLigas(){
   const respuesta = await fetch("/api/ligas");
   if (!respuesta.ok){
-    throw new Error("Error en la respueta: ", error.message);
+    throw new Error("Error en la respueta");
   }
   const datos = await respuesta.json();
   mostrarLigas(datos);
