@@ -1,16 +1,16 @@
-const assert = require("node:assert/strict");
-const fs = require("node:fs/promises");
-const os = require("node:os");
-const path = require("node:path");
-const { after, before, test } = require("node:test");
-const { createApp } = require("../js/app.js");
-const { createUserStore } = require("../js/users.js");
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { afterAll, beforeAll, test } from "@jest/globals";
+import { createApp } from "../js/app.js";
+import { createUserStore } from "../js/Usuarios/users.js";
 
 let temporaryDirectory;
 let server;
 let baseUrl;
 
-before(async () => {
+beforeAll(async () => {
   temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "ofsai-auth-"));
   const users = await createUserStore(path.join(temporaryDirectory, "users.json"));
   server = createApp({ users }).listen(0);
@@ -18,7 +18,7 @@ before(async () => {
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 
-after(async () => {
+afterAll(async () => {
   await new Promise((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve())),
   );
