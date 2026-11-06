@@ -6,7 +6,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "start": "node src/server.js",
+    "start": "node src/js/server.js",
     "test": "jest"
   },
   "devDependencies": {
@@ -14,5 +14,6 @@
     "eslint": "^10.14.0",
     "globals": "^17.14.0",
     "jest": "^30.5.2"
-  }
+  },
+  "type": "module"
 }
