@@ -24,7 +24,9 @@ export function createApp({
   app.use((error, req, res, next) => {
     console.error(error);
     if (res.headersSent) return next(error);
-    res.status(500).json({ error: "Ocurrió un error interno. Intentá nuevamente." });
+    res
+      .status(500)
+      .json({ error: "Ocurrió un error interno. Intentá nuevamente." });
   });
 
   return app;
