@@ -2,12 +2,12 @@ import { inicializarAutenticacion } from "./auth.js";
 
 const contenedorLigas = document.getElementById("contenedorLigas");
 
-window.addEventListener("load", ()=>{
+window.addEventListener("load", () => {
   inicializarAutenticacion();
   //distingue la pagina con atributo dataset en el body
   //Sostener esto? Separar en modulos con app.js centralizandolos?
   let pagina = document.body.dataset.pagina;
-  switch(pagina){
+  switch (pagina) {
     case "index": {
       cargarLigas();
       break;
@@ -20,19 +20,19 @@ window.addEventListener("load", ()=>{
 });
 
 //Comportamiento de index.html
-async function cargarLigas(){
+async function cargarLigas() {
   const respuesta = await fetch("/api/ligas");
-  if (!respuesta.ok){
+  if (!respuesta.ok) {
     throw new Error("Error en la respueta");
-  } 
+  }
   const datos = await respuesta.json();
   mostrarLigas(datos);
 }
 
-function mostrarLigas(ligas){
+function mostrarLigas(ligas) {
   contenedorLigas.innerHTML = "";
-  ligas.forEach(liga => {
-    let elemLiga = crearCardLiga(liga)
+  ligas.forEach((liga) => {
+    let elemLiga = crearCardLiga(liga);
     contenedorLigas.appendChild(elemLiga);
   });
 }
@@ -74,39 +74,39 @@ function crearCardLiga(liga) {
   return columna;
 }
 //Comportamiento de liga.html
-async function renderizarPaginaLiga(){
+async function renderizarPaginaLiga() {
   const urlActual = window.location.search;
   const parametros = new URLSearchParams(urlActual);
   const respuesta = await fetch(`/api/ligas/${parametros.get("id")}`);
-  if(!respuesta.ok){
+  if (!respuesta.ok) {
     throw new Error(`Error en la respuesta: ${respuesta.status}`);
   }
   const liga = await respuesta.json();
   renderizarEncabezadoLiga(liga);
   renderizarTablaLiga(liga);
 }
-async function renderizarEncabezadoLiga(liga){
+async function renderizarEncabezadoLiga(liga) {
   const escudoLiga = document.getElementById("escudoLiga");
   const tituloLiga = document.getElementById("tituloLiga");
   const paisLiga = document.getElementById("paisLiga");
   const temporadaLiga = document.getElementById("temporadaLiga");
 
   escudoLiga.src = liga.escudo;
-  escudoLiga.alt = `escudo-${liga.nombre}`
+  escudoLiga.alt = `escudo-${liga.nombre}`;
   tituloLiga.textContent = liga.nombre;
   paisLiga.textContent = liga.pais;
   temporadaLiga.textContent = liga.temporada;
 }
-function renderizarTablaLiga(liga){
+function renderizarTablaLiga(liga) {
   const cuerpoTabla = document.getElementById("cuerpoTablaPosiciones");
   const tablaDeLiga = liga.tabla;
   cuerpoTabla.replaceChildren();
-  tablaDeLiga.forEach(posicion => {
-    let tableRow = agregarPosicionATabla(posicion)
-    cuerpoTabla.appendChild(tableRow)
-  })
+  tablaDeLiga.forEach((posicion) => {
+    let tableRow = agregarPosicionATabla(posicion);
+    cuerpoTabla.appendChild(tableRow);
+  });
 }
-function agregarPosicionATabla(posicion){
+function agregarPosicionATabla(posicion) {
   const tableRow = document.createElement("tr");
   const celdaPosicion = document.createElement("th");
   celdaPosicion.scope = "row";
@@ -146,10 +146,10 @@ function agregarPosicionATabla(posicion){
     posicion.golesFavor,
     posicion.golesContra,
     posicion.diferenciaGol,
-    posicion.puntos
+    posicion.puntos,
   ];
 
-  estadisticas.forEach(estadistica => {
+  estadisticas.forEach((estadistica) => {
     const celdaEstadistica = document.createElement("td");
     celdaEstadistica.className = "text-center";
     celdaEstadistica.textContent = estadistica ?? "—";

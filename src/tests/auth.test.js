@@ -10,7 +10,7 @@ let temporaryDirectory;
 let server;
 let baseUrl;
 
-before(async () => {
+beforeAll(async () => {
   temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "ofsai-auth-"));
   const users = await createUserStore(path.join(temporaryDirectory, "users.json"));
   server = createApp({
@@ -21,7 +21,7 @@ before(async () => {
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 
-after(async () => {
+afterAll(async () => {
   await new Promise((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve())),
   );
