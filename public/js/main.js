@@ -46,6 +46,7 @@ function crearCardLiga(liga) {
   const tarjeta = document.createElement("a");
   tarjeta.href = `../liga.html?id=${liga.id}`;
   tarjeta.className = "card shadow-sm";
+  
 
   const cuerpo = document.createElement("div");
   cuerpo.className = "card-body p-3 d-flex align-items-center gap-2";
@@ -54,6 +55,7 @@ function crearCardLiga(liga) {
   escudo.className = "flex-shrink-0";
   escudo.width = 43;
   escudo.height = 43;
+  escudo.src = liga.escudo;
   escudo.style.objectFit = "contain";
   asignarEscudo(escudo, liga.escudo, `Escudo de ${liga.nombre}`);
 
