@@ -87,14 +87,33 @@
       }
 
       .navbar .nav-link {
+        border-radius: 8px;
         color: #68766f;
         font-size: 0.9rem;
         font-weight: 600;
+        transition:
+          background-color 160ms ease,
+          color 160ms ease,
+          transform 160ms ease;
       }
 
       .navbar .nav-link:hover,
       .navbar .nav-link.active {
         color: var(--grada-verde);
+      }
+
+      .navbar .nav-link:hover {
+        background-color: var(--grada-menta);
+      }
+
+      .navbar .nav-link:focus-visible {
+        position: relative;
+        z-index: 1;
+        outline: 3px solid var(--grada-verde);
+        outline-offset: 2px;
+        background-color: var(--grada-menta);
+        color: var(--grada-oscuro);
+        transform: scale(1.04);
       }
 
       .navbar .navbar-collapse {
@@ -184,6 +203,15 @@
       .boton-contorno-grada:focus {
         border-color: var(--grada-verde);
         color: var(--grada-verde);
+      }
+
+      .navbar .auth-anonymous [data-auth-open]:focus-visible {
+        position: relative;
+        z-index: 1;
+        outline: 3px solid var(--grada-oscuro);
+        outline-offset: 3px;
+        box-shadow: 0 0 0 5px #fff;
+        transform: scale(1.06);
       }
 
       .control-fecha {
@@ -376,6 +404,31 @@
       .tarjeta-liga:hover {
         transform: translateY(-2px);
         border-color: #a9cbbb;
+      }
+
+      #contenedorLigas .card {
+        border-color: var(--grada-borde);
+        color: var(--grada-oscuro);
+        text-decoration: none;
+        transition:
+          border-color 160ms ease,
+          box-shadow 160ms ease,
+          transform 160ms ease;
+      }
+
+      #contenedorLigas .card:hover {
+        border-color: #8fc7a8;
+        box-shadow: 0 0.35rem 0.9rem rgb(21 58 46 / 12%);
+        transform: translateY(-2px);
+      }
+
+      #contenedorLigas .card:focus-visible {
+        position: relative;
+        z-index: 1;
+        outline: 3px solid var(--grada-verde);
+        outline-offset: 3px;
+        box-shadow: 0 0.35rem 0.9rem rgb(21 58 46 / 16%);
+        transform: scale(1.02);
       }
 
       .icono-liga {
@@ -1325,6 +1378,24 @@
 
       .navbar .auth-controls .btn {
         margin-left: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .navbar .nav-link,
+        .navbar .auth-anonymous [data-auth-open],
+        #contenedorLigas .card {
+          transition: none;
+        }
+
+        .navbar .nav-link:focus-visible,
+        .navbar .auth-anonymous [data-auth-open]:focus-visible,
+        #contenedorLigas .card:focus-visible {
+          transform: none;
+        }
+
+        #contenedorLigas .card:hover {
+          transform: none;
+        }
       }
 
       .auth-user-label {
