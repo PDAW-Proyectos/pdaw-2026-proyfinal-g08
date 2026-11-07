@@ -1,6 +1,7 @@
 import { inicializarAutenticacion } from "./auth.js";
 
 const contenedorLigas = document.getElementById("contenedorLigas");
+const ESCUDO_LIGA_POR_DEFECTO = "/data/escudoNoEncontrado.png";
 
 
 window.addEventListener("load", () => {
@@ -53,9 +54,8 @@ function crearCardLiga(liga) {
   escudo.className = "flex-shrink-0";
   escudo.width = 43;
   escudo.height = 43;
-  escudo.src = liga.escudo;
-  escudo.alt = `Escudo de ${liga.nombre}`;
   escudo.style.objectFit = "contain";
+  asignarEscudo(escudo, liga.escudo, `Escudo de ${liga.nombre}`);
 
   const informacion = document.createElement("div");
 
@@ -74,6 +74,18 @@ function crearCardLiga(liga) {
 
   return columna;
 }
+
+function asignarEscudo(imagen, urlEscudo, textoAlternativo) {
+  imagen.alt = textoAlternativo;
+  imagen.onerror = () => {
+    imagen.onerror = null;
+    if (imagen.getAttribute("src") !== ESCUDO_LIGA_POR_DEFECTO) {
+      imagen.src = ESCUDO_LIGA_POR_DEFECTO;
+    }
+  };
+  imagen.src = urlEscudo || ESCUDO_LIGA_POR_DEFECTO;
+}
+
 //Comportamiento de liga.html
 async function renderizarPaginaLiga() {
   const urlActual = window.location.search;
@@ -92,8 +104,7 @@ async function renderizarEncabezadoLiga(liga) {
   const paisLiga = document.getElementById("paisLiga");
   const temporadaLiga = document.getElementById("temporadaLiga");
 
-  escudoLiga.src = liga.escudo;
-  escudoLiga.alt = `escudo-${liga.nombre}`;
+  asignarEscudo(escudoLiga, liga.escudo, `Escudo de ${liga.nombre}`);
   tituloLiga.textContent = liga.nombre;
   paisLiga.textContent = liga.pais;
   temporadaLiga.textContent = liga.temporada;
