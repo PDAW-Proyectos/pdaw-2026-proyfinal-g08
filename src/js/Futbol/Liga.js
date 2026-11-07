@@ -36,7 +36,9 @@ export class Liga {
   get obtenerEscudo() {
     return this.escudo;
   }
-
+  get obtenerTemporada(){
+    return this.temporada;
+  }
   get obtenerTabla() {
     return this.tabla;
   }
