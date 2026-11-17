@@ -6,5 +6,14 @@
     "passwordHash": "ccf1d5695b5a3b0d5e14f714a8a8ed3e855099ff580fd2497c86f73c469912016fb6ff93ce1ce7071d5ca9706a81e199ce705ebbc353d9f2a74d50f9ccbcd537",
     "salt": "9868bc24294ff16ae7c6dab78cd068bb",
     "favoriteTeam": "Juventus"
+  },
+  {
+    "id": "986aab4f-4ea6-44c7-8528-daf23648ab62",
+    "name": "Pablo",
+    "email": "pablogod@gmail.com",
+    "passwordHash": "f25827bdad04f69737d4e1884853aa9fb3710c6fd298cc50c8137f824f6c7360428959a663ead50dde48df66ed25d02e799f58f891dc81967a28812bbb11d821",
+    "salt": "76b50b0bdb4bcf6fe8949feb4b2b8107",
+    "role": "admin",
+    "favoriteTeam": null
   }
 ]

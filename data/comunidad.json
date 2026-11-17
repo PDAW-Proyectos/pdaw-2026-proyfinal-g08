@@ -1,0 +1,26 @@
+{
+  "publicaciones": [],
+  "comentarios": [],
+  "productos": [
+    {
+      "id": "b9c4d64b-04e2-462b-bdf9-3d42c7bcc5e4",
+      "nombre": "Camiseta Orsai",
+      "descripcion": "Camiseta verde de la comunidad.",
+      "categoria": "camisetas",
+      "precio": 39.9,
+      "stock": 10,
+      "activo": true
+    },
+    {
+      "id": "54689b4b-be6a-42bc-aa3e-0a625e458687",
+      "nombre": "Balón Match",
+      "descripcion": "Balón de fútbol talla 5.",
+      "categoria": "balones",
+      "precio": 24.9,
+      "stock": 8,
+      "activo": true
+    }
+  ],
+  "carritos": {},
+  "pedidos": []
+}

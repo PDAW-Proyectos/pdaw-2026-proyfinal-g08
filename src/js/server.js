@@ -5,6 +5,7 @@ import { RepositorioLigas } from "./Futbol/RepositorioLigas.js";
 import ServicioFutbol, {
   LIGAS_UTILIZADAS_IDS,
 } from "./Futbol/ServicioFutbol.js";
+import { crearRepositorioComunidad } from "./Comunidad/RepositorioComunidad.js";
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -61,13 +62,16 @@ export async function startServer() {
   const users = await createUserStore(
     process.env.USER_STORE_PATH || "./usuarios.json",
   );
-
+  const comunidad = await crearRepositorioComunidad(
+    process.env.COMMUNITY_STORE_PATH || "./data/comunidad.json",
+  );
   // 2. Inicializa los datos de la API de fútbol
   const repositorioLigas = await inicializarLigas();
 
   // 3. Crea la aplicación Express inyectando las dependencias
   const app = createApp({
     users,
+    comunidad,
     repositorioLigas,
     production: process.env.NODE_ENV === "production",
   });

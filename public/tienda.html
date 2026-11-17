@@ -140,22 +140,22 @@
         <div>
           <span class="beneficio-icono" aria-hidden="true">♧</span
           ><span
-            ><strong>Envío gratis desde 60 €</strong
-            ><small>A toda la península</small></span
+            ><strong>Catálogo actualizado</strong
+            ><small>Productos y stock disponibles</small></span
           >
         </div>
         <div>
           <span class="beneficio-icono" aria-hidden="true">◷</span
           ><span
-            ><strong>30 días para decidir</strong
-            ><small>Devoluciones sencillas</small></span
+            ><strong>Carrito personal</strong
+            ><small>Guardado para tu cuenta</small></span
           >
         </div>
         <div>
           <span class="beneficio-icono" aria-hidden="true">♧</span
           ><span
-            ><strong>Compra con confianza</strong
-            ><small>Pago seguro</small></span
+            ><strong>Pedido de prueba</strong
+            ><small>Sin cobro ni tarjeta</small></span
           >
         </div>
       </section>
@@ -221,16 +221,16 @@
             </div>
             <label class="orden-catalogo">
               <span class="visually-hidden">Ordenar productos</span>
-              <select aria-label="Ordenar productos">
-                <option>Más populares</option>
-                <option>Precio: menor a mayor</option>
-                <option>Precio: mayor a menor</option>
+              <select id="orden-productos" aria-label="Ordenar productos">
+                <option value="popular">Más populares</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
               </select>
             </label>
           </div>
         </div>
 
-        <div class="cuadricula-productos">
+        <div id="lista-productos" class="cuadricula-productos" aria-live="polite">
           <article class="tarjeta-producto" data-categoria="camisetas">
             <div class="producto-imagen-contenedor">
               <img
@@ -252,7 +252,7 @@
               <h3>Camiseta Orsai Club</h3>
               <p class="producto-descripcion">Verde campo · Tallas XS–XXL</p>
               <div class="producto-precio-fila">
-                <strong>39,90 €</strong><span>☆ 4,8</span>
+                <strong>$39.90</strong><span>☆ 4,8</span>
               </div>
               <a class="boton-ver-producto" href="#cuenta"
                 >Ver producto <span aria-hidden="true">→</span></a
@@ -280,7 +280,7 @@
               <h3>Balón Match 01</h3>
               <p class="producto-descripcion">Talla 5 · Fútbol de campo</p>
               <div class="producto-precio-fila">
-                <strong>24,90 €</strong><span>☆ 4,8</span>
+                <strong>$24.90</strong><span>☆ 4,8</span>
               </div>
               <a class="boton-ver-producto" href="#cuenta"
                 >Ver producto <span aria-hidden="true">→</span></a
@@ -308,7 +308,7 @@
               <h3>Botas Sprint FG</h3>
               <p class="producto-descripcion">Blanco / lima · Tallas 38–46</p>
               <div class="producto-precio-fila">
-                <strong>69,90 €</strong><span>☆ 4,8</span>
+                <strong>$69.90</strong><span>☆ 4,8</span>
               </div>
               <a class="boton-ver-producto" href="#cuenta"
                 >Ver producto <span aria-hidden="true">→</span></a
@@ -335,7 +335,7 @@
               <h3>Bufanda de la afición</h3>
               <p class="producto-descripcion">Verde / crudo · Talla única</p>
               <div class="producto-precio-fila">
-                <strong>19,90 €</strong><span>☆ 4,8</span>
+                <strong>$19.90</strong><span>☆ 4,8</span>
               </div>
               <a class="boton-ver-producto" href="#cuenta"
                 >Ver producto <span aria-hidden="true">→</span></a
@@ -344,8 +344,98 @@
           </article>
         </div>
         <p class="nota-catalogo mt-3 mb-4">
-          Precios expresados en euros, IVA incluido.
+          Precios expresados en dólares estadounidenses (USD). Las compras son
+          pedidos de prueba y no procesan pagos.
         </p>
+      </section>
+
+      <section
+        class="panel p-3 p-md-4 mb-4"
+        aria-labelledby="titulo-carrito"
+      >
+        <h2 id="titulo-carrito" class="titulo-seccion">Mi carrito</h2>
+        <div id="contenido-carrito" aria-live="polite"></div>
+        <p id="total-carrito" class="fw-bold"></p>
+        <button id="boton-vaciar-carrito" class="btn boton-contorno-grada" type="button">
+          Vaciar carrito
+        </button>
+        <button id="boton-finalizar-compra" class="btn boton-grada" type="button">
+          Finalizar compra de prueba
+        </button>
+        <p id="estado-tienda" class="mt-3 mb-0" role="status" aria-live="polite"></p>
+      </section>
+
+      <section
+        id="seccion-admin-productos"
+        class="panel p-3 p-md-4 mb-4"
+        aria-labelledby="titulo-admin-productos"
+        hidden
+      >
+        <h2 id="titulo-admin-productos" class="titulo-seccion">
+          Administración de productos
+        </h2>
+        <form id="form-producto">
+          <div class="mb-3">
+            <label class="form-label" for="nombre-producto">Nombre</label>
+            <input
+              class="form-control"
+              id="nombre-producto"
+              name="nombre"
+              maxlength="80"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="descripcion-producto">Descripción</label>
+            <textarea
+              class="form-control"
+              id="descripcion-producto"
+              name="descripcion"
+              maxlength="300"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="categoria-producto">Categoría</label>
+            <select class="form-select" id="categoria-producto" name="categoria" required>
+              <option value="camisetas">Camisetas</option>
+              <option value="botas">Botas</option>
+              <option value="balones">Balones</option>
+              <option value="accesorios">Accesorios</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="precio-producto">Precio en dólares (USD)</label>
+            <input
+              class="form-control"
+              id="precio-producto"
+              name="precio"
+              type="number"
+              min="0.01"
+              max="1000000"
+              step="0.01"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="stock-producto">Unidades en stock</label>
+            <input
+              class="form-control"
+              id="stock-producto"
+              name="stock"
+              type="number"
+              min="0"
+              max="100000"
+              step="1"
+              required
+            />
+          </div>
+          <button class="btn boton-grada" type="submit">Agregar producto</button>
+        </form>
+      </section>
+
+      <section class="panel p-3 p-md-4 mb-4" aria-labelledby="titulo-pedidos">
+        <h2 id="titulo-pedidos" class="titulo-seccion">Mis compras de prueba</h2>
+        <div id="historial-pedidos" aria-live="polite"></div>
       </section>
 
       <section
@@ -358,7 +448,7 @@
             Tu próxima equipación te espera.
           </h2>
           <p class="atenuado mb-0">
-            La cuenta y las compras estarán disponibles en próximas versiones.
+            Iniciá sesión para usar tu carrito y registrar una compra de prueba.
           </p>
         </div>
         <a class="btn boton-contorno-grada btn-sm px-3" href="index.html"
@@ -406,5 +496,6 @@
       </div>
     </footer>
     <script type="module" src="js/main.js" defer></script>
+    <script type="module" src="js/tienda.js"></script>
   </body>
 </html>

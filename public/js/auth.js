@@ -5,14 +5,26 @@ export function inicializarAutenticacion() {
   const controlesDeSesion = document.querySelector("[data-auth-session]");
   const nombreUsuario = document.querySelector("[data-auth-name]");
   const mensajeAutenticacion = document.querySelector("[data-auth-feedback]");
+  const botonCerrarSesion = controlesDeSesion?.querySelector("[data-auth-logout]");
 
   if (
     !controlesAnonimos ||
     !controlesDeSesion ||
     !nombreUsuario ||
-    !mensajeAutenticacion
+    !mensajeAutenticacion ||
+    !botonCerrarSesion
   ) {
     return;
+  }
+
+  let enlacePerfil = controlesDeSesion.querySelector("[data-auth-profile]");
+  if (!enlacePerfil) {
+    enlacePerfil = document.createElement("a");
+    enlacePerfil.className = "btn btn-sm boton-contorno-grada px-3";
+    enlacePerfil.href = "perfil.html";
+    enlacePerfil.dataset.authProfile = "";
+    enlacePerfil.textContent = "Mi perfil";
+    controlesDeSesion.insertBefore(enlacePerfil, botonCerrarSesion);
   }
 
   const dialogo = crearDialogoAutenticacion();
@@ -26,6 +38,9 @@ export function inicializarAutenticacion() {
     controlesAnonimos.hidden = Boolean(usuario);
     controlesDeSesion.hidden = !usuario;
     nombreUsuario.textContent = usuario ? usuario.name : "";
+    window.dispatchEvent(
+      new CustomEvent("auth:changed", { detail: { user: usuario } }),
+    );
   }
 
   function obtenerMensajeValidacion(campo, formulario) {
@@ -204,7 +219,7 @@ export function inicializarAutenticacion() {
     }
   }
 
-  controlesAnonimos.querySelectorAll("[data-auth-open]").forEach((boton) => {
+  document.querySelectorAll("[data-auth-open]").forEach((boton) => {
     boton.addEventListener("click", () => abrirDialogo(boton.dataset.authOpen));
   });
   dialogo
@@ -228,9 +243,7 @@ export function inicializarAutenticacion() {
     );
   });
 
-  controlesDeSesion
-    .querySelector("[data-auth-logout]")
-    .addEventListener("click", cerrarSesion);
+  botonCerrarSesion.addEventListener("click", cerrarSesion);
 
   cargarSesionActual();
 }

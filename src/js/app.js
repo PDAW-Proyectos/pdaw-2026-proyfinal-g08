@@ -10,15 +10,29 @@ const __dirname = path.dirname(__filename);
 const sessionCookieName = "ofsai.sid";
 const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
 
-const publicUser = ({ id, name, email, favoriteTeam }) => ({
+const publicUser = ({ id, name, email, favoriteTeam, role }) => ({
   id,
   name,
   email,
   favoriteTeam,
+  role,
 });
+
+const publicProfile = ({ id, name, favoriteTeam }) => ({
+  id,
+  name,
+  favoriteTeam,
+});
+
+const esPrecioValido = (precio) =>
+  Number.isFinite(precio) &&
+  precio > 0 &&
+  precio <= 1000000 &&
+  Math.abs(precio * 100 - Math.round(precio * 100)) < 0.000001;
 
 export function createApp({
   users,
+  comunidad,
   repositorioLigas = null,
   production = false,
 }) {
@@ -46,6 +60,7 @@ export function createApp({
     } else if (sessionId) {
       sessions.delete(sessionId);
     }
+
     next();
   });
 
@@ -53,6 +68,20 @@ export function createApp({
     req.user
       ? next()
       : res.status(401).json({ error: "Es necesario iniciar sesión." });
+
+  const requireAdmin = (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Es necesario iniciar sesión." });
+    }
+
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "No tenés permisos para realizar esta acción." });
+    }
+
+    next();
+  };
 
   const startSession = (res, user) => {
     const sessionId = randomBytes(32).toString("hex");
@@ -68,6 +97,246 @@ export function createApp({
       path: "/",
     });
   };
+
+  app.get("/api/forum/posts", (req, res) => {
+    res.json({ publicaciones: comunidad.listarPublicaciones() });
+  });
+
+  app.post("/api/forum/posts", requireAuth, async (req, res) => {
+    const titulo = req.body?.titulo;
+    const texto = req.body?.texto;
+
+    if (
+      typeof titulo !== "string" ||
+      titulo.trim().length < 3 ||
+      titulo.trim().length > 120 ||
+      typeof texto !== "string" ||
+      texto.trim().length < 1 ||
+      texto.trim().length > 2000
+    ) {
+      return res.status(400).json({
+        error: "El título debe tener 3-120 caracteres y el texto 1-2000.",
+      });
+    }
+
+    const publicacion = await comunidad.crearPublicacion(
+      req.user,
+      titulo.trim(),
+      texto.trim(),
+    );
+
+    res.status(201).json({ publicacion });
+  });
+
+  app.get("/api/forum/posts/:id/comments", (req, res) => {
+    if (!comunidad.buscarPublicacion(req.params.id)) {
+      return res.status(404).json({ error: "Publicación no encontrada." });
+    }
+
+    res.json({
+      comentarios: comunidad.listarComentarios(req.params.id),
+    });
+  });
+
+  app.post("/api/forum/posts/:id/comments", requireAuth, async (req, res) => {
+    if (!comunidad.buscarPublicacion(req.params.id)) {
+      return res.status(404).json({ error: "Publicación no encontrada." });
+    }
+
+    const texto = req.body?.texto;
+    if (
+      typeof texto !== "string" ||
+      texto.trim().length < 1 ||
+      texto.trim().length > 1000
+    ) {
+      return res.status(400).json({
+        error: "El comentario debe tener entre 1 y 1000 caracteres.",
+      });
+    }
+
+    const comentario = await comunidad.crearComentario(
+      req.user,
+      req.params.id,
+      texto.trim(),
+    );
+
+    res.status(201).json({ comentario });
+  });
+
+  app.delete("/api/forum/posts/:id", requireAdmin, async (req, res) => {
+    if (!comunidad.buscarPublicacion(req.params.id)) {
+      return res.status(404).json({ error: "Publicación no encontrada." });
+    }
+
+    await comunidad.borrarPublicacion(req.params.id);
+    res.status(204).end();
+  });
+
+  app.delete("/api/forum/comments/:id", requireAdmin, async (req, res) => {
+    if (!comunidad.buscarComentario(req.params.id)) {
+      return res.status(404).json({ error: "Comentario no encontrado." });
+    }
+
+    await comunidad.borrarComentario(req.params.id);
+    res.status(204).end();
+  });
+
+  app.get("/api/users/:id", (req, res) => {
+    const usuario = users.findById(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    res.json({
+      perfil: publicProfile(usuario),
+      publicaciones: comunidad.listarPublicacionesDeUsuario(usuario.id),
+      comentarios: comunidad.listarComentariosDeUsuario(usuario.id),
+    });
+  });
+
+  app.get("/api/me/profile", requireAuth, (req, res) => {
+    res.json({
+      perfil: {
+        ...publicProfile(req.user),
+        email: req.user.email,
+        role: req.user.role || "user",
+      },
+      publicaciones: comunidad.listarPublicacionesDeUsuario(req.user.id),
+      comentarios: comunidad.listarComentariosDeUsuario(req.user.id),
+      pedidos: comunidad.listarPedidosDeUsuario(req.user.id),
+    });
+  });
+
+  app.get("/api/products", (req, res) => {
+    res.json({ productos: comunidad.listarProductos() });
+  });
+
+  app.post("/api/products", requireAdmin, async (req, res) => {
+    const {
+      nombre,
+      descripcion = "",
+      categoria,
+      precio,
+      stock,
+    } = req.body || {};
+
+    if (
+      typeof nombre !== "string" ||
+      nombre.trim().length < 2 ||
+      nombre.trim().length > 80 ||
+      typeof descripcion !== "string" ||
+      descripcion.trim().length > 300 ||
+      !["camisetas", "botas", "balones", "accesorios"].includes(categoria) ||
+      !esPrecioValido(precio) ||
+      !Number.isInteger(stock) ||
+      stock < 0 ||
+      stock > 100000
+    ) {
+      return res.status(400).json({
+        error:
+          "Revisá los datos: el precio debe estar en dólares con hasta dos decimales y el stock debe ser un entero no negativo.",
+      });
+    }
+
+    const producto = await comunidad.agregarProducto(
+      nombre.trim(),
+      descripcion.trim(),
+      categoria,
+      precio,
+      stock,
+    );
+
+    res.status(201).json({ producto });
+  });
+
+  app.delete("/api/products/:id", requireAdmin, async (req, res) => {
+    const eliminado = await comunidad.borrarProducto(req.params.id);
+    if (!eliminado) {
+      return res.status(404).json({ error: "Producto no encontrado." });
+    }
+
+    res.status(204).end();
+  });
+
+  app.get("/api/cart", requireAuth, (req, res) => {
+    const lineas = comunidad
+      .obtenerCarrito(req.user.id)
+      .map((item) => {
+        const producto = comunidad.buscarProducto(item.productoId);
+        return producto ? { producto, cantidad: item.cantidad } : null;
+      })
+      .filter(Boolean);
+
+    res.json({ lineas });
+  });
+
+  app.post("/api/cart/items", requireAuth, async (req, res) => {
+    const { productoId, cantidad } = req.body || {};
+
+    if (
+      typeof productoId !== "string" ||
+      !Number.isInteger(cantidad) ||
+      cantidad < 1 ||
+      cantidad > 1000
+    ) {
+      return res.status(400).json({ error: "Producto o cantidad inválidos." });
+    }
+
+    try {
+      const carrito = await comunidad.agregarAlCarrito(
+        req.user.id,
+        productoId,
+        cantidad,
+      );
+      res.status(201).json({ carrito });
+    } catch (error) {
+      if (error.code !== "community_rule") throw error;
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/cart/items/:productId", requireAuth, async (req, res) => {
+    const { cantidad } = req.body || {};
+    if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 1000) {
+      return res.status(400).json({ error: "La cantidad no es válida." });
+    }
+
+    try {
+      const carrito = await comunidad.actualizarCantidadCarrito(
+        req.user.id,
+        req.params.productId,
+        cantidad,
+      );
+      res.json({ carrito });
+    } catch (error) {
+      if (error.code !== "community_rule") throw error;
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/cart/items/:productId", requireAuth, async (req, res) => {
+    await comunidad.quitarDelCarrito(req.user.id, req.params.productId);
+    res.status(204).end();
+  });
+
+  app.delete("/api/cart", requireAuth, async (req, res) => {
+    await comunidad.vaciarCarrito(req.user.id);
+    res.status(204).end();
+  });
+
+  app.post("/api/cart/checkout", requireAuth, async (req, res) => {
+    try {
+      const pedido = await comunidad.finalizarCompra(req.user.id);
+      res.status(201).json({ pedido });
+    } catch (error) {
+      if (error.code !== "community_rule") throw error;
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/orders", requireAuth, (req, res) => {
+    res.json({ pedidos: comunidad.listarPedidosDeUsuario(req.user.id) });
+  });
 
   app.post("/api/register", async (req, res, next) => {
     try {
@@ -92,6 +361,7 @@ export function createApp({
         .status(401)
         .json({ error: "Correo o contraseña incorrectos." });
     }
+
     startSession(res, user);
     res.json({ user: publicUser(user) });
   });

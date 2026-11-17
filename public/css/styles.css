@@ -25,6 +25,15 @@
         color: #055c3c;
       }
 
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid var(--grada-verde);
+        outline-offset: 3px;
+      }
+
       .encabezado-sitio,
       .pie-sitio {
         background: #fff;

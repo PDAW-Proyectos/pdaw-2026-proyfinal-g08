@@ -136,6 +136,7 @@ export async function createUserStore(
           email: normalizedEmail,
           passwordHash: passwordHash.toString("hex"),
           salt: salt.toString("hex"),
+          role: "user",
           favoriteTeam: favoriteTeam?.trim() || null,
         };
         users.push(user);
