@@ -19,7 +19,7 @@ export class RepositorioUsuarios {
       this.proximoId,
       datos.username,
       datos.email,
-      datos.password,
+      datos.password
     );
     this.proximoId++;
     this.usuarios.push(usuarioNuevo);

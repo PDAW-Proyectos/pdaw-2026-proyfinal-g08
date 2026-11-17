@@ -1,81 +1,244 @@
 import { fileURLToPath } from "node:url";
-import createApp from "./app.js";
-import { createUserStore } from "./Usuarios/users.js"; // Ajusta la ruta si está en otra carpeta
+import { createApp } from "./app.js";
+import { createUserStore } from "./usuarios/users.js";
 import { RepositorioLigas } from "./Futbol/RepositorioLigas.js";
-import ServicioFutbol, {
+import { RepositorioPartidos } from "./Futbol/RepositorioPartidos.js";
+import { RepositorioEquipos } from "./Futbol/RepositorioEquipos.js";
+import {
+  ServicioFutbol,
   LIGAS_UTILIZADAS_IDS,
 } from "./Futbol/ServicioFutbol.js";
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const NUEVOS_POR_LIGA_AL_INICIAR = 3; // En cada arranque se suman hasta 3 próximos partidos nuevos por cada liga principal
 
-export async function inicializarLigas(servicioFutbol = new ServicioFutbol()) {
-  const ligasDetalladas = [];
+async function asegurarEscudosPartido(
+  partido,
+  repositorioEquipos,
+  repositorioLigas,
+  servicioFutbol,
+) {
+  if (!partido) return partido;
 
-  for (const id of LIGAS_UTILIZADAS_IDS) {
-    let cargada = false;
-    for (let intento = 0; intento < 2 && !cargada; intento++) {
-      try {
-        const liga = await servicioFutbol.buscarLigaPorId(id);
-        if (liga) {
-          await esperar(350); // Pausa para no saturar la API
-          try {
-            const tabla = await servicioFutbol.buscarTablaDeLiga(liga.id);
-            liga.tabla = Array.isArray(tabla) ? tabla : [];
-          } catch (errorTabla) {
-            console.warn(
-              `Aviso al cargar tabla de liga ${id}:`,
-              errorTabla.message,
-            );
-            liga.tabla = [];
-          }
-          ligasDetalladas.push(liga);
-          cargada = true;
-        }
-      } catch (err) {
-        if (intento === 0) {
-          console.warn(`Reintentando liga ${id} tras error:`, err.message);
-          await esperar(1200);
-        } else {
-          console.warn(`Aviso definitivo al cargar liga ${id}:`, err.message);
-        }
+  if (!partido.escudoEquipoLocal) {
+    const escudoLocal = servicioFutbol.resolverEscudoEquipoLocal(
+      partido.idEquipoLocal,
+      partido.nombreEquipoLocal,
+      { repositorioEquipos, repositorioLigas },
+    );
+    if (escudoLocal) {
+      partido.escudoEquipoLocal = escudoLocal;
+    } else if (partido.idEquipoLocal || partido.nombreEquipoLocal) {
+      const eqLocal = partido.idEquipoLocal
+        ? await servicioFutbol.buscarEquipoPorId(partido.idEquipoLocal)
+        : await servicioFutbol.buscarEquipoPorNombre(partido.nombreEquipoLocal);
+      if (eqLocal) {
+        repositorioEquipos.agregarEquipo(eqLocal);
+        if (eqLocal.escudo) partido.escudoEquipoLocal = eqLocal.escudo;
       }
     }
-    await esperar(350);
   }
 
+  if (!partido.escudoEquipoVisitante) {
+    const escudoVisitante = servicioFutbol.resolverEscudoEquipoLocal(
+      partido.idEquipoVisitante,
+      partido.nombreEquipoVisitante,
+      { repositorioEquipos, repositorioLigas },
+    );
+    if (escudoVisitante) {
+      partido.escudoEquipoVisitante = escudoVisitante;
+    } else if (partido.idEquipoVisitante || partido.nombreEquipoVisitante) {
+      const eqVis = partido.idEquipoVisitante
+        ? await servicioFutbol.buscarEquipoPorId(partido.idEquipoVisitante)
+        : await servicioFutbol.buscarEquipoPorNombre(
+            partido.nombreEquipoVisitante,
+          );
+      if (eqVis) {
+        repositorioEquipos.agregarEquipo(eqVis);
+        if (eqVis.escudo) partido.escudoEquipoVisitante = eqVis.escudo;
+      }
+    }
+  }
+
+  return partido;
+}
+
+export async function inicializarLigas(
+  servicioFutbol = new ServicioFutbol(),
+  repositorioPartidos = new RepositorioPartidos(),
+  repositorioEquipos = new RepositorioEquipos(),
+  fechaReferencia = new Date(),
+) {
   const repositorioLigas = new RepositorioLigas();
 
-  // Compatibilidad: usa cargarLigas (como en tu server.js original) o agregarLiga
-  if (typeof repositorioLigas.cargarLigas === "function") {
-    repositorioLigas.cargarLigas(ligasDetalladas);
-  } else if (typeof repositorioLigas.agregarLiga === "function") {
-    ligasDetalladas.forEach((liga) => repositorioLigas.agregarLiga(liga));
+  // 1. Cargar las 5 ligas principales desde data/ligas.json (sin peticiones a la API ni tablas por adelantado)
+  const ligasLocales = servicioFutbol.cargarLigasLocal();
+  repositorioLigas.cargarLigas(ligasLocales);
+
+  // 2. Cargar equipos almacenados desde data/equipos.json (sin sobrescribir ni consultar API)
+  const equiposLocales = servicioFutbol.cargarEquiposLocal();
+  repositorioEquipos.agregarEquipos(equiposLocales);
+
+  // 3. Cargar partidos jugados históricos desde data/partidos_jugados.json (solo anexar)
+  const jugadosLocales = servicioFutbol.cargarPartidosJugadosLocal();
+  repositorioPartidos.agregarPartidos(jugadosLocales);
+
+  // 4. Cargar próximos partidos y verificar si ya pasaron su fecha
+  const proximosLocales = servicioFutbol.cargarProximosPartidosLocal();
+  const proximosVigentes = [];
+  const nuevosJugados = [];
+  let huboCambiosProximos = false;
+
+  for (const partido of proximosLocales) {
+    if (partido.yaPasoFecha(fechaReferencia) || partido.esJugado) {
+      huboCambiosProximos = true;
+      // Solicitar el partido jugado a la API y anexarlo a partidos_jugados.json
+      const eventoActualizado = await servicioFutbol.buscarEventoPorId(
+        partido.id,
+      );
+      if (eventoActualizado) {
+        await asegurarEscudosPartido(
+          eventoActualizado,
+          repositorioEquipos,
+          repositorioLigas,
+          servicioFutbol,
+        );
+        nuevosJugados.push(eventoActualizado);
+      } else if (partido.esJugado) {
+        nuevosJugados.push(partido);
+      }
+      await esperar(100);
+    } else {
+      proximosVigentes.push(partido);
+    }
   }
 
-  console.log(`Repositorio listo con ${ligasDetalladas.length} ligas.`);
+  if (nuevosJugados.length > 0) {
+    servicioFutbol.anexarPartidosJugadosLocal(nuevosJugados);
+    repositorioPartidos.agregarPartidos(nuevosJugados);
+  }
+
+  // 5. Conservar todos los partidos vigentes (incluidas competiciones descubiertas desde equipos)
+  // y sumar hasta 3 próximos partidos nuevos por cada una de las 5 ligas principales
+  const proximosAcumulados = [];
+  const idsYaIncluidos = new Set();
+
+  for (const partido of proximosVigentes) {
+    const idStr = String(partido.id ?? "");
+    if (!idStr || idsYaIncluidos.has(idStr)) {
+      huboCambiosProximos = true;
+      continue;
+    }
+    proximosAcumulados.push(partido);
+    idsYaIncluidos.add(idStr);
+  }
+
+  for (const idLiga of LIGAS_UTILIZADAS_IDS) {
+    const eventosLiga = await servicioFutbol.buscarProximosEventosLiga(idLiga, {
+      idsExistentes: idsYaIncluidos,
+      cantidadNuevaObjetivo: NUEVOS_POR_LIGA_AL_INICIAR,
+      fechaReferencia,
+    });
+    const candidatos = eventosLiga
+      .filter(
+        (ev) =>
+          ev.id &&
+          !ev.esJugado &&
+          !ev.yaPasoFecha(fechaReferencia) &&
+          !idsYaIncluidos.has(String(ev.id)),
+      )
+      .sort((a, b) => {
+        const ta = a.fechaDate ? a.fechaDate.getTime() : 0;
+        const tb = b.fechaDate ? b.fechaDate.getTime() : 0;
+        return ta - tb;
+      })
+      .slice(0, NUEVOS_POR_LIGA_AL_INICIAR);
+
+    for (const partidoNuevo of candidatos) {
+      await asegurarEscudosPartido(
+        partidoNuevo,
+        repositorioEquipos,
+        repositorioLigas,
+        servicioFutbol,
+      );
+      proximosAcumulados.push(partidoNuevo);
+      idsYaIncluidos.add(String(partidoNuevo.id));
+      huboCambiosProximos = true;
+    }
+
+    if (candidatos.length > 0) {
+      await esperar(150);
+    }
+  }
+
+  const proximosFinales = proximosAcumulados.sort((a, b) => {
+    const ta = a.fechaDate ? a.fechaDate.getTime() : 0;
+    const tb = b.fechaDate ? b.fechaDate.getTime() : 0;
+    return ta - tb;
+  });
+
+  // Asegurar escudos en partidos en memoria usando el repositorio local de equipos/tablas
+  for (const p of repositorioPartidos.partidos) {
+    if (!p.escudoEquipoLocal) {
+      const esc = servicioFutbol.resolverEscudoEquipoLocal(
+        p.idEquipoLocal,
+        p.nombreEquipoLocal,
+        { repositorioEquipos, repositorioLigas },
+      );
+      if (esc) p.escudoEquipoLocal = esc;
+    }
+    if (!p.escudoEquipoVisitante) {
+      const esc = servicioFutbol.resolverEscudoEquipoLocal(
+        p.idEquipoVisitante,
+        p.nombreEquipoVisitante,
+        { repositorioEquipos, repositorioLigas },
+      );
+      if (esc) p.escudoEquipoVisitante = esc;
+    }
+  }
+
+  repositorioPartidos.agregarPartidos(proximosFinales);
+
+  if (
+    huboCambiosProximos ||
+    proximosFinales.length !== proximosLocales.length
+  ) {
+    servicioFutbol.sobrescribirProximosPartidosLocal(proximosFinales);
+  }
+
+  console.log(
+    `Repositorio listo con ${repositorioLigas.listarLigas().length} ligas, ${repositorioEquipos.listarEquipos().length} equipos y ${repositorioPartidos.obtenerTodos().length} partidos.`,
+  );
+
+  repositorioLigas.repositorioPartidos = repositorioPartidos;
+  repositorioLigas.repositorioEquipos = repositorioEquipos;
+  repositorioLigas.servicioFutbol = servicioFutbol;
   return repositorioLigas;
 }
 
 export async function startServer() {
-  // 1. Inicializa la base de datos de usuarios
-  const users = await createUserStore(
-    process.env.USER_STORE_PATH || "./usuarios.json",
+  const users = await createUserStore(process.env.USER_STORE_PATH);
+  const servicioFutbol = new ServicioFutbol();
+  const repositorioPartidos = new RepositorioPartidos();
+  const repositorioEquipos = new RepositorioEquipos();
+  const repositorioLigas = await inicializarLigas(
+    servicioFutbol,
+    repositorioPartidos,
+    repositorioEquipos,
   );
 
-  // 2. Inicializa los datos de la API de fútbol
-  const repositorioLigas = await inicializarLigas();
-
-  // 3. Crea la aplicación Express inyectando las dependencias
   const app = createApp({
     users,
     repositorioLigas,
+    repositorioPartidos,
+    repositorioEquipos,
+    servicioFutbol,
     production: process.env.NODE_ENV === "production",
   });
 
   const port = Number(process.env.PORT) || 3000;
   const host = "localhost";
 
-  // 4. Levanta el servidor
   const server = app.listen(port, host, () => {
     console.log(`Servidor Ofsai disponible en http://${host}:${port}`);
   });
@@ -88,7 +251,6 @@ export async function startServer() {
   return { app, server };
 }
 
-// Detecta si este archivo se está ejecutando directamente (ej. node server.js)
 const isMainModule =
   process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 

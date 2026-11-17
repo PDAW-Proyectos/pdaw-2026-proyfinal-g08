@@ -3,11 +3,13 @@ import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import express from "express";
 import { crearRouterLigas } from "./Routes/ligas.routes.js";
+import { crearRouterPartidos } from "./Routes/partidos.routes.js";
+import { crearRouterEquipos } from "./Routes/equipos.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const sessionCookieName = "ofsai.sid";
+const sessionCookieName = "orsai.sid";
 const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
 
 const publicUser = ({ id, name, email, favoriteTeam }) => ({
@@ -20,6 +22,9 @@ const publicUser = ({ id, name, email, favoriteTeam }) => ({
 export function createApp({
   users,
   repositorioLigas = null,
+  repositorioPartidos = null,
+  repositorioEquipos = null,
+  servicioFutbol = null,
   production = false,
 }) {
   const app = express();
@@ -112,12 +117,33 @@ export function createApp({
   });
 
   if (repositorioLigas) {
-    app.use("/api/ligas", crearRouterLigas(repositorioLigas));
+    app.use(
+      "/api/ligas",
+      crearRouterLigas(repositorioLigas, repositorioPartidos, servicioFutbol),
+    );
+  }
+
+  if (repositorioPartidos) {
+    app.use("/api/partidos", crearRouterPartidos(repositorioPartidos));
+  }
+
+  if (repositorioEquipos) {
+    app.use(
+      "/api/equipos",
+      crearRouterEquipos(
+        repositorioEquipos,
+        repositorioLigas,
+        repositorioPartidos,
+        servicioFutbol,
+      ),
+    );
   }
 
   app.get("/auth.js", (req, res) =>
     res.sendFile(path.join(__dirname, "usuarios", "auth.js")),
   );
+
+  app.use("/cliente", express.static(path.join(__dirname, "cliente")));
 
   app.use(express.static(path.join(__dirname, "..", "..", "public")));
 

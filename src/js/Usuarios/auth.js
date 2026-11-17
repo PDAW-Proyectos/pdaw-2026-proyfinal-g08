@@ -4,60 +4,203 @@ const authName = document.querySelector("[data-auth-name]");
 const authFeedback = document.querySelector("[data-auth-feedback]");
 
 if (authAnonymous && authSession && authName && authFeedback) {
-  const dialog = document.createElement("dialog");
-  dialog.className = "dialogo-autenticacion";
-  dialog.setAttribute("aria-labelledby", "titulo-autenticacion");
-  dialog.innerHTML = `
-    <div class="auth-dialog-header">
-      <div>
-        <p class="texto-antetitulo mb-1">Comunidad ofsai</p>
-        <h2 class="titulo-seccion mb-0" id="titulo-autenticacion"></h2>
-      </div>
-      <button class="auth-dialog-close" type="button" aria-label="Cerrar">×</button>
-    </div>
-    <form class="auth-formulario" data-auth-form="register" novalidate hidden>
-      <label class="auth-label" for="auth-nombre">Nombre</label>
-      <input class="form-control auth-input" id="auth-nombre" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" required data-auth-field />
-      <p class="auth-field-error" data-auth-error="name" aria-live="polite" hidden></p>
-      <label class="auth-label" for="auth-registro-email">Correo electrónico</label>
-      <input class="form-control auth-input" id="auth-registro-email" name="email" type="email" autocomplete="email" maxlength="254" required data-auth-field />
-      <p class="auth-field-error" data-auth-error="email" aria-live="polite" hidden></p>
-      <label class="auth-label" for="auth-registro-password">Contraseña</label>
-      <input class="form-control auth-input" id="auth-registro-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required data-auth-field />
-      <p class="auth-field-error" data-auth-error="password" aria-live="polite" hidden></p>
-      <label class="auth-label" for="auth-equipo">Equipo favorito <span class="auth-optional">(opcional)</span></label>
-      <select class="form-select auth-input" id="auth-equipo" name="favoriteTeam">
-        <option value="">Elegir más tarde</option>
-        <option>Real Madrid</option>
-        <option>Barcelona</option>
-        <option>Atlético de Madrid</option>
-        <option>Sevilla</option>
-        <option>Arsenal</option>
-        <option>Liverpool</option>
-        <option>Manchester City</option>
-        <option>Chelsea</option>
-        <option>Bayern Múnich</option>
-        <option>Borussia Dortmund</option>
-        <option>Inter</option>
-        <option>Juventus</option>
-        <option>River Plate</option>
-        <option>Flamengo</option>
-      </select>
-      <button class="btn boton-grada auth-submit" type="submit">Crear cuenta</button>
-      <p class="auth-cambiar-modo">¿Ya tenés cuenta? <button type="button" data-auth-switch="login">Iniciá sesión</button></p>
-    </form>
-    <form class="auth-formulario" data-auth-form="login" novalidate hidden>
-      <label class="auth-label" for="auth-login-email">Correo electrónico</label>
-      <input class="form-control auth-input" id="auth-login-email" name="email" type="email" autocomplete="email" maxlength="254" required data-auth-field />
-      <p class="auth-field-error" data-auth-error="email" aria-live="polite" hidden></p>
-      <label class="auth-label" for="auth-login-password">Contraseña</label>
-      <input class="form-control auth-input" id="auth-login-password" name="password" type="password" autocomplete="current-password" required data-auth-field />
-      <p class="auth-field-error" data-auth-error="password" aria-live="polite" hidden></p>
-      <button class="btn boton-grada auth-submit" type="submit">Iniciar sesión</button>
-      <p class="auth-cambiar-modo">¿Todavía no tenés cuenta? <button type="button" data-auth-switch="register">Registrate</button></p>
-    </form>
-    <p class="auth-dialog-feedback" data-dialog-feedback role="status" aria-live="polite"></p>
-  `;
+  const crearElemento = (tag, opciones = {}, hijos = []) => {
+    const el = document.createElement(tag);
+    if (opciones.className) el.className = opciones.className;
+    if (opciones.textContent !== undefined) el.textContent = opciones.textContent;
+    if (opciones.attributes) {
+      Object.entries(opciones.attributes).forEach(([clave, valor]) => {
+        if (valor !== undefined && valor !== null) {
+          el.setAttribute(clave, String(valor));
+        }
+      });
+    }
+    if (opciones.hidden) el.hidden = true;
+    hijos.forEach((hijo) => {
+      if (hijo !== null && hijo !== undefined) el.append(hijo);
+    });
+    return el;
+  };
+
+  const crearCampoTexto = ({ id, label, name, type, autocomplete, minlength, maxlength }) => {
+    const labelEl = crearElemento("label", {
+      className: "auth-label",
+      textContent: label,
+      attributes: { for: id },
+    });
+    const inputEl = crearElemento("input", {
+      className: "form-control auth-input",
+      attributes: {
+        id,
+        name,
+        type,
+        autocomplete,
+        minlength,
+        maxlength,
+        required: "",
+        "data-auth-field": "",
+      },
+    });
+    const errorEl = crearElemento("p", {
+      className: "auth-field-error",
+      hidden: true,
+      attributes: { "data-auth-error": name, "aria-live": "polite" },
+    });
+    return [labelEl, inputEl, errorEl];
+  };
+
+  const EQUIPOS_FAVORITOS = [
+    "Real Madrid",
+    "Barcelona",
+    "Atlético de Madrid",
+    "Sevilla",
+    "Arsenal",
+    "Liverpool",
+    "Manchester City",
+    "Chelsea",
+    "Bayern Múnich",
+    "Borussia Dortmund",
+    "Inter",
+    "Juventus",
+    "River Plate",
+    "Flamengo",
+  ];
+
+  const dialog = crearElemento(
+    "dialog",
+    {
+      className: "dialogo-autenticacion",
+      attributes: { "aria-labelledby": "titulo-autenticacion" },
+    },
+    [
+      crearElemento("div", { className: "auth-dialog-header" }, [
+        crearElemento("div", {}, [
+          crearElemento("p", {
+            className: "texto-antetitulo mb-1",
+            textContent: "Comunidad ofsai",
+          }),
+          crearElemento("h2", {
+            className: "titulo-seccion mb-0",
+            attributes: { id: "titulo-autenticacion" },
+          }),
+        ]),
+        crearElemento("button", {
+          className: "auth-dialog-close",
+          textContent: "×",
+          attributes: { type: "button", "aria-label": "Cerrar" },
+        }),
+      ]),
+      crearElemento(
+        "form",
+        {
+          className: "auth-formulario",
+          hidden: true,
+          attributes: { "data-auth-form": "register", novalidate: "" },
+        },
+        [
+          ...crearCampoTexto({
+            id: "auth-nombre",
+            label: "Nombre",
+            name: "name",
+            type: "text",
+            autocomplete: "name",
+            minlength: 2,
+            maxlength: 80,
+          }),
+          ...crearCampoTexto({
+            id: "auth-registro-email",
+            label: "Correo electrónico",
+            name: "email",
+            type: "email",
+            autocomplete: "email",
+            maxlength: 254,
+          }),
+          ...crearCampoTexto({
+            id: "auth-registro-password",
+            label: "Contraseña",
+            name: "password",
+            type: "password",
+            autocomplete: "new-password",
+            minlength: 8,
+            maxlength: 128,
+          }),
+          crearElemento("label", { className: "auth-label", attributes: { for: "auth-equipo" } }, [
+            "Equipo favorito ",
+            crearElemento("span", { className: "auth-optional", textContent: "(opcional)" }),
+          ]),
+          crearElemento(
+            "select",
+            {
+              className: "form-select auth-input",
+              attributes: { id: "auth-equipo", name: "favoriteTeam" },
+            },
+            [
+              crearElemento("option", {
+                textContent: "Elegir más tarde",
+                attributes: { value: "" },
+              }),
+              ...EQUIPOS_FAVORITOS.map((equipo) =>
+                crearElemento("option", { textContent: equipo })
+              ),
+            ]
+          ),
+          crearElemento("button", {
+            className: "btn boton-grada auth-submit",
+            textContent: "Crear cuenta",
+            attributes: { type: "submit" },
+          }),
+          crearElemento("p", { className: "auth-cambiar-modo" }, [
+            "¿Ya tenés cuenta? ",
+            crearElemento("button", {
+              textContent: "Iniciá sesión",
+              attributes: { type: "button", "data-auth-switch": "login" },
+            }),
+          ]),
+        ]
+      ),
+      crearElemento(
+        "form",
+        {
+          className: "auth-formulario",
+          hidden: true,
+          attributes: { "data-auth-form": "login", novalidate: "" },
+        },
+        [
+          ...crearCampoTexto({
+            id: "auth-login-email",
+            label: "Correo electrónico",
+            name: "email",
+            type: "email",
+            autocomplete: "email",
+            maxlength: 254,
+          }),
+          ...crearCampoTexto({
+            id: "auth-login-password",
+            label: "Contraseña",
+            name: "password",
+            type: "password",
+            autocomplete: "current-password",
+          }),
+          crearElemento("button", {
+            className: "btn boton-grada auth-submit",
+            textContent: "Iniciar sesión",
+            attributes: { type: "submit" },
+          }),
+          crearElemento("p", { className: "auth-cambiar-modo" }, [
+            "¿Todavía no tenés cuenta? ",
+            crearElemento("button", {
+              textContent: "Registrate",
+              attributes: { type: "button", "data-auth-switch": "register" },
+            }),
+          ]),
+        ]
+      ),
+      crearElemento("p", {
+        className: "auth-dialog-feedback",
+        attributes: { "data-dialog-feedback": "", role: "status", "aria-live": "polite" },
+      }),
+    ]
+  );
   document.body.append(dialog);
 
   const title = dialog.querySelector("#titulo-autenticacion");
