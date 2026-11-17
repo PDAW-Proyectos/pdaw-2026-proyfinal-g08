@@ -7,10 +7,10 @@ const listaComentarios = document.querySelector("#comentarios-perfil");
 const seccionPedidos = document.querySelector("#seccion-pedidos-perfil");
 const listaPedidos = document.querySelector("#pedidos-perfil");
 
-const formatoDolares = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
+const formatoPuntos = new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 2,
 });
+const puntos = (valor) => `${formatoPuntos.format(valor)} puntos`;
 
 async function solicitar(url) {
   const respuesta = await fetch(url);
@@ -74,7 +74,7 @@ function renderizarComentarios(comentarios) {
 function renderizarPedidos(pedidos) {
   listaPedidos.replaceChildren();
   if (pedidos.length === 0) {
-    mostrarListaVacia(listaPedidos, "Todavía no realizaste compras.");
+    mostrarListaVacia(listaPedidos, "Todavía no realizaste canjes.");
     return;
   }
 
@@ -83,13 +83,13 @@ function renderizarPedidos(pedidos) {
     const titulo = document.createElement("h3");
     const lista = document.createElement("ul");
     titulo.textContent =
-      `Compra ${pedido.id.slice(0, 8)} — ${formatoDolares.format(pedido.total)}`;
+      `Canje ${pedido.id.slice(0, 8)} — ${puntos(pedido.total)}`;
 
     for (const linea of pedido.lineas) {
       const item = document.createElement("li");
       item.textContent =
         `${linea.nombre}: ${linea.cantidad} × ` +
-        `${formatoDolares.format(linea.precio)}`;
+        `${puntos(linea.precio)}`;
       lista.append(item);
     }
 

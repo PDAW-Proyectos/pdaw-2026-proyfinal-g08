@@ -23,7 +23,7 @@ const productosIniciales = [
   },
 ];
 
-const redondearDolares = (valor) =>
+const redondearPuntos = (valor) =>
   Math.round((valor + Number.EPSILON) * 100) / 100;
 
 const errorDeRegla = (mensaje) => {
@@ -218,7 +218,7 @@ export async function crearRepositorioComunidad(archivo) {
         nombre,
         descripcion,
         categoria,
-        precio: redondearDolares(precio),
+        precio: redondearPuntos(precio),
         stock,
         activo: true,
       };
@@ -351,7 +351,7 @@ export async function crearRepositorioComunidad(archivo) {
           };
         });
 
-        const total = redondearDolares(
+        const total = redondearPuntos(
           lineasPedido.reduce(
             (suma, linea) => suma + linea.precio * linea.cantidad,
             0,
@@ -363,7 +363,7 @@ export async function crearRepositorioComunidad(archivo) {
           usuarioId,
           lineas: lineasPedido,
           total,
-          moneda: "USD",
+          unidad: "puntos",
           creadoEn: new Date().toISOString(),
         };
 

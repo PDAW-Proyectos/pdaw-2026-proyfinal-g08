@@ -2,17 +2,14 @@ const listaProductos = document.querySelector("#lista-productos");
 const contenidoCarrito = document.querySelector("#contenido-carrito");
 const totalCarrito = document.querySelector("#total-carrito");
 const estadoTienda = document.querySelector("#estado-tienda");
-const formularioProducto = document.querySelector("#form-producto");
-const seccionAdmin = document.querySelector("#seccion-admin-productos");
 const historialPedidos = document.querySelector("#historial-pedidos");
 
-let usuarioActual = null;
 let categoriaActiva = "todos";
 
-const formatoDolares = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
+const formatoPuntos = new Intl.NumberFormat("es-AR", {
+  maximumFractionDigits: 2,
 });
+const puntos = (valor) => `${formatoPuntos.format(valor)} puntos`;
 
 async function solicitar(url, opciones = {}) {
   const respuesta = await fetch(url, {
@@ -71,7 +68,7 @@ async function cargarProductos() {
     titulo.textContent = producto.nombre;
     titulo.className = "h3";
     descripcion.textContent = producto.descripcion;
-    precio.textContent = formatoDolares.format(producto.precio);
+    precio.textContent = puntos(producto.precio);
     filaPrecio.className = "producto-precio-fila";
     filaPrecio.append(precio);
     stock.textContent = `Unidades disponibles: ${producto.stock}`;
@@ -105,26 +102,6 @@ async function cargarProductos() {
     );
     tarjeta.append(detalle);
 
-    if (usuarioActual?.role === "admin") {
-      const botonEliminar = document.createElement("button");
-      botonEliminar.type = "button";
-      botonEliminar.className = "btn boton-contorno-grada mt-2";
-      botonEliminar.textContent = `Eliminar ${producto.nombre}`;
-      botonEliminar.addEventListener("click", async () => {
-        try {
-          await solicitar(`/api/products/${producto.id}`, {
-            method: "DELETE",
-          });
-          estadoTienda.textContent = "Producto eliminado del catálogo.";
-          await cargarProductos();
-          await cargarCarrito();
-        } catch (error) {
-          estadoTienda.textContent = error.message;
-        }
-      });
-      tarjeta.append(botonEliminar);
-    }
-
     listaProductos.append(tarjeta);
   }
 }
@@ -152,8 +129,10 @@ async function cargarCarrito() {
 
   let total = 0;
   for (const linea of resultado.lineas) {
-    const grupo = document.createElement("div");
-    const nombre = document.createElement("p");
+    const grupo = document.createElement("article");
+    const producto = document.createElement("div");
+    const nombre = document.createElement("h3");
+    const precio = document.createElement("p");
     const cantidadLabel = document.createElement("label");
     const cantidad = document.createElement("input");
     const actualizar = document.createElement("button");
@@ -161,8 +140,10 @@ async function cargarCarrito() {
     const subtotal = linea.producto.precio * linea.cantidad;
 
     total += subtotal;
-    nombre.textContent =
-      `${linea.producto.nombre} — ${formatoDolares.format(subtotal)}`;
+    nombre.textContent = linea.producto.nombre;
+    precio.textContent =
+      `${linea.cantidad} × ${puntos(linea.producto.precio)} · ` +
+      `Subtotal: ${puntos(subtotal)}`;
     cantidadLabel.htmlFor = `cantidad-${linea.producto.id}`;
     cantidadLabel.textContent = `Cantidad de ${linea.producto.nombre}`;
     cantidad.id = cantidadLabel.htmlFor;
@@ -170,9 +151,9 @@ async function cargarCarrito() {
     cantidad.min = "1";
     cantidad.max = String(linea.producto.stock);
     cantidad.value = String(linea.cantidad);
-    cantidad.className = "form-control mb-2";
+    cantidad.className = "form-control";
     actualizar.type = "button";
-    actualizar.className = "btn boton-contorno-grada me-2";
+    actualizar.className = "btn boton-contorno-grada";
     actualizar.textContent = "Actualizar cantidad";
     quitar.type = "button";
     quitar.className = "btn boton-contorno-grada";
@@ -203,15 +184,24 @@ async function cargarCarrito() {
       }
     });
 
-    grupo.className = "mb-3";
-    grupo.append(nombre, cantidadLabel, cantidad, actualizar, quitar);
+    grupo.className = "linea-carrito";
+    producto.className = "producto-carrito";
+    nombre.className = "nombre-producto-carrito";
+    precio.className = "precio-producto-carrito";
+    cantidadLabel.className = "cantidad-carrito";
+    cantidadLabel.append(cantidad);
+    const acciones = document.createElement("div");
+    acciones.className = "acciones-linea-carrito";
+    acciones.append(actualizar, quitar);
+    producto.append(nombre, precio);
+    grupo.append(producto, cantidadLabel, acciones);
     contenidoCarrito.append(grupo);
   }
 
   totalCarrito.textContent =
-    `Total aproximado: ${formatoDolares.format(
+    `Total aproximado: ${puntos(
       Math.round((total + Number.EPSILON) * 100) / 100,
-    )}. El total definitivo lo calcula el servidor.`;
+    )}. El total definitivo lo calcula el servidor en puntos.`;
 }
 
 async function cargarPedidos() {
@@ -219,7 +209,7 @@ async function cargarPedidos() {
   try {
     const resultado = await solicitar("/api/orders");
     if (resultado.pedidos.length === 0) {
-      historialPedidos.textContent = "Todavía no realizaste compras.";
+      historialPedidos.textContent = "Todavía no realizaste canjes.";
       return;
     }
 
@@ -231,7 +221,7 @@ async function cargarPedidos() {
 
       articulo.className = "mb-3";
       titulo.textContent =
-        `Compra ${pedido.id.slice(0, 8)} — ${formatoDolares.format(pedido.total)}`;
+        `Canje ${pedido.id.slice(0, 8)} — ${puntos(pedido.total)}`;
       fecha.dateTime = pedido.creadoEn;
       fecha.textContent = new Date(pedido.creadoEn).toLocaleString("es-AR");
 
@@ -239,7 +229,7 @@ async function cargarPedidos() {
         const elemento = document.createElement("li");
         elemento.textContent =
           `${linea.nombre}: ${linea.cantidad} × ` +
-          `${formatoDolares.format(linea.precio)}`;
+          `${puntos(linea.precio)}`;
         lineas.append(elemento);
       }
 
@@ -248,8 +238,7 @@ async function cargarPedidos() {
     }
   } catch (error) {
     if (error.message.includes("iniciar sesión")) {
-      historialPedidos.textContent =
-        "Iniciá sesión para consultar tus compras.";
+      historialPedidos.textContent = "Iniciá sesión para consultar tus canjes.";
       return;
     }
     throw error;
@@ -257,33 +246,8 @@ async function cargarPedidos() {
 }
 
 async function actualizarVista() {
-  seccionAdmin.hidden = usuarioActual?.role !== "admin";
   await Promise.all([cargarProductos(), cargarCarrito(), cargarPedidos()]);
 }
-
-formularioProducto.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const datos = new FormData(formularioProducto);
-
-  try {
-    await solicitar("/api/products", {
-      method: "POST",
-      body: JSON.stringify({
-        nombre: datos.get("nombre"),
-        descripcion: datos.get("descripcion"),
-        categoria: datos.get("categoria"),
-        precio: Number(datos.get("precio")),
-        stock: Number(datos.get("stock")),
-      }),
-    });
-
-    formularioProducto.reset();
-    estadoTienda.textContent = "Producto agregado al catálogo.";
-    await cargarProductos();
-  } catch (error) {
-    estadoTienda.textContent = error.message;
-  }
-});
 
 document
   .querySelector("#boton-vaciar-carrito")
@@ -305,7 +269,7 @@ document
         method: "POST",
       });
       estadoTienda.textContent =
-        `Compra de prueba registrada por ${formatoDolares.format(
+        `Canje de prueba registrado por ${puntos(
           resultado.pedido.total,
         )}.`;
       await actualizarVista();
@@ -334,24 +298,12 @@ document.querySelector("#orden-productos")?.addEventListener("change", () => {
   });
 });
 
-window.addEventListener("auth:changed", (evento) => {
-  usuarioActual = evento.detail.user;
+window.addEventListener("auth:changed", () => {
   actualizarVista().catch((error) => {
     estadoTienda.textContent = error.message;
   });
 });
 
-solicitar("/api/me")
-  .then((resultado) => {
-    usuarioActual = resultado.user;
-  })
-  .catch((error) => {
-    if (!error.message.includes("iniciar sesión")) {
-      estadoTienda.textContent = error.message;
-    }
-  })
-  .finally(() => {
-    actualizarVista().catch((error) => {
-      estadoTienda.textContent = error.message;
-    });
-  });
+actualizarVista().catch((error) => {
+  estadoTienda.textContent = error.message;
+});

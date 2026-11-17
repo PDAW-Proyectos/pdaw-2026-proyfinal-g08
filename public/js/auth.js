@@ -27,6 +27,17 @@ export function inicializarAutenticacion() {
     controlesDeSesion.insertBefore(enlacePerfil, botonCerrarSesion);
   }
 
+  let enlaceAdmin = controlesDeSesion.querySelector("[data-auth-admin]");
+  if (!enlaceAdmin) {
+    enlaceAdmin = document.createElement("a");
+    enlaceAdmin.className = "btn btn-sm boton-contorno-grada px-3";
+    enlaceAdmin.href = "admin.html";
+    enlaceAdmin.dataset.authAdmin = "";
+    enlaceAdmin.textContent = "Panel de administrador";
+    enlaceAdmin.hidden = true;
+    controlesDeSesion.insertBefore(enlaceAdmin, enlacePerfil);
+  }
+
   const dialogo = crearDialogoAutenticacion();
   document.body.append(dialogo);
 
@@ -38,6 +49,7 @@ export function inicializarAutenticacion() {
     controlesAnonimos.hidden = Boolean(usuario);
     controlesDeSesion.hidden = !usuario;
     nombreUsuario.textContent = usuario ? usuario.name : "";
+    enlaceAdmin.hidden = usuario?.role !== "admin";
     window.dispatchEvent(
       new CustomEvent("auth:changed", { detail: { user: usuario } }),
     );

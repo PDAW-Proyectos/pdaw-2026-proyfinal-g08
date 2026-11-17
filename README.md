@@ -46,24 +46,32 @@ npm start
 ```
 
 La aplicación estará disponible en `http://localhost:3000`. Las cuentas se guardan
-en `usuarios.json` por defecto (se puede cambiar con `USER_STORE_PATH`) y las
-contraseñas se almacenan como hashes. Las publicaciones, productos, carritos y
-pedidos se guardan en `data/comunidad.json` por defecto; la ubicación se puede
-cambiar con `COMMUNITY_STORE_PATH`.
+localmente en `usuarios.json` por defecto (se puede cambiar con `USER_STORE_PATH`);
+ese archivo no se versiona y las contraseñas se almacenan como hashes. Las
+publicaciones, productos, carritos y pedidos se guardan en `data/comunidad.json`
+por defecto; la ubicación se puede cambiar con `COMMUNITY_STORE_PATH`.
+
+Para configurar la cuenta administradora inicial, definir `ADMIN_NAME`,
+`ADMIN_EMAIL` y `ADMIN_PASSWORD` en un `.env` local antes de iniciar el servidor.
+No compartir ni versionar ese archivo. Usa una contraseña robusta en cualquier
+entorno expuesto.
 
 ## Foro, perfiles y tienda
 
 - Las cuentas registradas pueden crear publicaciones y comentarios.
 - Los perfiles públicos muestran el equipo favorito, publicaciones y comentarios,
   sin exponer el correo electrónico ni datos de autenticación. El perfil propio
-  requiere iniciar sesión y también muestra el correo y el historial de pedidos.
-- Solo una cuenta con `role: "admin"` puede eliminar publicaciones y comentarios,
-  o agregar y eliminar productos. El rol se comprueba en el servidor.
+  requiere iniciar sesión y también muestra el correo y el historial de canjes.
+- Solo una cuenta con `role: "admin"` puede acceder al panel privado para moderar
+  publicaciones, gestionar productos y consultar, suspender, reactivar o eliminar
+  cuentas. El servidor protege tanto el panel como sus operaciones.
 - El carrito pertenece a la cuenta iniciada. El servidor valida stock y vuelve a
-  calcular los totales al registrar el pedido.
-- Los precios y totales se expresan como números en dólares estadounidenses
-  (`USD`). El checkout actual registra pedidos de prueba: no procesa cobros ni
-  solicita datos de tarjetas.
+  calcular los totales en puntos al registrar un canje de prueba.
+- Los precios del catálogo se expresan en puntos. Esta versión no implementa
+  saldos ni formas de obtener puntos, y no procesa pagos reales.
+- Al eliminar una cuenta, su nombre pasa a ser “Cuenta borrada”, se conserva el
+  correo para administración y sus publicaciones y comentarios dejan de ser
+  visibles públicamente. La suspensión conserva la cuenta y se puede revertir.
 
 ## Cómo ejecutar las pruebas
 

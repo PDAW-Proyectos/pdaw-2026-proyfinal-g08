@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Panel privado de administración de Orsai."
+    />
+    <title>Panel de administrador · Orsai.</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="encabezado-sitio sticky-top">
+      <nav
+        class="navbar container envoltura-pagina"
+        aria-label="Navegación principal"
+      >
+        <a class="navbar-brand" href="index.html" aria-label="Orsai, inicio">
+          <span class="marca-icono" aria-hidden="true">O</span>Orsai.
+        </a>
+        <input
+          class="menu-movil-control"
+          type="checkbox"
+          id="menuMovilAdmin"
+          aria-label="Mostrar menú de navegación"
+        />
+        <label class="navbar-toggler" for="menuMovilAdmin">
+          <span class="navbar-toggler-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Menú</span>
+        </label>
+        <div class="navbar-collapse">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="tienda.html">Tienda</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="foro.html">Foro</a>
+            </li>
+          </ul>
+          <div class="auth-controls">
+            <div class="auth-anonymous" data-auth-anonymous>
+              <button
+                class="btn btn-sm boton-contorno-grada px-3"
+                type="button"
+                data-auth-open="login"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                class="btn btn-sm boton-grada px-3"
+                type="button"
+                data-auth-open="register"
+              >
+                Registrarse
+              </button>
+            </div>
+            <div class="auth-session" data-auth-session hidden>
+              <span class="auth-user-label"
+                >Usuario: <strong data-auth-name></strong
+              ></span>
+              <button
+                class="btn btn-sm boton-contorno-grada px-3"
+                type="button"
+                data-auth-logout
+              >
+                Cerrar sesión
+              </button>
+            </div>
+            <span
+              class="auth-feedback"
+              data-auth-feedback
+              role="status"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container envoltura-pagina py-4 py-lg-5">
+      <nav class="migas-pan mb-3" aria-label="Ruta de navegación">
+        <a href="index.html">Inicio</a><span aria-hidden="true"> / </span>
+        <span aria-current="page">Panel de administrador</span>
+      </nav>
+
+      <section class="encabezado-foro mb-4">
+        <div>
+          <p class="texto-antetitulo mb-1">Administración privada</p>
+          <h1 class="titulo-pagina mb-1">Panel de administrador</h1>
+          <p class="atenuado mb-0">
+            Gestioná el catálogo, las publicaciones y las cuentas de la comunidad.
+          </p>
+        </div>
+      </section>
+
+      <p id="estado-admin" class="mb-3" role="status" aria-live="polite"></p>
+
+      <details class="panel admin-seccion p-3 p-md-4 mb-3" open>
+        <summary>Productos de la tienda</summary>
+        <div class="admin-seccion-contenido">
+          <form id="form-producto" class="mb-4">
+            <div class="mb-3">
+              <label class="form-label" for="nombre-producto">Nombre</label>
+              <input
+                class="form-control"
+                id="nombre-producto"
+                name="nombre"
+                maxlength="80"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="descripcion-producto">
+                Descripción
+              </label>
+              <textarea
+                class="form-control"
+                id="descripcion-producto"
+                name="descripcion"
+                maxlength="300"
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="categoria-producto">
+                Categoría
+              </label>
+              <select
+                class="form-select"
+                id="categoria-producto"
+                name="categoria"
+                required
+              >
+                <option value="camisetas">Camisetas</option>
+                <option value="botas">Botas</option>
+                <option value="balones">Balones</option>
+                <option value="accesorios">Accesorios</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="precio-producto">
+                Precio en puntos
+              </label>
+              <input
+                class="form-control"
+                id="precio-producto"
+                name="precio"
+                type="number"
+                min="0.01"
+                max="1000000"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="stock-producto">
+                Unidades en stock
+              </label>
+              <input
+                class="form-control"
+                id="stock-producto"
+                name="stock"
+                type="number"
+                min="0"
+                max="100000"
+                step="1"
+                required
+              />
+            </div>
+            <button class="btn boton-grada" type="submit">
+              Agregar producto
+            </button>
+          </form>
+          <div id="lista-productos-admin" class="admin-lista"></div>
+        </div>
+      </details>
+
+      <details class="panel admin-seccion p-3 p-md-4 mb-3">
+        <summary>Publicaciones del foro</summary>
+        <div
+          id="lista-publicaciones-admin"
+          class="admin-seccion-contenido admin-lista"
+        ></div>
+      </details>
+
+      <details class="panel admin-seccion p-3 p-md-4 mb-3">
+        <summary>Usuarios</summary>
+        <div
+          id="lista-usuarios-admin"
+          class="admin-seccion-contenido admin-lista"
+        ></div>
+      </details>
+    </main>
+
+    <footer class="pie-sitio py-4">
+      <div
+        class="container envoltura-pagina d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"
+      >
+        <a class="navbar-brand fs-5" href="index.html">Orsai.</a>
+        <span>© 2026 Orsai</span>
+      </div>
+    </footer>
+    <script type="module" src="js/main.js" defer></script>
+    <script type="module" src="js/admin.js"></script>
+  </body>
+</html>

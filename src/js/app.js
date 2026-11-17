@@ -24,6 +24,28 @@ const publicProfile = ({ id, name, favoriteTeam }) => ({
   favoriteTeam,
 });
 
+const adminUser = ({
+  id,
+  name,
+  email,
+  favoriteTeam,
+  role,
+  status,
+  createdAt,
+  statusChangedAt,
+  deletedAt,
+}) => ({
+  id,
+  name,
+  email,
+  favoriteTeam,
+  role: role || "user",
+  status: status || "active",
+  createdAt: createdAt || null,
+  statusChangedAt: statusChangedAt || null,
+  deletedAt: deletedAt || null,
+});
+
 const esPrecioValido = (precio) =>
   Number.isFinite(precio) &&
   precio > 0 &&
@@ -55,8 +77,13 @@ export function createApp({
     const session = sessionId ? sessions.get(sessionId) : null;
 
     if (session && session.expiresAt > Date.now()) {
-      req.user = users?.findById(session.userId) || null;
-      req.sessionId = sessionId;
+      const user = users?.findById(session.userId) || null;
+      if (user && !["suspended", "deleted"].includes(user.status)) {
+        req.user = user;
+        req.sessionId = sessionId;
+      } else {
+        sessions.delete(sessionId);
+      }
     } else if (sessionId) {
       sessions.delete(sessionId);
     }
@@ -98,8 +125,17 @@ export function createApp({
     });
   };
 
+  const isPublicUser = (userId) =>
+    users?.findById(userId)?.status !== "deleted";
+  const isPublicPost = (publicacion) =>
+    publicacion && isPublicUser(publicacion.autorId);
+
   app.get("/api/forum/posts", (req, res) => {
-    res.json({ publicaciones: comunidad.listarPublicaciones() });
+    res.json({
+      publicaciones: comunidad
+        .listarPublicaciones()
+        .filter((publicacion) => isPublicUser(publicacion.autorId)),
+    });
   });
 
   app.post("/api/forum/posts", requireAuth, async (req, res) => {
@@ -129,17 +165,21 @@ export function createApp({
   });
 
   app.get("/api/forum/posts/:id/comments", (req, res) => {
-    if (!comunidad.buscarPublicacion(req.params.id)) {
+    const publicacion = comunidad.buscarPublicacion(req.params.id);
+    if (!isPublicPost(publicacion)) {
       return res.status(404).json({ error: "Publicación no encontrada." });
     }
 
     res.json({
-      comentarios: comunidad.listarComentarios(req.params.id),
+      comentarios: comunidad
+        .listarComentarios(req.params.id)
+        .filter((comentario) => isPublicUser(comentario.autorId)),
     });
   });
 
   app.post("/api/forum/posts/:id/comments", requireAuth, async (req, res) => {
-    if (!comunidad.buscarPublicacion(req.params.id)) {
+    const publicacion = comunidad.buscarPublicacion(req.params.id);
+    if (!isPublicPost(publicacion)) {
       return res.status(404).json({ error: "Publicación no encontrada." });
     }
 
@@ -181,16 +221,77 @@ export function createApp({
     res.status(204).end();
   });
 
+  app.get("/api/admin/posts", requireAdmin, (req, res) => {
+    const publicaciones = comunidad.listarPublicaciones().map((publicacion) => ({
+      ...publicacion,
+      comentarios: comunidad.listarComentarios(publicacion.id),
+    }));
+    res.json({ publicaciones });
+  });
+
+  app.get("/api/admin/users", requireAdmin, (req, res) => {
+    res.json({ usuarios: users.list().map(adminUser) });
+  });
+
+  app.patch("/api/admin/users/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const user = await users.setStatus(req.params.id, req.body?.status);
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado." });
+      }
+      res.json({ usuario: adminUser(user) });
+    } catch (error) {
+      if (error.code === "invalid_status") {
+        return res.status(400).json({ error: error.message });
+      }
+      if (error.code === "protected_admin") {
+        return res.status(403).json({ error: error.message });
+      }
+      if (error.code === "deleted_account") {
+        return res.status(409).json({ error: error.message });
+      }
+      throw error;
+    }
+  });
+
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const user = await users.deleteAccount(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "Usuario no encontrado." });
+      }
+      res.json({ usuario: adminUser(user) });
+    } catch (error) {
+      if (error.code === "protected_admin") {
+        return res.status(403).json({ error: error.message });
+      }
+      throw error;
+    }
+  });
+
   app.get("/api/users/:id", (req, res) => {
     const usuario = users.findById(req.params.id);
-    if (!usuario) {
+    if (!usuario || usuario.status === "deleted") {
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
     res.json({
       perfil: publicProfile(usuario),
-      publicaciones: comunidad.listarPublicacionesDeUsuario(usuario.id),
-      comentarios: comunidad.listarComentariosDeUsuario(usuario.id),
+      publicaciones: comunidad
+        .listarPublicacionesDeUsuario(usuario.id)
+        .filter((publicacion) => isPublicUser(publicacion.autorId)),
+      comentarios: comunidad
+        .listarComentariosDeUsuario(usuario.id)
+        .filter((comentario) => {
+          const publicacion = comunidad.buscarPublicacion(
+            comentario.publicacionId,
+          );
+          return (
+            publicacion &&
+            isPublicUser(publicacion.autorId) &&
+            isPublicUser(comentario.autorId)
+          );
+        }),
     });
   });
 
@@ -234,7 +335,7 @@ export function createApp({
     ) {
       return res.status(400).json({
         error:
-          "Revisá los datos: el precio debe estar en dólares con hasta dos decimales y el stock debe ser un entero no negativo.",
+          "Revisá los datos: el precio debe estar en puntos con hasta dos decimales y el stock debe ser un entero no negativo.",
       });
     }
 
@@ -388,6 +489,13 @@ export function createApp({
   app.get("/auth.js", (req, res) =>
     res.sendFile(path.join(__dirname, "..", "..", "public", "js", "auth.js")),
   );
+
+  app.get("/admin.html", (req, res, next) => {
+    if (req.user?.role !== "admin") {
+      return res.redirect("/index.html");
+    }
+    next();
+  });
 
   app.use(express.static(path.join(__dirname, "..", "..", "public")));
 

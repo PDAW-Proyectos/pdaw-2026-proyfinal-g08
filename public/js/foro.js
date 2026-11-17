@@ -4,6 +4,7 @@ const estadoForo = document.querySelector("#estado-foro");
 const busquedaPublicaciones = document.querySelector("#busqueda-publicaciones");
 
 let usuarioActual = null;
+let cargaPublicacionesActual = 0;
 
 async function solicitar(url, opciones = {}) {
   const respuesta = await fetch(url, {
@@ -46,7 +47,10 @@ async function mostrarComentarios(publicacion, comentarios, articulo) {
   const boton = document.createElement("button");
 
   seccion.setAttribute("aria-label", `Comentarios de ${publicacion.titulo}`);
+  seccion.className = "comentarios-publicacion";
   titulo.textContent = "Comentarios";
+  titulo.className = "titulo-comentarios";
+  lista.className = "lista-comentarios";
   etiqueta.htmlFor = `comentario-${publicacion.id}`;
   etiqueta.textContent = "Agregar un comentario";
   campo.id = etiqueta.htmlFor;
@@ -55,6 +59,7 @@ async function mostrarComentarios(publicacion, comentarios, articulo) {
   campo.maxLength = 1000;
   campo.required = true;
   campo.className = "form-control mb-2";
+  formulario.className = "formulario-comentario";
   boton.type = "submit";
   boton.className = "btn boton-contorno-grada";
   boton.textContent = "Comentar";
@@ -87,6 +92,8 @@ async function mostrarComentarios(publicacion, comentarios, articulo) {
       comentario.autorNombre,
     );
     const texto = document.createElement("p");
+    elemento.className = "comentario-foro";
+    texto.className = "texto-comentario";
     texto.textContent = comentario.texto;
     elemento.append(autor, texto);
 
@@ -112,22 +119,25 @@ async function mostrarComentarios(publicacion, comentarios, articulo) {
   articulo.append(seccion);
 }
 
-async function mostrarPublicacion(publicacion, comentarios) {
+async function mostrarPublicacion(publicacion, comentarios, destino) {
   const articulo = document.createElement("article");
   const titulo = document.createElement("h2");
   const autor = document.createElement("p");
   const texto = document.createElement("p");
   const fecha = document.createElement("time");
 
-  articulo.className = "fila-tema p-3";
-  titulo.className = "titulo-seccion";
+  articulo.className = "publicacion-foro p-3";
+  titulo.className = "titulo-publicacion";
   titulo.textContent = publicacion.titulo;
+  autor.className = "meta-publicacion";
   autor.append(
     document.createTextNode("Por "),
     crearEnlacePerfil(publicacion.autorId, publicacion.autorNombre),
   );
+  texto.className = "texto-publicacion";
   texto.textContent = publicacion.texto;
   fecha.dateTime = publicacion.creadaEn;
+  fecha.className = "fecha-publicacion";
   fecha.textContent = new Date(publicacion.creadaEn).toLocaleString("es-AR");
   articulo.append(titulo, autor, texto, fecha);
 
@@ -151,12 +161,12 @@ async function mostrarPublicacion(publicacion, comentarios) {
   }
 
   await mostrarComentarios(publicacion, comentarios, articulo);
-  listaPublicaciones.append(articulo);
+  destino.append(articulo);
 }
 
 async function cargarPublicaciones() {
+  const cargaActual = ++cargaPublicacionesActual;
   listaPublicaciones.setAttribute("aria-busy", "true");
-  listaPublicaciones.replaceChildren();
 
   try {
     const resultado = await solicitar("/api/forum/posts");
@@ -168,6 +178,8 @@ async function cargarPublicaciones() {
         ).comentarios,
       })),
     );
+    if (cargaActual !== cargaPublicacionesActual) return;
+
     const comentarios = publicaciones.flatMap((item) => item.comentarios);
     const participantes = new Set(
       [
@@ -175,13 +187,6 @@ async function cargarPublicaciones() {
         ...comentarios.map((comentario) => comentario.autorId),
       ].filter(Boolean),
     );
-
-    document.querySelector("#conteo-publicaciones").textContent =
-      String(resultado.publicaciones.length);
-    document.querySelector("#conteo-comentarios").textContent =
-      String(comentarios.length);
-    document.querySelector("#conteo-participantes").textContent =
-      String(participantes.size);
 
     const busqueda = busquedaPublicaciones.value.trim().toLocaleLowerCase();
     const filtradas = publicaciones.filter(({ publicacion }) =>
@@ -191,6 +196,14 @@ async function cargarPublicaciones() {
         publicacion.autorNombre,
       ].some((valor) => valor?.toLocaleLowerCase().includes(busqueda)),
     );
+    const contenido = document.createDocumentFragment();
+
+    document.querySelector("#conteo-publicaciones").textContent =
+      String(resultado.publicaciones.length);
+    document.querySelector("#conteo-comentarios").textContent =
+      String(comentarios.length);
+    document.querySelector("#conteo-participantes").textContent =
+      String(participantes.size);
 
     if (filtradas.length === 0) {
       const vacio = document.createElement("p");
@@ -198,14 +211,19 @@ async function cargarPublicaciones() {
       vacio.textContent = resultado.publicaciones.length
         ? "No hay publicaciones que coincidan con la búsqueda."
         : "Todavía no hay publicaciones. ¡Creá la primera!";
-      listaPublicaciones.append(vacio);
+      contenido.append(vacio);
     }
 
     for (const item of filtradas) {
-      await mostrarPublicacion(item.publicacion, item.comentarios);
+      await mostrarPublicacion(item.publicacion, item.comentarios, contenido);
+      if (cargaActual !== cargaPublicacionesActual) return;
     }
+
+    listaPublicaciones.replaceChildren(contenido);
   } finally {
-    listaPublicaciones.setAttribute("aria-busy", "false");
+    if (cargaActual === cargaPublicacionesActual) {
+      listaPublicaciones.setAttribute("aria-busy", "false");
+    }
   }
 }
 
@@ -242,17 +260,6 @@ window.addEventListener("auth:changed", (evento) => {
   });
 });
 
-solicitar("/api/me")
-  .then((resultado) => {
-    usuarioActual = resultado.user;
-  })
-  .catch((error) => {
-    if (!error.message.includes("iniciar sesión")) {
-      estadoForo.textContent = error.message;
-    }
-  })
-  .finally(() => {
-    cargarPublicaciones().catch((error) => {
-      estadoForo.textContent = error.message;
-    });
-  });
+cargarPublicaciones().catch((error) => {
+  estadoForo.textContent = error.message;
+});
