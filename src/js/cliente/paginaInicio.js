@@ -1,5 +1,10 @@
 import { obtenerLigasCompartidas } from "./api.js";
 import { crearElementoPartidoInicio } from "./tarjetasPartido.js";
+import {
+  extraerClaveFechaPartido,
+  formatearFechaLarga,
+  sumarDiasAFecha,
+} from "./fechas.js";
 
 function crearCardLiga(liga) {
   const columna = document.createElement("div");
@@ -67,7 +72,8 @@ function agruparPartidosPorCompetencia(partidos, ligas = []) {
     if (!grupos.has(clave)) {
       grupos.set(clave, {
         idLiga,
-        nombreLiga: ligaMeta?.nombre || partido.nombreLiga || "Otras competiciones",
+        nombreLiga:
+          ligaMeta?.nombre || partido.nombreLiga || "Otras competiciones",
         pais: ligaMeta?.pais || "",
         escudo: ligaMeta?.escudo || "",
         partidos: [],
@@ -77,8 +83,12 @@ function agruparPartidosPorCompetencia(partidos, ligas = []) {
   });
 
   return Array.from(grupos.values()).sort((a, b) => {
-    const ordA = indiceOrden.has(a.idLiga) ? indiceOrden.get(a.idLiga) : Number.MAX_SAFE_INTEGER;
-    const ordB = indiceOrden.has(b.idLiga) ? indiceOrden.get(b.idLiga) : Number.MAX_SAFE_INTEGER;
+    const ordA = indiceOrden.has(a.idLiga)
+      ? indiceOrden.get(a.idLiga)
+      : Number.MAX_SAFE_INTEGER;
+    const ordB = indiceOrden.has(b.idLiga)
+      ? indiceOrden.get(b.idLiga)
+      : Number.MAX_SAFE_INTEGER;
     if (ordA !== ordB) return ordA - ordB;
     return a.nombreLiga.localeCompare(b.nombreLiga);
   });
@@ -94,7 +104,9 @@ function crearBloqueCompetenciaProximos(grupo) {
   const cabecera = document.createElement("header");
   cabecera.className = "cabecera-grupo-liga";
 
-  const tituloCont = grupo.idLiga ? document.createElement("a") : document.createElement("div");
+  const tituloCont = grupo.idLiga
+    ? document.createElement("a")
+    : document.createElement("div");
   tituloCont.className = "grupo-liga-enlace";
   if (grupo.idLiga) {
     tituloCont.href = `liga.html?id=${encodeURIComponent(grupo.idLiga)}`;
@@ -138,7 +150,9 @@ function crearBloqueCompetenciaProximos(grupo) {
   const lista = document.createElement("div");
   lista.className = "grupo-liga-lista";
   const tarjetas = grupo.partidos.map((partido, indice) => {
-    const tarjeta = crearElementoPartidoInicio(partido, { escudoLiga: grupo.escudo });
+    const tarjeta = crearElementoPartidoInicio(partido, {
+      escudoLiga: grupo.escudo,
+    });
     if (indice >= PARTIDOS_VISIBLES_POR_LIGA_INICIO) {
       tarjeta.hidden = true;
     }
@@ -181,9 +195,33 @@ function crearBloqueCompetenciaProximos(grupo) {
   return bloque;
 }
 
+function crearEstadoVacioFiltro(fechaFiltro, onQuitarFiltro) {
+  const caja = document.createElement("div");
+  caja.className = "estado-vacio-filtro";
+
+  const mensaje = document.createElement("p");
+  mensaje.className = "estado-vacio-filtro-texto";
+  mensaje.textContent = `No hay próximos partidos programados para el ${formatearFechaLarga(
+    fechaFiltro,
+  )}.`;
+
+  const botonQuitar = document.createElement("button");
+  botonQuitar.type = "button";
+  botonQuitar.className = "grupo-liga-toggle";
+  botonQuitar.textContent = "Ver todos los partidos";
+  botonQuitar.addEventListener("click", onQuitarFiltro);
+
+  caja.append(mensaje, botonQuitar);
+  return caja;
+}
+
 async function cargarPartidosInicio() {
-  const contenedorProximos = document.getElementById("contenedorPartidosProximos");
-  const contenedorJugados = document.getElementById("contenedorPartidosJugados");
+  const contenedorProximos = document.getElementById(
+    "contenedorPartidosProximos",
+  );
+  const contenedorJugados = document.getElementById(
+    "contenedorPartidosJugados",
+  );
   if (!contenedorProximos && !contenedorJugados) return;
 
   let ligasDisponibles = [];
@@ -194,22 +232,105 @@ async function cargarPartidosInicio() {
   }
 
   if (contenedorProximos) {
+    let todosLosProximos = [];
+    let fechaFiltro = null;
+
+    const barraFiltro = document.querySelector(
+      "#proximos-partidos .barra-filtro-fecha",
+    );
+    const botonesFiltro = barraFiltro
+      ? Array.from(barraFiltro.querySelectorAll("[data-filtro-fecha]"))
+      : [];
+    const entradaFecha = document.getElementById("filtroFechaInicio");
+
+    const sincronizarControlesFiltro = () => {
+      const fechaHoy = sumarDiasAFecha(new Date(), 0);
+      const fechaManana = sumarDiasAFecha(new Date(), 1);
+
+      if (entradaFecha) {
+        entradaFecha.value = fechaFiltro || "";
+        entradaFecha.classList.toggle("activo", Boolean(fechaFiltro));
+      }
+
+      botonesFiltro.forEach((boton) => {
+        const tipo = boton.dataset.filtroFecha;
+        const activo =
+          (tipo === "todos" && !fechaFiltro) ||
+          (tipo === "hoy" && fechaFiltro === fechaHoy) ||
+          (tipo === "manana" && fechaFiltro === fechaManana);
+        boton.classList.toggle("activo", activo);
+        boton.setAttribute("aria-pressed", String(activo));
+      });
+    };
+
+    const renderizarProximos = () => {
+      contenedorProximos.replaceChildren();
+
+      const filtrados = fechaFiltro
+        ? todosLosProximos.filter(
+            (partido) => extraerClaveFechaPartido(partido) === fechaFiltro,
+          )
+        : todosLosProximos;
+
+      if (filtrados.length > 0) {
+        const grupos = agruparPartidosPorCompetencia(
+          filtrados,
+          ligasDisponibles,
+        );
+        grupos.forEach((grupo) => {
+          contenedorProximos.appendChild(crearBloqueCompetenciaProximos(grupo));
+        });
+        return;
+      }
+
+      if (fechaFiltro && todosLosProximos.length > 0) {
+        contenedorProximos.appendChild(
+          crearEstadoVacioFiltro(fechaFiltro, () => aplicarFiltroFecha(null)),
+        );
+        return;
+      }
+
+      const vacio = document.createElement("div");
+      vacio.className = "p-3 text-body-secondary small";
+      vacio.textContent = "No hay partidos próximos programados.";
+      contenedorProximos.appendChild(vacio);
+    };
+
+    const aplicarFiltroFecha = (nuevaFecha) => {
+      fechaFiltro = nuevaFecha || null;
+      sincronizarControlesFiltro();
+      renderizarProximos();
+    };
+
+    botonesFiltro.forEach((boton) => {
+      boton.addEventListener("click", () => {
+        const tipo = boton.dataset.filtroFecha;
+        if (tipo === "hoy") {
+          aplicarFiltroFecha(sumarDiasAFecha(new Date(), 0));
+        } else if (tipo === "manana") {
+          aplicarFiltroFecha(sumarDiasAFecha(new Date(), 1));
+        } else {
+          aplicarFiltroFecha(null);
+        }
+      });
+    });
+
+    if (entradaFecha) {
+      const manejarCambioCalendario = () => {
+        aplicarFiltroFecha(entradaFecha.value ? entradaFecha.value : null);
+      };
+      entradaFecha.addEventListener("change", manejarCambioCalendario);
+      entradaFecha.addEventListener("input", manejarCambioCalendario);
+    }
+
+    sincronizarControlesFiltro();
+
     try {
       const res = await fetch("/api/partidos/proximos?limite=0");
       if (res.ok) {
         const proximos = await res.json();
-        contenedorProximos.replaceChildren();
-        if (Array.isArray(proximos) && proximos.length > 0) {
-          const grupos = agruparPartidosPorCompetencia(proximos, ligasDisponibles);
-          grupos.forEach((grupo) => {
-            contenedorProximos.appendChild(crearBloqueCompetenciaProximos(grupo));
-          });
-        } else {
-          const vacio = document.createElement("div");
-          vacio.className = "p-3 text-body-secondary small";
-          vacio.textContent = "No hay partidos próximos programados.";
-          contenedorProximos.appendChild(vacio);
-        }
+        todosLosProximos = Array.isArray(proximos) ? proximos : [];
+        renderizarProximos();
       }
     } catch (err) {
       console.warn("Aviso al cargar próximos partidos de inicio:", err);

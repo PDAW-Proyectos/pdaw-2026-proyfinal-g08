@@ -18,32 +18,60 @@ export class Liga {
     this.tabla = tabla ?? [];
   }
 
-  get id() { return this.#id; }
-  get nombre() { return this.#nombre; }
-  get pais() { return this.#pais; }
-  get escudo() { return this.#escudo; }
-  get temporada() { return this.#temporada; }
-  get tabla() { return [...this.#tabla]; }
+  get id() {
+    return this.#id;
+  }
+  get nombre() {
+    return this.#nombre;
+  }
+  get pais() {
+    return this.#pais;
+  }
+  get escudo() {
+    return this.#escudo;
+  }
+  get temporada() {
+    return this.#temporada;
+  }
+  get tabla() {
+    return [...this.#tabla];
+  }
 
-  get obtenerId() { return this.#id; }
-  get obtenerNombre() { return this.#nombre; }
-  get obtenerPais() { return this.#pais; }
-  get obtenerEscudo() { return this.#escudo; }
-  get obtenerTabla() { return [...this.#tabla]; }
+  get obtenerId() {
+    return this.#id;
+  }
+  get obtenerNombre() {
+    return this.#nombre;
+  }
+  get obtenerPais() {
+    return this.#pais;
+  }
+  get obtenerEscudo() {
+    return this.#escudo;
+  }
+  get obtenerTabla() {
+    return [...this.#tabla];
+  }
 
-  set nombre(valor) { this.#nombre = valor ?? ""; }
-  set pais(valor) { this.#pais = valor ?? ""; }
-  set escudo(valor) { this.#escudo = valor ?? ""; }
-  set temporada(valor) { this.#temporada = valor ?? ""; }
+  set nombre(valor) {
+    this.#nombre = valor ?? "";
+  }
+  set pais(valor) {
+    this.#pais = valor ?? "";
+  }
+  set escudo(valor) {
+    this.#escudo = valor ?? "";
+  }
+  set temporada(valor) {
+    this.#temporada = valor ?? "";
+  }
 
   set tabla(nuevaTabla) {
     if (!Array.isArray(nuevaTabla)) {
       this.#tabla = [];
       return;
     }
-    this.#tabla = nuevaTabla.map((item) =>
-      item instanceof Posicion ? item : new Posicion(item)
-    );
+    this.#tabla = nuevaTabla.map((item) => new Posicion(item));
   }
 
   toJSON() {
@@ -53,9 +81,7 @@ export class Liga {
       pais: this.#pais,
       escudo: this.#escudo,
       temporada: this.#temporada,
-      tabla: this.#tabla.map((pos) =>
-        typeof pos.toJSON === "function" ? pos.toJSON() : pos
-      ),
+      tabla: this.#tabla.map((pos) => pos.toJSON()),
     };
   }
 }

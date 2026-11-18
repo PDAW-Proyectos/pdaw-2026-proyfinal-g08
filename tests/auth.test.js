@@ -1,10 +1,10 @@
-const assert = require("node:assert/strict");
-const fs = require("node:fs/promises");
-const os = require("node:os");
-const path = require("node:path");
-const { after, before, test } = require("node:test");
-const { createApp } = require("../src/app");
-const { createUserStore } = require("../src/users");
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { after, before, test } from "node:test";
+import { createApp } from "../src/js/app.js";
+import { createUserStore } from "../src/js/usuarios/users.js";
 
 let temporaryDirectory;
 let server;
@@ -43,6 +43,7 @@ test("el registro persiste el usuario y abre una sesión sin exponer la contrase
     password: "contraseña-segura",
     favoriteTeam: "River Plate",
   });
+
   assert.equal(response.status, 201);
   const { user } = await response.json();
   assert.deepEqual(
@@ -54,6 +55,7 @@ test("el registro persiste el usuario y abre una sesión sin exponer la contrase
   const cookie = response.headers.get("set-cookie").split(";")[0];
   assert.match(response.headers.get("set-cookie"), /HttpOnly/i);
   assert.match(response.headers.get("set-cookie"), /SameSite=Lax/i);
+
   const sessionResponse = await request("/api/me", { headers: { cookie } });
   assert.equal(sessionResponse.status, 200);
   assert.equal((await sessionResponse.json()).user.name, "Ana Pérez");
@@ -87,10 +89,11 @@ test("el inicio requiere únicamente correo y contraseña y permite cerrar sesi�
     password: "contraseña-segura",
   });
   assert.equal(login.status, 200);
-  const cookie = login.headers.get("set-cookie").split(";")[0];
 
+  const cookie = login.headers.get("set-cookie").split(";")[0];
   const logout = await jsonRequest("/api/logout", {}, cookie);
   assert.equal(logout.status, 204);
+
   const sessionResponse = await request("/api/me", { headers: { cookie } });
   assert.equal(sessionResponse.status, 401);
 
@@ -133,7 +136,17 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
   assert.equal(script.status, 200);
   assert.match(await script.text(), /\/api\/register/);
 
-  const appScript = await request("/js/app.js");
-  assert.equal(appScript.status, 200);
-  assert.match(await appScript.text(), /fechaPartido/);
+  const mainScript = await request("/js/main.js");
+  assert.equal(mainScript.status, 200);
+  assert.match(await mainScript.text(), /inicializarBuscadores/);
+
+  const controlsScript = await request("/cliente/controlesGenerales.js");
+  assert.equal(controlsScript.status, 200);
+  assert.match(await controlsScript.text(), /fechaPartido/);
+
+  const modalScript = await request("/cliente/modalPartido.js");
+  assert.equal(modalScript.status, 200);
+
+  const searchScript = await request("/cliente/buscadorEquipos.js");
+  assert.equal(searchScript.status, 200);
 });

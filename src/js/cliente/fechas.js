@@ -5,6 +5,43 @@ export function fechaAValorEntrada(fecha) {
   return `${anio}-${mes}-${dia}`;
 }
 
+export function sumarDiasAFecha(fechaBase = new Date(), dias = 0) {
+  const fecha = new Date(
+    fechaBase.getFullYear(),
+    fechaBase.getMonth(),
+    fechaBase.getDate() + dias,
+  );
+  return fechaAValorEntrada(fecha);
+}
+
+export function extraerClaveFechaPartido(partido) {
+  if (!partido) return "";
+  const fechaTexto = String(partido.fecha || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(fechaTexto)) {
+    if (partido.hora) {
+      const fechaConHora = new Date(
+        `${fechaTexto}T${String(partido.hora).trim()}`,
+      );
+      if (!Number.isNaN(fechaConHora.getTime())) {
+        return fechaAValorEntrada(fechaConHora);
+      }
+    }
+    return fechaTexto;
+  }
+
+  const ts = String(partido.timestamp || "").trim();
+  if (ts) {
+    const fechaTs = new Date(ts);
+    if (!Number.isNaN(fechaTs.getTime())) {
+      return fechaAValorEntrada(fechaTs);
+    }
+    if (/^\d{4}-\d{2}-\d{2}/.test(ts)) {
+      return ts.slice(0, 10);
+    }
+  }
+  return "";
+}
+
 export function formatearFechaPartido(fechaStr, horaStr) {
   if (!fechaStr) return "";
   try {

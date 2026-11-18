@@ -2488,3 +2488,101 @@
         }
       }
 
+      /* ===== Filtro por fecha en Próximos partidos (inicio) ===== */
+      .barra-filtro-fecha {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #edf1ee;
+        background: #fbfdfc;
+      }
+
+      .filtro-fecha-botones {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .boton-filtro-fecha {
+        min-height: 32px;
+        padding: 0.32rem 0.78rem;
+        border: 1px solid var(--grada-borde);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--grada-oscuro);
+        font-size: 0.76rem;
+        font-weight: 650;
+        white-space: nowrap;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition:
+          background-color 140ms ease,
+          border-color 140ms ease,
+          color 140ms ease;
+      }
+
+      .boton-filtro-fecha:hover {
+        border-color: var(--grada-verde);
+        color: var(--grada-verde);
+      }
+
+      .boton-filtro-fecha.activo {
+        border-color: var(--grada-verde);
+        background: var(--grada-verde);
+        color: #fff;
+      }
+
+      .boton-filtro-fecha:focus-visible {
+        outline: 2px solid var(--grada-verde);
+        outline-offset: 2px;
+      }
+
+      .filtro-fecha-selector {
+        display: flex;
+        align-items: center;
+      }
+
+      .filtro-fecha-selector .control-fecha {
+        min-height: 32px;
+        max-width: 165px;
+        font-size: 0.76rem;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .filtro-fecha-selector .control-fecha.activo {
+        border-color: var(--grada-verde);
+        background: #f5fbf7;
+      }
+
+      .estado-vacio-filtro {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
+      }
+
+      .estado-vacio-filtro-texto {
+        margin: 0;
+        color: var(--grada-atenuado);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 575.98px) {
+        .barra-filtro-fecha {
+          padding: 0.6rem 0.75rem;
+        }
+
+        .filtro-fecha-selector,
+        .filtro-fecha-selector .control-fecha {
+          width: 100%;
+          max-width: none;
+        }
+      }
+
+

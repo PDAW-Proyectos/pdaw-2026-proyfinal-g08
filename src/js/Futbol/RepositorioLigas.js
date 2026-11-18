@@ -21,7 +21,9 @@ export class RepositorioLigas {
   }
 
   buscarLiga(id) {
-    const termino = String(id ?? "").trim().toLowerCase();
+    const termino = String(id ?? "")
+      .trim()
+      .toLowerCase();
     const terminoNorm = normalizar(termino);
 
     const ligaResultado = this.#ligas.find((l) => {
@@ -34,10 +36,14 @@ export class RepositorioLigas {
       ) {
         return true;
       }
-      if (terminoNorm.includes("premier") && String(l.id) === "4328") return true;
-      if (terminoNorm.includes("laliga") && String(l.id) === "4335") return true;
-      if (terminoNorm.includes("bundesliga") && String(l.id) === "4331") return true;
-      if (terminoNorm.includes("seriea") && String(l.id) === "4332") return true;
+      if (terminoNorm.includes("premier") && String(l.id) === "4328")
+        return true;
+      if (terminoNorm.includes("laliga") && String(l.id) === "4335")
+        return true;
+      if (terminoNorm.includes("bundesliga") && String(l.id) === "4331")
+        return true;
+      if (terminoNorm.includes("seriea") && String(l.id) === "4332")
+        return true;
       if (terminoNorm.includes("ligue") && String(l.id) === "4334") return true;
       return false;
     });
@@ -60,12 +66,14 @@ export class RepositorioLigas {
 
     let tablaNueva = [];
     if (Array.isArray(datos.tabla) && datos.tabla.length > 0) {
-      tablaNueva = datos.tabla.map((posicionCruda) =>
-        posicionCruda instanceof Posicion ? posicionCruda : new Posicion(posicionCruda)
+      tablaNueva = datos.tabla.map(
+        (posicionCruda) => new Posicion(posicionCruda),
       );
     }
 
-    const indiceExistente = this.#ligas.findIndex((l) => String(l.id) === String(datos.id));
+    const indiceExistente = this.#ligas.findIndex(
+      (l) => String(l.id) === String(datos.id),
+    );
     if (indiceExistente !== -1) {
       const existente = this.#ligas[indiceExistente];
       const tablaFinal = tablaNueva.length > 0 ? tablaNueva : existente.tabla;
@@ -75,7 +83,7 @@ export class RepositorioLigas {
         datos.pais || existente.pais,
         datos.escudo || existente.escudo,
         datos.temporada || existente.temporada,
-        tablaFinal
+        tablaFinal,
       );
       this.#ligas[indiceExistente] = ligaActualizada;
       return ligaActualizada;
@@ -87,7 +95,7 @@ export class RepositorioLigas {
       datos.pais,
       datos.escudo,
       datos.temporada,
-      tablaNueva
+      tablaNueva,
     );
     this.#ligas.push(nuevaLiga);
     return nuevaLiga;

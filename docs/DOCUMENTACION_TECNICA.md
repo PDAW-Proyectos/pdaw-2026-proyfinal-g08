@@ -1,190 +1,285 @@
-# Documentación Técnica de Arquitectura y Flujos — **Ofsai**
+# Documentación Técnica de Arquitectura y Flujos — **Orsai**
 
-Este documento explica en profundidad la arquitectura completa de **Ofsai**, el rol de cada archivo JavaScript dentro de `src/` y `public/`, la evaluación técnica y de seguridad de `public/js/main.js`, las trazas completas desde la API externa (TheSportsDB) hasta la interfaz web, y la estrategia de persistencia sobre los archivos `.json` en `data/`.
+Este documento explica en profundidad la arquitectura completa de **Orsai**, el funcionamiento interno de **`src/js/server.js`** y **`src/js/app.js`**, el rol de cada módulo dentro de `src/` y `public/`, el manejo integral de la API externa (**TheSportsDB**) de extremo a extremo, las políticas de persistencia en `data/*.json` y un glosario técnico con las decisiones de diseño adoptadas en el proyecto.
 
 ---
 
 ## 1. Visión general de la arquitectura
 
-La aplicación sigue una arquitectura **Node.js + Express (ES Modules)** dividida en capas con separación estricta de responsabilidades:
+La aplicación sigue una arquitectura **Node.js + Express (ES Modules)** dividida en cuatro capas con separación estricta de responsabilidades:
 
-1. **Punto de entrada del servidor (`server.js` y `src/js/server.js`)**: inicializa repositorios, sincroniza datos locales/API respetando límites de tasa y levanta Express en el puerto `3000`.
-2. **Capa de aplicación HTTP (`src/js/app.js` y `src/js/Routes/*`)**: expone endpoints REST `/api/*`, gestiona sesiones con cookies `HttpOnly`, sirve el cliente modular bajo `/cliente` y los archivos estáticos de `public/`.
-3. **Capa de dominio y persistencia (`src/js/Futbol/*` y `src/js/usuarios/*`)**: modela entidades encapsuladas con atributos privados (`#`), transforma los datos externos en objetos del dominio, gestiona caché en memoria y escribe/lee archivos `.json` en `data/`.
-4. **Capa de presentación cliente (`public/js/main.js` + `src/js/cliente/*`)**: `public/js/main.js` actúa como único script dentro de `public/` y delega cada funcionalidad de interfaz a módulos pequeños y especializados dentro de `src/js/cliente/`.
-
----
-
-## 2. Evaluación técnica de `public/js/main.js` (Seguridad, Integridad y Buenas Prácticas)
-
-### ¿Qué hace `public/js/main.js`?
-`public/js/main.js` (35 líneas) es exclusivamente el **punto de entrada (*entry point* / *composition root*)** del navegador. Su única tarea es:
-1. Esperar a que el DOM esté parseado (`DOMContentLoaded` o ejecución directa si ya cargó).
-2. Inicializar los componentes transversales presentes en todas las páginas (`inicializarBuscadores()` e `inicializarControlesGenerales()`).
-3. Detectar la vista actual mediante `document.body.dataset.pagina` (y respaldos por IDs clave) y ejecutar únicamente el controlador de esa página (`inicializarInicio`, `inicializarLiga`, `inicializarEquipo`, `inicializarLigas`).
-
-### ¿Es correcto desde el punto de vista de seguridad, integridad y buena programación?
-
-**Sí, el enfoque de diseño es sólido y sigue estándares modernos**, con algunos matices importantes que conviene conocer:
-
-#### Fortalezas de ingeniería y seguridad
-1. **Principio de Responsabilidad Única (SRP)**: `main.js` ya no mezcla acceso a red, formateo de fechas, creación de DOM y lógica de 4 páginas distintas en un bloque de ~1.000 líneas. Cada módulo en `src/js/cliente/` atiende un único problema.
-2. **Aislamiento de ámbito mediante ES Modules (`<script type="module">`)**: al cargarse como módulo ES, `main.js` no contamina el objeto global `window` con funciones ni variables internas, reduciendo riesgos de colisiones o manipulación accidental desde consola/scripts externos.
-3. **Principio de Menor Privilegio en el cliente**:
-   - El navegador **nunca** posee claves ni URLs directas a endpoints sensibles ni escribe archivos.
-   - Todas las consultas a TheSportsDB pasan por el backend Express (`/api/*`), donde el servidor controla el ritmo de peticiones (`1100 ms`), filtra respuestas (ej. solo `Soccer`) y persiste en JSON.
-4. **Exposición acotada de `src/`**: `src/js/app.js` monta únicamente la subcarpeta `/cliente` (`app.use("/cliente", express.static(...))`) y `/auth.js`, manteniendo ocultos al navegador los archivos de servidor (`server.js`, `users.js`, `ServicioFutbol.js`, `Futbol/*`, `Routes/*`) y los datos (`data/*.json`).
-5. **Autenticación e integridad de sesión desacopladas**: `main.js` ni siquiera manipula sesiones ni contraseñas; la autenticación corre por `src/js/usuarios/auth.js` contra `/api/login` y `/api/register` usando cookies `HttpOnly` + `SameSite=Lax`.
-
-#### Puntos a vigilar para mantener la integridad a futuro
-1. **Nunca importar archivos de servidor desde `public/js/main.js`**: todo archivo dentro de `src/js/cliente/` es público para el navegador (como todo JS frontend). No debe contener secretos ni validaciones exclusivas que no estén replicadas en el servidor.
-2. **Uso exclusivo de `createElement` + `textContent` (sin `innerHTML`)**: todos los módulos en `src/js/cliente/` y `src/js/usuarios/auth.js` construyen el DOM de forma programática mediante `document.createElement`, `textContent` y `replaceChildren`, eliminando la interpolación de cadenas HTML y previniendo riesgos de **XSS (Cross-Site Scripting)**.
+1. **Punto de entrada y ciclo de vida del servidor (`server.js` y `src/js/server.js`)**: carga de inmediato los datos locales en los repositorios para abrir el puerto sin demoras y ejecuta en segundo plano la sincronización incremental con la API.
+2. **Capa de aplicación HTTP (`src/js/app.js` y `src/js/Routes/*`)**: configura Express, gestiona sesiones con cookies `HttpOnly`, expone los endpoints REST `/api/*`, publica el frontend modular bajo `/cliente` y `/auth.js` y sirve los archivos estáticos de `public/`.
+3. **Capa de dominio, servicios API y persistencia (`src/js/Futbol/*` y `src/js/usuarios/*`)**: modela entidades encapsuladas con atributos privados (`#`), separa el cliente HTTP/JSON compartido (`ClienteApiFutbol`) de los servicios por dominio (`ServicioLigas`, `ServicioPartidos`, `ServicioEquipos` detrás de la fachada `ServicioFutbol`), mantiene repositorios en memoria y persiste archivos `.json` en `data/`.
+4. **Capa de presentación cliente (`public/js/main.js` + `src/js/cliente/*`)**: `public/js/main.js` actúa como único script dentro de `public/` y delega cada vista y componente transversal a módulos especializados dentro de `src/js/cliente/`, construyendo todo el DOM con `document.createElement`, `textContent` y `replaceChildren` (sin `innerHTML`).
 
 ---
 
-## 3. Catálogo completo de archivos JavaScript en `src/` (y arranque)
+## 2. Análisis detallado de `server.js` y `app.js`
 
-### 3.1 Arranque y configuración Express
+### 2.1 Arranque raíz (`server.js`) e inicialización del servidor (`src/js/server.js`)
 
-| Archivo | Responsabilidad principal | Qué contiene y por qué existe |
+El archivo `server.js` en la raíz del repositorio es un lanzador mínimo que importa `startServer` desde `./src/js/server.js` y verifica mediante `import.meta.url === pathToFileURL(process.argv[1]).href` si fue ejecutado directamente (`node server.js`). Esto permite usar `npm start` o `node server.js` indistintamente y exportar `startServer` para tests sin levantar automáticamente el servidor al importar el módulo.
+
+Toda la lógica real de arranque y orquestación inicial vive en **`src/js/server.js`**:
+
+#### a) Constantes de control de arranque
+- `NUEVOS_POR_LIGA_AL_INICIAR = 1`: define que en cada arranque del servidor se intenta sumar **hasta 1 próximo partido nuevo por cada una de las 5 ligas principales** (`4328`, `4331`, `4332`, `4335`, `4334`), acumulándose sobre los partidos ya guardados en `data/proximos_partidos.json`.
+
+#### b) `asegurarEscudosPartido(partido, repositorioEquipos, repositorioLigas, servicioFutbol)`
+Completa `escudoEquipoLocal` y `escudoEquipoVisitante` cuando un partido nuevo o recién finalizado llega sin alguno de los dos escudos:
+1. Primero busca localmente en `RepositorioEquipos`, `data/equipos.json` y las tablas de `RepositorioLigas` mediante `servicioFutbol.resolverEscudoEquipoLocal(...)` (0 peticiones externas).
+2. Solo si sigue faltando, consulta `buscarEquipoPorId` (`lookupteam.php`) o `buscarEquipoPorNombre` (`searchteams.php`), agrega el equipo encontrado al repositorio en memoria y lo anexa a `data/equipos.json`.
+
+#### c) `cargarDatosLocales(servicioFutbol, repositorioPartidos, repositorioEquipos, fechaReferencia)`
+Carga de manera **síncrona e inmediata** el estado base desde disco sin hacer ninguna petición HTTP externa:
+1. Carga las 5 ligas desde `data/ligas.json` (`cargarLigasLocal()`) en `RepositorioLigas`.
+2. Carga los clubes guardados desde `data/equipos.json` (`cargarEquiposLocal()`) en `RepositorioEquipos`.
+3. Carga el historial desde `data/partidos_jugados.json` (`cargarPartidosJugadosLocal()`) en `RepositorioPartidos`.
+4. Lee `data/proximos_partidos.json` (`cargarProximosPartidosLocal()`), filtra en memoria los que todavía son vigentes (`!p.esJugado && !p.yaPasoFecha(fechaReferencia)`) y los carga en `RepositorioPartidos`.
+5. Completa escudos locales faltantes en los partidos cargados y deja enlazadas las referencias cruzadas en `repositorioLigas` (`repositorioPartidos`, `repositorioEquipos`, `servicioFutbol`).
+
+#### d) `sincronizarDatosApi(servicioFutbol, repositorioLigas, repositorioPartidos, repositorioEquipos, fechaReferencia)`
+Ejecuta la actualización progresiva contra TheSportsDB manteniendo intacto el histórico acumulado:
+1. **Validación de próximos guardados**: recorre `cargarProximosPartidosLocal()`. Para todo partido cuya fecha ya pasó (`yaPasoFecha(fechaReferencia)`) o ya figura jugado:
+   - Lo quita de `RepositorioPartidos` temporalmente para no mostrar partidos vencidos como próximos.
+   - Llama a `servicioFutbol.buscarEventoPorId(partido.id)` (`lookupevent.php`), resuelve sus escudos si faltan y lo **anexa** a `data/partidos_jugados.json` y a `RepositorioPartidos`.
+2. **Conservación + acumulación equitativa**: conserva todos los próximos partidos vigentes (incluidos los de otras competiciones descubiertas al visitar fichas de equipos) usando un `Set` de IDs (`idsYaIncluidos`) para evitar duplicados.
+3. **Búsqueda de 1 partido nuevo por liga**: recorre `LIGAS_UTILIZADAS_IDS`, llama a `buscarProximosEventosLiga(idLiga, { idsExistentes, cantidadNuevaObjetivo: 1, fechaReferencia })`, toma el más cercano en fecha que aún no esté guardado, completa sus escudos (`asegurarEscudosPartido`) y lo suma a `proximosAcumulados`.
+4. **Ordenamiento y persistencia**: ordena cronológicamente todos los próximos acumulados, actualiza `RepositorioPartidos` y, solo si hubo cambios, sobrescribe `data/proximos_partidos.json` con la lista vigente ampliada.
+
+#### e) `inicializarLigas(...)`
+Combina `cargarDatosLocales(...)` + `await sincronizarDatosApi(...)` en forma secuencial. Se conserva exportada para que las pruebas unitarias e de integración puedan ejecutar el flujo completo de forma determinista y verificar el estado final tras terminar todas las llamadas simuladas.
+
+#### f) `resolverPuertoServidor()` y `startServer()`
+- **`resolverPuertoServidor()`**: toma `process.env.PORT`, salvo cuando coincide con `process.env.NGINX_PORT` (escenario de contenedor con proxy Nginx escuchando en `8080`), caso en el cual cae en `process.env.DEFAULT_APP_PORT || 3000` para evitar errores `EADDRINUSE`.
+- **`startServer()`**:
+  1. Inicializa el almacén de usuarios (`createUserStore`).
+  2. Instancia `ServicioFutbol`, `RepositorioPartidos` y `RepositorioEquipos`.
+  3. Ejecuta **`cargarDatosLocales(...)`** para tener los repositorios poblados en milisegundos.
+  4. Crea la app Express con `createApp(...)` y abre el servidor HTTP inmediatamente (`app.listen(port, "0.0.0.0")`), de modo que la aplicación responde desde el primer instante.
+  5. Una vez abierto el puerto, lanza **`sincronizarDatosApi(...)` en segundo plano** con `.catch(...)`, evitando bloquear el arranque del servidor si la API externa tarda o responde con `429`.
+
+---
+
+### 2.2 Fábrica de la aplicación Express (`src/js/app.js`)
+
+`src/js/app.js` exporta `createApp({ users, repositorioLigas, repositorioPartidos, repositorioEquipos, servicioFutbol, production })`. Está diseñada bajo el patrón **Factory + Inyección de Dependencias**, lo que permite instanciar exactamente la misma aplicación tanto en producción (`startServer`) como en pruebas unitarias aisladas con repositorios y mocks propios sin tocar archivos reales ni puertos fijos.
+
+Su configuración interna sigue este orden exacto:
+
+1. **Seguridad de proxy y parseo de cuerpos**:
+   - Si `production === true`, activa `app.set("trust proxy", 1)` para respetar encabezados HTTPS detrás de un proxy inverso.
+   - `express.json({ limit: "16kb" })` y `express.urlencoded({ extended: false })` limitan el tamaño de entrada para evitar cargas maliciosas excesivas.
+
+2. **Middleware de sesión en memoria (`sessions = new Map()`)**:
+   - Cookie llamada `Orsai.sid` con vigencia de 7 días (`sessionDurationMs`).
+   - En cada petición lee `req.headers.cookie`, extrae `Orsai.sid`, busca el identificador en `sessions` y valida `session.expiresAt > Date.now()`. Si es válida, adjunta `req.user` (desde `users.findById`) y `req.sessionId`; si expiró, la limpia del `Map`.
+   - `startSession(res, user)` genera un token criptográfico aleatorio de 32 bytes (`randomBytes(32).toString("hex")`) y emite la cookie con `httpOnly: true` (inaccesible vía `document.cookie`), `sameSite: "lax"` y `secure: production`.
+   - `requireAuth` protege rutas privadas devolviendo `401` si no existe `req.user`.
+
+3. **Rutas de autenticación (`/api/register`, `/api/login`, `/api/me`, `/api/logout`)**:
+   - `POST /api/register`: delega en `users.register(req.body)`, inicia sesión y responde `201` con `publicUser(user)` (omitiendo siempre el hash de contraseña). Traduce errores de dominio (`invalid_registration` → `400`, `email_exists` → `409`).
+   - `POST /api/login`: verifica credenciales con `users.verify(email, password)`, abre cookie de sesión y devuelve `200` o `401`.
+   - `GET /api/me`: protegida por `requireAuth`, retorna los datos públicos del usuario autenticado.
+   - `POST /api/logout`: protegida por `requireAuth`, elimina la sesión del `Map` y limpia la cookie (`204 No Content`).
+
+4. **Montaje modular de routers de fútbol**:
+   - Si recibe `repositorioLigas`, monta `crearRouterLigas(...)` en `/api/ligas`.
+   - Si recibe `repositorioPartidos`, monta `crearRouterPartidos(...)` en `/api/partidos`.
+   - Si recibe `repositorioEquipos`, monta `crearRouterEquipos(...)` en `/api/equipos`.
+
+5. **Exposición acotada de archivos estáticos y script cliente**:
+   - `GET /auth.js`: sirve únicamente `src/js/usuarios/auth.js` para el modal de autenticación en el navegador.
+   - `app.use("/cliente", express.static(...))`: expone únicamente la carpeta `src/js/cliente/` (módulos ES del navegador).
+   - `app.use(express.static(...))`: sirve HTML y CSS desde `public/` (y `public/js/main.js`).
+   - De este modo, **nunca** quedan accesibles por HTTP los módulos de servidor (`server.js`, `users.js`, `Futbol/*`, `Routes/*`) ni los JSON de `data/`.
+
+6. **Manejador global de errores**:
+   - Middleware final `(error, req, res, next)` que registra la excepción en consola y responde `500` con un mensaje genérico si aún no se enviaron encabezados, evitando filtrar *stack traces* al cliente.
+
+---
+
+## 3. Cómo manejamos la API externa (TheSportsDB) en todo momento
+
+Toda comunicación con `https://www.thesportsdb.com/api/v1/json/123/` pasa exclusivamente por el servidor backend. El navegador jamás llama a TheSportsDB directamente.
+
+### 3.1 Arquitectura modular de servicios (`src/js/Futbol/`)
+
+Para evitar sobrecargar una única clase con múltiples responsabilidades, la lógica de API y persistencia quedó dividida en una base compartida, 3 servicios de dominio y una fachada:
+
+| Módulo | Responsabilidad | Métodos principales |
 | :--- | :--- | :--- |
-| **`server.js`** *(raíz)* | Lanzador raíz del proyecto | Importa `startServer` desde `./src/js/server.js`. Permite ejecutar `node server.js` desde la raíz comprobando si fue invocado como módulo principal (`isMainModule`). |
-| **`src/js/server.js`** | Inicialización de estado y servidor HTTP | Define `inicializarLigas()` (orquesta la carga inicial de JSONs, caducidad de próximos partidos y cupo equitativo de 15 partidos = 3 por liga) y `startServer()` (crea almacén de usuarios, repositorios, aplicación Express y escucha en puerto `3000`). |
-| **`src/js/app.js`** | Fábrica de la aplicación Express (`createApp`) | Configura middlewares JSON/URL-encoded, gestión en memoria de sesiones (`ofsai.sid`), endpoints `/api/register`, `/api/login`, `/api/me`, `/api/logout`, monta los routers `/api/ligas`, `/api/partidos`, `/api/equipos`, expone `/auth.js`, `/cliente` (módulos frontend) y `public/` (estáticos), además del manejador global de errores `500`. |
+| **`ClienteApiFutbol.js`** | Base HTTP segura, construcción de URLs y lectura/escritura JSON en disco | `fetchSeguro`, `construirUrl`, `leerJson`, `escribirJson`, `existeArchivo`, `LIGAS_UTILIZADAS_IDS`, `LIGAS_PRINCIPALES_DEFAULT`, `normalizarTexto` |
+| **`ServicioLigas.js`** | Persistencia y endpoints de competiciones y tablas | `cargarLigasLocal`, `guardarLigasLocal`, `listarLigas`, `buscarLigaPorId`, `buscarTablaDeLiga` |
+| **`ServicioPartidos.js`** | Persistencia y endpoints de partidos futuros y finalizados | `cargarProximosPartidosLocal`, `sobrescribirProximosPartidosLocal`, `anexarProximosPartidosLocal`, `cargarPartidosJugadosLocal`, `anexarPartidosJugadosLocal`, `buscarProximosEventosLiga`, `buscarEventoPorId`, `buscarProximosEventosEquipo`, `buscarUltimosEventosEquipo` |
+| **`ServicioEquipos.js`** | Persistencia y endpoints de clubes + resolución local de escudos | `cargarEquiposLocal`, `anexarEquipoLocal`, `anexarEquiposLocal`, `buscarEquipoLocal`, `buscarEquipoPorId`, `buscarEquiposPorNombre`, `buscarEquipoPorNombre`, `resolverEscudoEquipoLocal` |
+| **`ServicioFutbol.js`** | **Fachada pública** que unifica los servicios manteniendo estado privado (`#`) | Compone `#clienteApi`, `#servicioLigas`, `#servicioPartidos` y `#servicioEquipos`, exponiendo la interfaz única que consumen `server.js`, los routers y los repositorios. |
 
----
+### 3.2 Control de tráfico HTTP: `ClienteApiFutbol.fetchSeguro(url, maxReintentos = 2)`
 
-### 3.2 Capa de Dominio, Formateo y Persistencia (`src/js/Futbol/`)
+Cada petición a TheSportsDB pasa obligatoriamente por `fetchSeguro`:
 
-Todas las entidades y repositorios de esta carpeta utilizan **campos privados (`#`)**, **getters** de lectura, **setters** controlados y `toJSON()` para serialización segura.
+1. **Cola secuencial (`#colaPeticiones`)**: encadena las llamadas en una promesa única para que no salgan ráfagas simultáneas hacia TheSportsDB aunque lleguen varias rutas o módulos al mismo tiempo.
+2. **Espaciado mínimo (`#esperarTurnoPeticion`)**: mide el tiempo transcurrido desde `#ultimaPeticionMs`; si es menor a `#intervaloMinimoMs` (`1100 ms` por defecto al usar `fetch` real, `0 ms` en tests con `mockFetch`), espera la diferencia antes de disparar la llamada.
+3. **Bloque `try` y reintentos de red**:
+   - Dentro del `try` ejecuta `await this.#fetchFn(url, { headers: { accept: "application/json", "User-Agent": "curl/7.88.1" } })`.
+   - Si falla la red o hay un error de conexión, entra al `catch`: si quedan intentos, espera `400 * (intento + 1)` ms y reintenta (`continue`); si era el último intento, lanza el error.
+4. **Manejo de límite de peticiones (`HTTP 429`)**:
+   - Lee la cabecera `Retry-After`.
+   - Si la espera solicitada es corta (`<= 5` segundos) y quedan reintentos, aguarda `(segundos + 1) * 1000` ms y reintenta.
+   - Si es un castigo largo (por ejemplo `120` segundos en la clave gratuita `123`) o se agotaron los intentos, lanza un `Error` descriptivo (`"Límite de peticiones de la API alcanzado. Reintenta en X segundos."`).
+5. **Validación HTTP y retorno**: si `!respuesta.ok`, lanza `Falla de la API: <status>`. Si todo salió bien, **retorna una `Promise` que resuelve con el objeto `Response` de `fetch`** listo para hacer `await respuesta.json()`.
 
-| Archivo | Responsabilidad principal | Qué contiene y por qué existe |
-| :--- | :--- | :--- |
-| **`Posicion.js`** | Modelo de una fila en la tabla de posiciones | Encapsula `#idEquipo`, `#nombreEquipo`, `#escudoEquipo`, `#idLiga`, `#posicion`, `#partidosJugados`, `#victorias`, `#derrotas`, `#empates`, `#golesFavor`, `#golesContra`, `#diferenciaGol`, `#puntos` y `#racha`. Expone getters, setters editables y `toJSON()`. |
-| **`Liga.js`** | Modelo de una competición | Encapsula `#id`, `#nombre`, `#pais`, `#escudo`, `#temporada` y `#tabla` (array de instancias `Posicion`). Al devolver `tabla` retorna una copia (`[...this.#tabla]`) para proteger la integridad interna. |
-| **`Equipo.js`** | Modelo de un club de fútbol | Encapsula `#id`, `#nombre`, `#escudo`, `#estadio`, `#pais`, `#fundacion`, `#descripcion`, `#sitioWeb`, `#idLiga`, `#nombreLiga`, más propiedades derivadas para vista detalle (`#proximoPartido`, `#ultimoPartido`, `#posicion`, `#liga`). Soporta construcción por objeto o posicional. |
-| **`Partido.js`** | Modelo de un encuentro deportivo | Encapsula todos los datos de un evento (`#id`, `#idLiga`, equipos local/visitante con sus `#escudoEquipo*`, `#golesLocal`, `#golesVisitante`, `#fecha`, `#hora`, `#timestamp`, `#estado`, `#estadio`, `#descripcion`). Incluye getters calculados `esJugado`, `esProximo`, `fechaDate` (UTC) y el método `yaPasoFecha(referencia)`. |
-| **`formatos.js`** | Capa de adaptación / *mapper* API <-> Dominio | Funciones puras: `formatearLigaAPI`, `formatearTablaAPI`, `formatearPartidoAPI`, `formatearEquipoAPI` (traducen claves crudas de TheSportsDB como `strHomeTeam`, `intHomeScore`, `strBadge` a nuestras entidades) y `exponerLiga`, `exponerPartido`, `exponerEquipo` (convierten entidades en objetos planos JSON listos para API/disco). |
-| **`RepositorioLigas.js`** | Colección en memoria de ligas | Administra `#ligas`. Permite `cargarLigas`, `agregarLiga` (haciendo *merge* si ya existe y conservando tabla si no viene vacía), `buscarLiga` (por ID, nombre normalizado sin tildes/espacios o alias como `"premier"`, `"laliga"`) y `listarLigas`. |
-| **`RepositorioPartidos.js`** | Colección en memoria de partidos | Administra `#partidos`. Provee `agregarPartido`/`agregarPartidos` (upsert por `id`), `eliminarPartido`, `obtenerPorId`, `obtenerPorLiga`, `obtenerProximos` (orden ascendente por fecha), `obtenerJugados` (orden descendente) y `obtenerEventosDeLiga`. |
-| **`RepositorioEquipos.js`** | Colección y agregador de detalle de clubes | Administra `#equipos`. Además de `agregarEquipo` (fusión sin perder datos existentes), `buscarEquipo`, `buscarCoincidencias` (búsqueda ordenada por exactitud/prefijo), implementa `obtenerDetalleCompleto(id, deps)`: busca el club (local o en API si falta), vincula su posición desde `RepositorioLigas`, y obtiene su próximo y último partido desde `RepositorioPartidos` o consultando a la API bajo demanda si faltan. |
-| **`ServicioFutbol.js`** | Cliente HTTP TheSportsDB + Gestor JSON | Centraliza toda comunicación externa y toda lectura/escritura en `data/*.json`. Implementa una **cola secuencial con espaciado mínimo (`1100 ms` en producción, `0 ms` en tests)** y reintentos para `429 Too Many Requests` (`fetchSeguro`), métodos de consulta (`buscarTablaDeLiga`, `buscarProximosEventosLiga` + `eventsround.php`, `buscarEventoPorId`, `buscarEquipoPorId`, `buscarEquiposPorNombre`, `buscarProximosEventosEquipo`, `buscarUltimosEventosEquipo`), resolución local de escudos y métodos específicos de lectura/sobrescritura/anexo para los 4 JSON de fútbol. |
+### 3.3 Mapa completo de endpoints TheSportsDB, archivos intervinientes y caché
 
----
-
-### 3.3 Capa de Rutas API REST (`src/js/Routes/`)
-
-| Archivo | Endpoints expuestos | Qué hace cada ruta |
-| :--- | :--- | :--- |
-| **`ligas.routes.js`** | `GET /api/ligas`<br>`GET /api/ligas/:id`<br>`GET /api/ligas/:id/partidos` | Lista las 5 ligas guardadas; en `/:id` devuelve la liga y, si su tabla aún está vacía, consulta `buscarTablaDeLiga()` en TheSportsDB y guarda la tabla en `data/ligas.json`; en `/:id/partidos` retorna `{ proximos, jugados }` de esa competición. |
-| **`partidos.routes.js`** | `GET /api/partidos`<br>`GET /api/partidos/proximos`<br>`GET /api/partidos/jugados`<br>`GET /api/partidos/:id` | Filtra partidos en memoria por `tipo` (`proximos`/`jugados`), `limite` y `liga`, o retorna el detalle completo de un partido específico por `id`. |
-| **`equipos.routes.js`** | `GET /api/equipos`<br>`GET /api/equipos/buscar?q=`<br>`GET /api/equipos/:id`<br>`GET /api/equipos/:id/partidos` | Lista equipos locales; `/buscar` busca primero en `equipos.json`, luego en tablas cargadas de ligas, y solo si no hay resultados locales (y `q.length >= 3`) consulta `searchteams.php` filtrando `Soccer`; `/:id` entrega ficha completa (posición + próximo + último partido); `/:id/partidos` lista calendarios del club consultando `eventsnext`/`eventslast` bajo demanda si falta alguna de las dos listas. |
-
----
-
-### 3.4 Capa de Usuarios y Autenticación (`src/js/usuarios/`)
-
-| Archivo | Responsabilidad principal | Qué contiene y por qué existe |
-| :--- | :--- | :--- |
-| **`users.js`** | Almacén persistente y seguro de usuarios | Gestiona `data/users.json`. Valida registro (`validateRegistration`), deriva contraseñas con `crypto.scrypt` + *salt* aleatorio de 16 bytes, verifica con `timingSafeEqual` (previene ataques de tiempo) y serializa escrituras atómicas (`tmp` + `rename`). |
-| **`auth.js`** | Script cliente de autenticación | Servido por Express en `GET /auth.js`. Construye el `<dialog>` modal de login/registro, valida campos del lado cliente, consulta `/api/me` al cargar, y llama a `/api/login`, `/api/register` y `/api/logout`. |
-| **`Usuario.js`** y **`RepositorioUsuarios.js`** | Modelos POO base iniciales de usuario | Clases simples originales de usuario en memoria (`id`, `username`, `email`, `password`). El flujo activo de autenticación utiliza `users.js` por sus requisitos criptográficos y persistencia atómica. |
-
----
-
-### 3.5 Capa Frontend Modular (`public/js/main.js` y `src/js/cliente/`)
-
-| Archivo | Responsabilidad principal | Qué contiene y con quién colabora |
-| :--- | :--- | :--- |
-| **`public/js/main.js`** | Orquestador de arranque (único `.js` en `public/`) | Importa los controladores desde `/cliente/*` y activa los módulos correspondientes a la página abierta. |
-| **`src/js/cliente/api.js`** | Caché HTTP de ligas en el navegador | `obtenerLigasCompartidas()` consulta `/api/ligas` una sola vez por carga de página (compartiendo la misma promesa entre módulos) y `obtenerEscudoLiga(idLiga)` devuelve la URL del escudo desde el mapa cacheado. |
-| **`src/js/cliente/fechas.js`** | Formateo de fechas, horas e iniciales | Contiene funciones puras: `fechaAValorEntrada`, `formatearFechaPartido` (formato corto `"Sáb, 21 nov"`), `formatearFechaLarga` (para modal), `formatearHora` y `inicialesEquipo` (fallback visual si un escudo falla). |
-| **`src/js/cliente/modalPartido.js`** | Modal `<dialog>` de detalle de partido | Crea dinámicamente `<dialog id="modalDetallePartido">`, renderiza competición, escudos, enlaces a equipos, marcador/hora, estadio, fecha y descripción (`abrirModalPartido`). Expone `vincularAperturaModalPartido()` que abre el modal al clickear la tarjeta **excepto** si el usuario clickeó un `<a>` o `<button>` interno (preservando enlaces a equipos). Si falta estadio o descripción, consulta `/api/partidos/:id` en segundo plano. |
-| **`src/js/cliente/buscadorEquipos.js`** | Buscador de equipos de la barra superior | Hidrata `[data-buscador-equipos]` en todas las páginas. Aplica *debounce* (`260 ms`), cancela peticiones previas con `AbortController`, llama a `/api/equipos/buscar?q=...`, muestra dropdown `role="listbox"` con escudos y soporta navegación por teclado (`ArrowUp`, `ArrowDown`, `Enter`, `Escape`). |
-| **`src/js/cliente/tarjetasPartido.js`** | Constructores reutilizables de tarjetas de partidos | Crea `crearElementoPartidoInicio` (tarjetas compactas del panel inicio) y `crearElementoPartidoLiga` (filas detalladas para `liga.html` y barras laterales de `equipo.html`), vinculando cada una con `modalPartido.js`. |
-| **`src/js/cliente/controlesGenerales.js`** | Controles interactivos compartidos | Inicializa el año en footer (`#anioActual`), selector/navegación de fechas (`#fechaPartido`), botones de filtro por categoría (`[data-filtro]`) y favoritos persistidos en `localStorage` (`[data-favorito]`). |
-| **`src/js/cliente/paginaInicio.js`** | Controlador de `index.html` | Pide ligas y los 15 próximos partidos (`/api/partidos/proximos?limite=15`), los agrupa ordenadamente en bloques por competencia (`agruparPartidosPorCompetencia`) con encabezado de liga y renderiza también los últimos 6 resultados (`/api/partidos/jugados?limite=6`). |
-| **`src/js/cliente/paginaLigas.js`** | Controlador de `ligas.html` | Vincula las 6 tarjetas estáticas de ligas con los datos de `/api/ligas` y carga las tablas resumidas **bajo demanda** cuando el usuario despliega `<details class="tabla-liga">` llamando a `/api/ligas/:id`. |
-| **`src/js/cliente/paginaLiga.js`** | Controlador de `liga.html` | Lee `?id=` de la URL, llama a `/api/ligas/:id`, renderiza encabezado + tabla completa de posiciones (con botón de reintento si la API limita la petición) y carga `/api/ligas/:id/partidos`. |
-| **`src/js/cliente/paginaEquipo.js`** | Controlador de `equipo.html` | Lee `?id=`, pide `/api/equipos/:id` y `/api/equipos/:id/partidos`, muestra encabezado del club, su puesto en liga, las tarjetas destacadas de **Próximo partido** y **Último partido jugado** (ambas clickeables para abrir el modal manteniendo el enlace al rival), datos institucionales y listas laterales. |
-
----
-
-## 4. Traza completa: API externa → Transformación → Visualización en página
-
-A continuación se detalla el camino exacto de los datos en los 4 escenarios principales de uso.
-
-### Traza A: Arranque del servidor e Inicio (`index.html`) — Próximos partidos agrupados por liga
-
-1. **Arranque (`src/js/server.js` → `inicializarLigas`)**:
-   - Carga `data/ligas.json` con `servicioFutbol.cargarLigasLocal()` → crea instancias `Liga` con `tabla: []` en `RepositorioLigas`. **(0 peticiones a la API para ligas o tablas)**.
-   - Carga `data/equipos.json` → `RepositorioEquipos` y `data/partidos_jugados.json` → `RepositorioPartidos`.
-   - Carga `data/proximos_partidos.json` con `cargarProximosPartidosLocal()` (instancias `Partido` creadas por `formatearPartidoAPI`).
-   - Recorre cada próximo partido y ejecuta `partido.yaPasoFecha(ahora)`:
-     - Si ya venció, llama a `servicioFutbol.buscarEventoPorId(partido.id)` (`lookupevent.php?id=...`), resuelve sus escudos (`asegurarEscudosPartido`), lo anexa a `data/partidos_jugados.json` y lo elimina de la lista de próximos vigentes.
-   - Agrupa los vigentes por liga (`4328, 4331, 4332, 4335, 4334`). Para cualquier liga con menos de `3` partidos (`CUPOS_POR_LIGA = 3`), llama a `servicioFutbol.buscarProximosEventosLiga(idLiga)` (`eventsnextleague.php`, y `eventsround.php` si la API gratuita devuelve menos de 3 eventos).
-   - Para los partidos nuevos, `asegurarEscudosPartido` busca el escudo en caché local (`equipos.json` / tablas); si falta un club, llama a `lookupteam.php` o `searchteams.php` **una sola vez**, lo guarda en `equipos.json` y asigna el escudo al partido.
-   - Si hubo cambios en los próximos, sobrescribe `data/proximos_partidos.json` con exactamente los 15 partidos (3 por liga).
-2. **Petición del navegador (`index.html`)**:
-   - El HTML carga `<script type="module" src="js/main.js"></script>`.
-   - `main.js` detecta `pagina === "index"` e invoca `inicializarInicio()` (`src/js/cliente/paginaInicio.js`).
-   - `paginaInicio.js` pide en paralelo `/api/ligas` (vía `cliente/api.js`) y `/api/partidos/proximos?limite=15` + `/api/partidos/jugados?limite=6` (atendidos por `partidos.routes.js` → `RepositorioPartidos` → `exponerPartido()`).
-3. **Transformación y pintado en pantalla**:
-   - `paginaInicio.js` ejecuta `agruparPartidosPorCompetencia(proximos, ligasDisponibles)` ordenando bloques según el orden de las 5 ligas.
-   - Por cada bloque crea `<section class="grupo-liga-partidos">` con su `<header class="cabecera-grupo-liga">` (escudo de liga, enlace a `liga.html?id=...` y contador de partidos).
-   - Dentro de cada bloque llama a `crearElementoPartidoInicio()` (`src/js/cliente/tarjetasPartido.js`), que construye los enlaces `<a href="equipo.html?id=...">` con escudos y vincula el rectángulo con `vincularAperturaModalPartido()` (`src/js/cliente/modalPartido.js`).
-
-### Traza B: Carga bajo demanda de tabla de posiciones (`liga.html?id=4328`)
-
-1. Al abrir `liga.html?id=4328`, `main.js` ejecuta `inicializarLiga()` (`src/js/cliente/paginaLiga.js`).
-2. `paginaLiga.js` solicita `GET /api/ligas/4328`.
-3. `src/js/Routes/ligas.routes.js` busca la liga en `RepositorioLigas`. Al detectar `liga.tabla.length === 0`:
-   - Llama a `servicioFutbol.buscarTablaDeLiga("4328", { lanzarError: true, temporada })` → petición espaciada (`fetchSeguro`) a `lookuptable.php?l=4328`.
-   - `formatearTablaAPI()` transforma los objetos crudos (`intRank`, `strTeam`, `strBadge`, `intPoints`...) en un arreglo de instancias `Posicion`.
-   - Asigna `liga.tabla = tabla` y persiste en disco llamando `servicioFutbol.guardarLigasLocal(repositorio.ligas)` sobre `data/ligas.json`.
-   - Visitas posteriores ya leen la tabla en memoria/JSON con **0 peticiones externas**.
-4. `paginaLiga.js` recibe el JSON devuelto por `exponerLiga(liga)`, dibuja la tabla fila por fila (`agregarPosicionATabla`) con enlaces a `equipo.html?id=...`, y dispara `GET /api/ligas/4328/partidos` para llenar los paneles laterales (también interactivos con el modal).
-
-### Traza C: Ficha completa de un equipo y buscador (`buscadorEquipos.js` + `equipo.html`)
-
-1. **Búsqueda en barra superior (`src/js/cliente/buscadorEquipos.js`)**:
-   - Al escribir ≥ 2 caracteres, espera `260 ms` y solicita `GET /api/equipos/buscar?q=...`.
-   - `src/js/Routes/equipos.routes.js` busca:
-     1. En `RepositorioEquipos.buscarCoincidencias()` (datos en `equipos.json`).
-     2. En tablas ya cargadas dentro de `RepositorioLigas` (anexando coincidencias al repo).
-     3. Solo si no encontró nada local y `q.length >= 3`, llama a `servicioFutbol.buscarEquiposPorNombre(q)` (`searchteams.php?t=...`), filtra únicamente `strSport === "Soccer"` y anexa los resultados a `data/equipos.json`.
-   - `buscadorEquipos.js` pinta el desplegable con escudos, liga y país; al hacer clic o presionar `Enter`, navega a `equipo.html?id=...`.
-2. **Carga de ficha (`src/js/cliente/paginaEquipo.js` → `GET /api/equipos/:id`)**:
-   - `RepositorioEquipos.obtenerDetalleCompleto()` revisa si el equipo está en memoria (`equipos.json`). Si no está, consulta `lookupteam.php?id=...` y lo anexa a `data/equipos.json`.
-   - Busca al club dentro de las tablas de `RepositorioLigas` para adjuntar su objeto `posicion` y su `liga`.
-   - Busca sus partidos en `RepositorioPartidos`:
-     - Si falta su próximo partido (`proximos.length === 0`), llama a `eventsnext.php?id=...`, resuelve escudos locales y lo agrega a `RepositorioPartidos`.
-     - Si falta su último partido (`jugados.length === 0`), llama a `eventslast.php?id=...`, resuelve escudos locales, lo agrega a `RepositorioPartidos` y lo **anexa a `data/partidos_jugados.json`**.
-   - `paginaEquipo.js` muestra posición en la tabla, las tarjetas destacadas **Próximo partido** y **Último partido jugado** (vinculadas al `<dialog>` de `modalPartido.js` preservando el enlace al rival), información institucional y listas laterales (`/api/equipos/:id/partidos`).
-
-### Traza D: Apertura del modal de detalle de partido (`modalPartido.js`)
-
-1. Al hacer clic dentro de cualquier tarjeta vinculada (`.partido-resumen-interactivo`, `.partido-lista-interactivo`, `.partido-destacado-interactivo`):
-   - `modalPartido.js` comprueba primero `if (event.target.closest("a, button, input, select, textarea")) return;`. Si el clic fue sobre el nombre/escudo de un equipo (`<a>`), deja que el navegador vaya a `equipo.html?id=...`.
-   - Si fue en el resto del rectángulo, construye/actualiza `<dialog id="modalDetallePartido">`, muestra escudo de liga, equipos con enlaces, marcador/horario, fecha larga, estadio, estado y descripción, y abre el modal nativo con `dialogo.showModal()`.
-   - Si al objeto partido le faltaba `estadio` o `descripcion`, consulta en segundo plano `GET /api/partidos/:id` y re-renderiza el contenido si llegaron nuevos datos.
-
----
-
-## 5. Traza de persistencia sobre archivos `.json` (Sobrescritura vs. Solo-Anexar)
-
-El directorio `data/` alberga 5 archivos JSON, cada uno con una política de escritura diseñada para minimizar peticiones a la API sin perder información histórica:
-
-| Archivo JSON | Política de escritura | Métodos responsables (`Archivo`) | Cuándo y cómo se escribe |
+| Endpoint TheSportsDB | Servicio / Método que lo llama | Quién dispara la llamada | Política de caché y persistencia |
 | :--- | :--- | :--- | :--- |
-| **`data/proximos_partidos.json`** | **Sobrescritura controlada** | `sobrescribirProximosPartidosLocal()` (`ServicioFutbol.js`) | Se llama en `inicializarLigas()` (`src/js/server.js`) **solo si hubo cambios** (partidos que vencieron por fecha y salieron de próximos, o cupos faltantes repuestos hasta completar 15 equitativos). Reemplaza todo el archivo con la lista vigente de los 15 próximos partidos serializados con `exponerPartido()`. |
-| **`data/partidos_jugados.json`** | **Solo anexar (*Append-only*)** | `anexarPartidosJugadosLocal()` (`ServicioFutbol.js`) | **Nunca borra registros existentes.** Lee el arreglo actual en disco, construye un `Set` con los `id` ya almacenados, agrega únicamente los partidos nuevos cuyo `id` no exista y vuelve a escribir el arreglo completo ampliado. Se ejecuta: <br>1. Al arrancar el servidor cuando un próximo partido ya pasó de fecha y se consulta su resultado en `lookupevent.php`. <br>2. Bajo demanda al entrar a un equipo (`GET /api/equipos/:id` o `/partidos`) si no tenía partidos jugados previos y se consulta `eventslast.php`. |
-| **`data/equipos.json`** | **Solo anexar (*Append-only*)** | `anexarEquipoLocal()` / `anexarEquiposLocal()` (`ServicioFutbol.js`) | **Nunca borra equipos existentes.** Lee `data/equipos.json`, indexa los `id` y nombres normalizados existentes, descarta duplicados, extrae un objeto base limpio (`id, nombre, escudo, estadio, pais, fundacion, descripcion, sitioWeb, idLiga, nombreLiga` — omitiendo campos dinámicos como `posicion` o `proximoPartido`) y lo añade al final. Se ejecuta: <br>1. Al resolver escudos faltantes de partidos nuevos (`asegurarEscudosPartido`). <br>2. Al abrir un equipo no cacheado (`lookupteam.php` / `searchteams.php`). <br>3. Al buscar en el buscador un equipo remoto de fútbol (`GET /api/equipos/buscar`). |
-| **`data/ligas.json`** | **Inicialización + actualización de tabla bajo demanda** | `cargarLigasLocal()` y `guardarLigasLocal()` (`ServicioFutbol.js`) | Si no existe el archivo, guarda las 5 ligas base (`LIGAS_PRINCIPALES_DEFAULT` con `tabla: []`). Luego, cuando un usuario entra a `GET /api/ligas/:id` y esa liga tiene `tabla: []`, consulta `lookuptable.php`, asigna las instancias `Posicion` y ejecuta `guardarLigasLocal(repositorio.ligas)` para persistir la tabla junto a las ligas ya guardadas. |
-| **`data/users.json`** | **Escritura atómica en cola** | `persist()` y `serializeWrite()` (`src/js/usuarios/users.js`) | Cada registro se encola en `writeQueue` para evitar condiciones de carrera. Escribe en un archivo temporal (`users.json.<uuid>.tmp`) con permisos restringidos `0o600` y realiza `fs.rename()` atómico sobre `users.json`. |
+| `eventsnextleague.php?id=<liga>` | `ServicioPartidos.buscarProximosEventosLiga` | `sincronizarDatosApi` (`src/js/server.js`) al iniciar | Obtiene próximos eventos de cada liga principal. Se acumulan en `data/proximos_partidos.json` sumando hasta `1` nuevo por liga en cada arranque. |
+| `eventsround.php?id=<liga>&r=<ronda>&s=<temp>` | `ServicioPartidos.buscarProximosEventosLiga` | Respaldo automático dentro del mismo método | Como la clave demo `123` suele devolver solo 1 evento en `eventsnextleague.php`, si ese único evento ya estaba guardado se consultan rondas consecutivas para hallar partidos nuevos sin repetir. |
+| `lookupevent.php?id=<evento>` | `ServicioPartidos.buscarEventoPorId` | `sincronizarDatosApi` (`src/js/server.js`) | Se llama únicamente cuando un partido guardado en `proximos_partidos.json` ya superó su fecha/hora (`yaPasoFecha`). Su resultado oficial se anexa a `data/partidos_jugados.json`. |
+| `lookuptable.php?l=<liga>(&s=<temp>)` | `ServicioLigas.buscarTablaDeLiga` | `GET /api/ligas/:id` (`ligas.routes.js`) | **Bajo demanda**: solo la primera vez que un usuario abre una liga cuya `tabla` está vacía. Luego se persiste en `data/ligas.json` y futuras visitas no llaman a la API. |
+| `lookupteam.php?id=<equipo>` | `ServicioEquipos.buscarEquipoPorId` | `asegurarEscudosPartido` (`server.js`) o `GET /api/equipos/:id` (`RepositorioEquipos.obtenerDetalleCompleto`) | Solo si el equipo no existe en `data/equipos.json`. Una vez obtenido, se anexa con `anexarEquipoLocal` y queda cacheado. |
+| `searchteams.php?t=<nombre>` | `ServicioEquipos.buscarEquiposPorNombre` | `GET /api/equipos/buscar?q=` (`equipos.routes.js`) o `buscarEquipoPorNombre` | Solo cuando `q.length >= 3` y no hubo coincidencias en `equipos.json` ni en tablas cargadas. Filtra únicamente fútbol (`strSport === "Soccer"`) y anexa a `data/equipos.json`. |
+| `eventsnext.php?id=<equipo>` | `ServicioPartidos.buscarProximosEventosEquipo` | `GET /api/equipos/:id` (`RepositorioEquipos`) y `GET /api/equipos/:id/partidos` (`equipos.routes.js`) | Si al abrir un club no hay próximos partidos suyos en memoria, consulta la API, completa escudos locales, actualiza `RepositorioPartidos` y **anexa todos los nuevos vigentes (incluso de otras copas) a `data/proximos_partidos.json`**. |
+| `eventslast.php?id=<equipo>` | `ServicioPartidos.buscarUltimosEventosEquipo` | `GET /api/equipos/:id` (`RepositorioEquipos`) y `GET /api/equipos/:id/partidos` (`equipos.routes.js`) | Si al abrir un club no hay resultados recientes suyos en memoria, consulta la API y **anexa** los resultados a `data/partidos_jugados.json`. |
 
-### Flujo interno de escritura segura en `ServicioFutbol.#escribirJson()`
-Todas las operaciones de escritura sobre los JSON deportivos pasan por el método privado `#escribirJson(ruta, datos)` en `src/js/Futbol/ServicioFutbol.js`:
-1. Verifica que la carpeta destino exista (`fs.existsSync(dir)` → `fs.mkdirSync(dir, { recursive: true })`).
-2. Serializa los datos formateados con `JSON.stringify(datos, null, 2)` en codificación `utf-8`.
-3. Captura posibles errores de E/S en un `try/catch` para evitar que un fallo puntual de disco derribe el servidor HTTP.
+> **Nota sobre límites de tasa (`HTTP 429`) con la clave gratuita `123`:**
+> La clave pública demo de TheSportsDB permite alrededor de ~30 peticiones por minuto y responde con bloqueos temporales (`Retry-After: 120`) cuando se excede ese cupo (por ejemplo, tras varios reinicios seguidos donde `eventsnextleague.php` devuelve un partido ya cacheado y dispara búsquedas por ronda `eventsround.php`, o cuando vencen varios partidos al mismo tiempo).
+
+---
+
+## 4. Cómo modelamos el resultado final (Transformación → Dominio → Interfaz)
+
+Desde que llega un JSON crudo de TheSportsDB hasta que el usuario ve una tarjeta o tabla en pantalla, los datos atraviesan 5 etapas bien definidas:
+
+### Etapa 1: Adaptación / Mapeo de entrada (`src/js/Futbol/formatos.js`)
+TheSportsDB usa nombres en inglés con prefijos (`idEvent`, `strHomeTeam`, `intHomeScore`, `strBadge`, `intRank`, `strCountry`). Las funciones de `formatos.js` traducen esa estructura externa al lenguaje del dominio en español y retornan instancias de nuestras clases:
+- `formatearLigaAPI(datos)` → objeto normalizado de liga (`id`, `nombre`, `temporada`, `pais`, `escudo`).
+- `formatearTablaAPI(tablaCruda)` → arreglo de instancias `Posicion`.
+- `formatearPartidoAPI(datos)` → instancia `Partido` (lee indistintamente claves crudas `idEvent` o claves locales `id`, por lo que sirve tanto para API, JSON en disco o entidades ya creadas).
+- `formatearEquipoAPI(datos)` → instancia `Equipo` (soporta `idTeam`/`id`, `strCountry || strLocation || pais`, descripción en español o inglés).
+
+### Etapa 2: Modelado de entidades encapsuladas y polimorfismo (`Posicion.js`, `Liga.js`, `Partido.js`, `Equipo.js`)
+- Todas las clases almacenan su estado en **campos privados `#`** y exponen acceso controlado por getters y setters.
+- **`Partido`** calcula comportamiento de negocio sin duplicar lógica fuera de la clase:
+  - `esJugado`: `true` si `estado === "FT"` o si existen ambos marcadores (`golesLocal` y `golesVisitante`).
+  - `esProximo`: inverso de `esJugado`.
+  - `fechaDate`: interpreta fechas/timestamps en UTC.
+  - `yaPasoFecha(referencia)`: compara si la fecha del partido ya quedó atrás respecto a `referencia`.
+- **`Liga`** normaliza su `#tabla` asegurando que cada elemento sea una instancia `Posicion`.
+- **`Equipo`** normaliza `#proximoPartido` y `#ultimoPartido` como instancias `Partido` al asignarse.
+- Todas implementan **`toJSON()`**: esto permite que `exponerLiga`, `exponerPartido` y `exponerEquipo` serialicen cualquier entidad o estructura normalizada mediante **polimorfismo** y construcción uniforme (`new Partido(p).toJSON()`, `new Equipo(e).toJSON()`, `new Liga(...).toJSON()`), evitando depender de comprobaciones de tipo como `instanceof` o `typeof` para decidir cómo serializar.
+
+### Etapa 3: Agregación en repositorios en memoria
+- **`RepositorioLigas`**: indexa ligas y ofrece búsqueda tolerante a tildes, mayúsculas y alias (`"premier"`, `"laliga"`, `"bundesliga"`, `"seriea"`, `"ligue"`).
+- **`RepositorioPartidos`**: mantiene la colección unificada de próximos y jugados, evita duplicados por `id` mediante upsert en `agregarPartido`, ordena próximos de forma ascendente (el más cercano primero) y jugados de forma descendente (el más reciente primero), y filtra por competición y límite.
+- **`RepositorioEquipos`**: fusiona datos parciales del mismo club sin pisar campos ya cargados (`agregarEquipo`), resuelve autocompletado ordenado por coincidencia exacta/prefijo (`buscarCoincidencias`) y construye en `obtenerDetalleCompleto()` un objeto compuesto que une: datos base del club + `liga` + `posicion` en tabla + `proximoPartido` + `ultimoPartido`.
+
+### Etapa 4: Exposición REST (`/api/*`)
+Los routers (`ligas.routes.js`, `partidos.routes.js`, `equipos.routes.js`) devuelven exclusivamente JSON limpio ya serializado en español:
+- `GET /api/partidos/proximos?limite=0` (o `todos=true`) entrega todos los próximos partidos acumulados ordenados cronológicamente.
+- `GET /api/equipos/:id` entrega la ficha unificada del club.
+- `GET /api/ligas/:id` entrega metadata y tabla de posiciones completa.
+
+### Etapa 5: Renderizado seguro en el cliente (`src/js/cliente/*`)
+- **`paginaInicio.js`**: agrupa los próximos partidos por competición (`agruparPartidosPorCompetencia`), renderiza el encabezado de cada liga, oculta inicialmente los partidos que exceden `PARTIDOS_VISIBLES_POR_LIGA_INICIO = 3` (`tarjeta.hidden = true`) y agrega el botón **`Mostrar más (+N)` / `Mostrar menos`** en cada bloque que supere 3 partidos.
+- **`tarjetasPartido.js`** y **`modalPartido.js`**: generan las tarjetas con enlaces a `equipo.html?id=...` y vinculan el clic del contenedor para abrir `<dialog id="modalDetallePartido">` (completando en segundo plano desde `GET /api/partidos/:id` si faltan `estadio` o `descripcion`).
+- Todo el HTML dinámico del cliente se construye con `document.createElement`, `textContent` y `replaceChildren`, eliminando `innerHTML` y previniendo XSS.
+
+---
+
+## 5. Catálogo completo de archivos JavaScript en `src/` y `public/`
+
+### 5.1 Arranque y Express
+| Archivo | Responsabilidad principal |
+| :--- | :--- |
+| **`server.js`** *(raíz)* | Lanzador raíz que invoca `startServer()` cuando se ejecuta con `node server.js`. |
+| **`src/js/server.js`** | Carga inmediata desde JSON (`cargarDatosLocales`), sincronización incremental en segundo plano (`sincronizarDatosApi`), resolución de puerto seguro (`resolverPuertoServidor`) e inicio de Express (`startServer`). |
+| **`src/js/app.js`** | Fábrica `createApp`: middlewares de parseo y sesión en memoria (`Orsai.sid`), autenticación REST, montaje de routers `/api/*`, estáticos seguros (`/auth.js`, `/cliente`, `public/`) y manejo global de error `500`. |
+
+### 5.2 Dominio, Servicios API y Persistencia (`src/js/Futbol/`)
+| Archivo | Responsabilidad principal |
+| :--- | :--- |
+| **`Posicion.js`** | Entidad de una fila en la tabla de posiciones (`#` + getters/setters + `toJSON`). |
+| **`Liga.js`** | Entidad de liga; normaliza `#tabla` como arreglo de `Posicion`. |
+| **`Equipo.js`** | Entidad de club; normaliza `#proximoPartido` y `#ultimoPartido` como `Partido` (admite objeto o constructor posicional). |
+| **`Partido.js`** | Entidad de encuentro con getters calculados (`esJugado`, `esProximo`, `fechaDate`) y `yaPasoFecha()`. |
+| **`formatos.js`** | Mappers `formatear*API` y normalizadores `exponerLiga`, `exponerPartido`, `exponerEquipo`. |
+| **`RepositorioLigas.js`** | Almacén y buscador en memoria de ligas. |
+| **`RepositorioPartidos.js`** | Almacén, filtro y ordenamiento en memoria de partidos próximos y jugados. |
+| **`RepositorioEquipos.js`** | Almacén, buscador y agregador de detalle completo de equipos (`obtenerDetalleCompleto`). |
+| **`ClienteApiFutbol.js`** | Cliente HTTP seguro (`fetchSeguro`, cola secuencial, espaciado mínimo, `429`), constructor de URLs y helpers de lectura/escritura JSON en disco. |
+| **`ServicioLigas.js`** | Persistencia local y consultas API de ligas y tablas. |
+| **`ServicioPartidos.js`** | Persistencia local (`sobrescribir` próximos / `anexar` próximos y jugados) y consultas API de partidos. |
+| **`ServicioEquipos.js`** | Persistencia `append-only` de equipos, resolución local de escudos y búsquedas por ID o nombre. |
+| **`ServicioFutbol.js`** | Fachada pública que delega en `ClienteApiFutbol`, `ServicioLigas`, `ServicioPartidos` y `ServicioEquipos`. |
+
+### 5.3 Rutas REST (`src/js/Routes/`) y Usuarios (`src/js/usuarios/`)
+| Archivo | Responsabilidad principal |
+| :--- | :--- |
+| **`ligas.routes.js`** | `GET /api/ligas`, `GET /api/ligas/:id` (carga tabla bajo demanda), `GET /api/ligas/:id/partidos`. |
+| **`partidos.routes.js`** | `GET /api/partidos`, `/proximos`, `/jugados` (soporta `limite=0` o `todos=true`) y `/:id`. |
+| **`equipos.routes.js`** | `GET /api/equipos`, `/buscar?q=`, `/:id` y `/:id/partidos` (persiste nuevos próximos y jugados descubiertos). |
+| **`users.js`** | Persistencia atómica en `data/users.json`, hashing con `crypto.scrypt` + *salt* y verificación con `timingSafeEqual`. |
+| **`auth.js`** | Modal cliente de login/registro servido en `/auth.js`, conectado a `/api/login`, `/api/register`, `/api/me` y `/api/logout`. |
+| **`Usuario.js` / `RepositorioUsuarios.js`** | Clases base iniciales de modelo de usuario en memoria. |
+
+### 5.4 Frontend Modular (`public/js/main.js` y `src/js/cliente/`)
+| Archivo | Responsabilidad principal |
+| :--- | :--- |
+| **`public/js/main.js`** | Único `.js` en `public/`. Inicializa buscadores, controles generales y el controlador de la vista actual según `document.body.dataset.pagina`. |
+| **`src/js/cliente/api.js`** | Caché compartida de `/api/ligas` durante la carga de página (`obtenerLigasCompartidas`, `obtenerEscudoLiga`). |
+| **`src/js/cliente/fechas.js`** | Utilidades de presentación en español: `fechaAValorEntrada` (`YYYY-MM-DD` para `<input type="date">`), `formatearFechaPartido` (`"Sáb, 21 nov"`), `formatearFechaLarga`, `formatearHora` (`HH:MM`) e `inicialesEquipo` (respaldo visual si falla un escudo). |
+| **`src/js/cliente/controlesGenerales.js`** | Controles transversales de UI: año actual en `#anioActual`, inicialización y desplazamiento `-1 / +1` día en `#fechaPartido` (emitiendo evento `change`), filtros `[data-filtro]` en filas `.fila-resultado` y botones de favoritos `[data-favorito]` guardados en `localStorage` (`Orsai-favorite-matches`). |
+| **`src/js/cliente/buscadorEquipos.js`** | Autocompletado accesible (`role="listbox"`) con *debounce* de `260 ms`, cancelación con `AbortController`, ícono vectorial `<svg>` y navegación por teclado (`ArrowUp`, `ArrowDown`, `Enter`, `Escape`). |
+| **`src/js/cliente/tarjetasPartido.js`** | Constructores reutilizables `crearElementoPartidoInicio` y `crearElementoPartidoLiga`. |
+| **`src/js/cliente/modalPartido.js`** | `<dialog id="modalDetallePartido">` con carga diferida de detalles completos y preservación de enlaces a clubes. |
+| **`src/js/cliente/paginaInicio.js`** | Controlador de `index.html`: tarjetas de ligas, bloques agrupados de próximos partidos colapsados a 3 con `Mostrar más (+N)` y últimos 6 resultados. |
+| **`src/js/cliente/paginaLigas.js`** | Controlador de `ligas.html`: carga bajo demanda de tablas resumidas al abrir `<details class="tabla-liga">`. |
+| **`src/js/cliente/paginaLiga.js`** | Controlador de `liga.html`: cabecera de liga, tabla completa de posiciones con reintento ante `429` y listados de partidos. |
+| **`src/js/cliente/paginaEquipo.js`** | Controlador de `equipo.html`: ficha del club, puesto en tabla, tarjetas destacadas de próximo y último partido, e historial lateral. |
+
+---
+
+## 6. Traza de persistencia sobre archivos `.json` (`data/`)
+
+| Archivo JSON | Política de escritura | Métodos responsables | Cuándo y cómo se escribe |
+| :--- | :--- | :--- | :--- |
+| **`data/proximos_partidos.json`** | **Acumulativa + limpieza de vencidos** | `sobrescribirProximosPartidosLocal()` y `anexarProximosPartidosLocal()` (`ServicioPartidos.js`) | En cada inicio (`sincronizarDatosApi`), limpia partidos ya vencidos (pasándolos a `partidos_jugados.json`), conserva todos los vigentes (incluidos de otras copas) y suma 1 nuevo por cada una de las 5 ligas principales. Al visitar un equipo (`equipos.routes.js` / `RepositorioEquipos.js`), anexa todos los próximos descubiertos evitando duplicados con un `Set` y reordenando por fecha. |
+| **`data/partidos_jugados.json`** | **Solo anexar (*Append-only*)** | `anexarPartidosJugadosLocal()` (`ServicioPartidos.js`) | Nunca borra registros previos. Agrega nuevos partidos por `id` no repetido cuando vence un próximo partido en arranque o cuando se consulta `eventslast.php` al visitar un equipo. |
+| **`data/equipos.json`** | **Solo anexar (*Append-only*)** | `anexarEquipoLocal()` / `anexarEquiposLocal()` (`ServicioEquipos.js`) | Nunca borra clubes guardados. Deduplica por `id` y nombre normalizado, y guarda únicamente el registro limpio del club (sin campos dinámicos de vista). |
+| **`data/ligas.json`** | **Inicialización + tabla bajo demanda** | `cargarLigasLocal()` y `guardarLigasLocal()` (`ServicioLigas.js`) | Si no existe el archivo, siembra `LIGAS_PRINCIPALES_DEFAULT` con `tabla: []`. Al visitar `GET /api/ligas/:id` por primera vez, guarda la tabla obtenida de `lookuptable.php`. |
+| **`data/users.json`** | **Escritura atómica en cola** | `persist()` y `serializeWrite()` (`users.js`) | Encola escrituras en `writeQueue`, escribe un archivo temporal (`0o600`) y ejecuta `fs.rename()` atómico. |
+
+---
+
+## 7. Referencia de conceptos técnicos y decisiones de diseño
+
+### 7.1 Módulo `node:fs`, variable `fs` y `!fs.existsSync(ruta)` (`ClienteApiFutbol.js`)
+- **`node:fs`**: es el módulo nativo **File System** incluido en Node.js. El prefijo `node:` indica explícitamente que se importa un módulo interno de Node.js y no una dependencia externa de `node_modules`.
+- **`fs`**: es la referencia importada de ese módulo mediante la cual se invocan operaciones de archivo (`existsSync`, `readFileSync`, `writeFileSync`, `mkdirSync`).
+- **`!fs.existsSync(ruta)` en `leerJson(ruta, respaldo)`**: verifica de forma sincrónica si el archivo existe en disco (`false` si no existe, convertido en `true` por `!`). Si no existe, retorna inmediatamente `respaldo` (por ejemplo `[]` o `null`), evitando una excepción en `readFileSync`.
+- **Escritura segura (`escribirJson`)**: comprueba si el directorio existe (`!fs.existsSync(dir)` → `fs.mkdirSync(dir, { recursive: true })`), serializa con `JSON.stringify(datos, null, 2)` en `utf-8` y envuelve la operación en `try/catch` para no derribar el servidor ante fallos de disco.
+
+### 7.2 Qué son `eventsnextleague.php` y "ronda" (`eventsround.php`)
+- **`eventsnextleague.php`**: *endpoint* de TheSportsDB que recibe `?id=<idLiga>` y devuelve los próximos encuentros programados de esa liga bajo `cuerpo.events`. En el proyecto se usa dentro de `ServicioPartidos.buscarProximosEventosLiga`.
+- **Ronda (`intRound` / `jornada`)**: representa el número de **jornada o fecha** del torneo (por ejemplo, Jornada 14 de LaLiga). Como la clave gratuita `123` de `eventsnextleague.php` suele devolver un único partido, si ese partido ya estaba almacenado, `buscarProximosEventosLiga` toma su `jornada` y `temporada` y consulta `eventsround.php?id=<liga>&r=<ronda>&s=<temporada>` para descubrir partidos nuevos de esa jornada o las inmediatas posteriores.
+
+### 7.3 Qué significa "anexar", "serializar" y el uso de `new Set`
+- **Anexar (*Append*)**: agregar elementos nuevos al final de una colección o archivo JSON existente **sin borrar ni perder los registros previos**.
+- **Serializar**: transformar instancias encapsuladas con atributos privados (`#`) en objetos planos mediante `.toJSON()` (`exponer*`) y posteriormente en texto JSON con `JSON.stringify(datos, null, 2)` para enviar por HTTP o guardar en disco.
+- **`new Set` en `anexarProximosPartidosLocal`**: crea un conjunto de valores únicos con los `id` ya presentes en `proximos_partidos.json`. Permite comprobar en tiempo constante $O(1)$ si un partido nuevo ya existe (`idsExistentes.has(idStr)`), descartar duplicados tanto respecto del disco como dentro del mismo lote recibido (`idsExistentes.add(idStr)`), y filtrar además los ya jugados o vencidos antes de reordenar cronológicamente.
+
+### 7.4 Namespace `http://www.w3.org/2000/svg` en `buscadorEquipos.js`
+Al eliminar `innerHTML` y construir el ícono de la lupa de forma programática en `crearIconoLupa()`, no se puede usar `document.createElement("svg")` porque crearía un elemento HTML desconocido en lugar de un gráfico vectorial. `document.createElementNS("http://www.w3.org/2000/svg", "svg")` (y lo mismo para `<path>`) indica al DOM el espacio de nombres XML oficial de SVG estandarizado por el **W3C** para que el navegador dibuje el vector correctamente. No realiza ninguna petición de red: es únicamente una cadena identificadora estándar.
+
+### 7.5 Polimorfismo frente a `instanceof` y `typeof`
+Para respetar el encapsulamiento y el polimorfismo orientado a objetos, se evitaron comprobaciones de tipo (`instanceof`, helpers `es...` y `typeof` innecesarios) en la capa de dominio, servicios y rutas:
+- **Normalización uniforme en los límites**: los constructores de `Posicion`, `Liga`, `Partido`, `Equipo` y las funciones `formatearPartidoAPI` / `formatearEquipoAPI` aceptan tanto objetos planos como entidades ya instanciadas gracias a que comparten los mismos nombres de getters. En `ClienteApiFutbol`, `new URL(url)` admite cadenas e instancias `URL` de forma nativa.
+- **Polimorfismo por contrato (`.toJSON()`)**: como `Liga.#tabla` solo guarda instancias `Posicion` y `Equipo.#proximoPartido`/`#ultimoPartido` solo guardan instancias `Partido`, la serialización llama directamente a `.toJSON()` sin inspeccionar el tipo del objeto.
+- **Invocación opcional (`?.()`)**: en `RepositorioEquipos.js` y `equipos.routes.js` los métodos opcionales de persistencia/resolución sobre `servicioFutbol` se invocan mediante `servicioFutbol.metodo?.(...)`.
+- **Únicas excepciones justificadas donde sí permanece `typeof`**:
+  1. Validación de entradas externas de usuario provenientes de peticiones HTTP en `src/js/usuarios/users.js` (`string`).
+  2. Detección de sobrecarga en el constructor de `src/js/Futbol/Equipo.js` (admite un objeto de propiedades o argumentos posicionales).
+  3. Detección de soporte del método nativo `dialog.showModal` en el navegador dentro de `src/js/cliente/modalPartido.js`.

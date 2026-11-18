@@ -21,7 +21,7 @@ export class RepositorioEquipos {
 
   agregarEquipo(datos) {
     if (!datos) return null;
-    const obj = datos instanceof Equipo ? datos : new Equipo(datos);
+    const obj = new Equipo(datos);
     if (!obj.id && !obj.nombre) return null;
 
     const idStr = String(obj.id);
@@ -140,9 +140,7 @@ export class RepositorioEquipos {
         }
         if (equipo) {
           this.agregarEquipo(equipo);
-          if (typeof servicioFutbol.anexarEquipoLocal === "function") {
-            servicioFutbol.anexarEquipoLocal(equipo);
-          }
+          servicioFutbol.anexarEquipoLocal?.(equipo);
         }
       } catch (err) {
         console.warn(`Aviso al buscar equipo ${id} en API:`, err.message);
@@ -153,7 +151,7 @@ export class RepositorioEquipos {
       throw new Error(`El equipo '${id}' no existe`);
     }
 
-    const detalle = new Equipo(equipo.toJSON ? equipo.toJSON() : equipo);
+    const detalle = new Equipo(equipo);
 
     // 1. Vincular su posición y liga buscando en las tablas ya cargadas de las ligas
     if (repositorioLigas) {
@@ -266,9 +264,7 @@ export class RepositorioEquipos {
           if (Array.isArray(proxApi) && proxApi.length > 0) {
             completarEscudosLocales(proxApi);
             repositorioPartidos.agregarPartidos(proxApi);
-            if (typeof servicioFutbol.anexarProximosPartidosLocal === "function") {
-              servicioFutbol.anexarProximosPartidosLocal(proxApi);
-            }
+            servicioFutbol.anexarProximosPartidosLocal?.(proxApi);
           }
         } catch (err) {
           console.warn(`Aviso al buscar próximo partido del equipo ${idEq}:`, err.message);
@@ -281,9 +277,7 @@ export class RepositorioEquipos {
           if (Array.isArray(ultApi) && ultApi.length > 0) {
             completarEscudosLocales(ultApi);
             repositorioPartidos.agregarPartidos(ultApi);
-            if (typeof servicioFutbol.anexarPartidosJugadosLocal === "function") {
-              servicioFutbol.anexarPartidosJugadosLocal(ultApi);
-            }
+            servicioFutbol.anexarPartidosJugadosLocal?.(ultApi);
           }
         } catch (err) {
           console.warn(`Aviso al buscar último partido del equipo ${idEq}:`, err.message);

@@ -10,7 +10,7 @@ import {
 } from "./Futbol/ServicioFutbol.js";
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const NUEVOS_POR_LIGA_AL_INICIAR = 3; // En cada arranque se suman hasta 3 próximos partidos nuevos por cada liga principal
+const NUEVOS_POR_LIGA_AL_INICIAR = 1; // En cada arranque se suma hasta 1 próximo partido nuevo por cada liga principal (5 por inicio)
 
 async function asegurarEscudosPartido(
   partido,
@@ -63,7 +63,7 @@ async function asegurarEscudosPartido(
   return partido;
 }
 
-export async function inicializarLigas(
+export function cargarDatosLocales(
   servicioFutbol = new ServicioFutbol(),
   repositorioPartidos = new RepositorioPartidos(),
   repositorioEquipos = new RepositorioEquipos(),
@@ -79,11 +79,50 @@ export async function inicializarLigas(
   const equiposLocales = servicioFutbol.cargarEquiposLocal();
   repositorioEquipos.agregarEquipos(equiposLocales);
 
-  // 3. Cargar partidos jugados históricos desde data/partidos_jugados.json (solo anexar)
+  // 3. Cargar partidos jugados históricos desde data/partidos_jugados.json
   const jugadosLocales = servicioFutbol.cargarPartidosJugadosLocal();
   repositorioPartidos.agregarPartidos(jugadosLocales);
 
-  // 4. Cargar próximos partidos y verificar si ya pasaron su fecha
+  // 4. Precargar en memoria los próximos partidos vigentes para responder al instante
+  const proximosLocales = servicioFutbol.cargarProximosPartidosLocal();
+  const proximosVigentes = proximosLocales.filter(
+    (p) => !p.esJugado && !p.yaPasoFecha(fechaReferencia),
+  );
+  repositorioPartidos.agregarPartidos(proximosVigentes);
+
+  for (const p of repositorioPartidos.partidos) {
+    if (!p.escudoEquipoLocal) {
+      const esc = servicioFutbol.resolverEscudoEquipoLocal(
+        p.idEquipoLocal,
+        p.nombreEquipoLocal,
+        { repositorioEquipos, repositorioLigas },
+      );
+      if (esc) p.escudoEquipoLocal = esc;
+    }
+    if (!p.escudoEquipoVisitante) {
+      const esc = servicioFutbol.resolverEscudoEquipoLocal(
+        p.idEquipoVisitante,
+        p.nombreEquipoVisitante,
+        { repositorioEquipos, repositorioLigas },
+      );
+      if (esc) p.escudoEquipoVisitante = esc;
+    }
+  }
+
+  repositorioLigas.repositorioPartidos = repositorioPartidos;
+  repositorioLigas.repositorioEquipos = repositorioEquipos;
+  repositorioLigas.servicioFutbol = servicioFutbol;
+  return repositorioLigas;
+}
+
+export async function sincronizarDatosApi(
+  servicioFutbol,
+  repositorioLigas,
+  repositorioPartidos,
+  repositorioEquipos,
+  fechaReferencia = new Date(),
+) {
+  // 1. Cargar próximos partidos y verificar si ya pasaron su fecha
   const proximosLocales = servicioFutbol.cargarProximosPartidosLocal();
   const proximosVigentes = [];
   const nuevosJugados = [];
@@ -92,6 +131,7 @@ export async function inicializarLigas(
   for (const partido of proximosLocales) {
     if (partido.yaPasoFecha(fechaReferencia) || partido.esJugado) {
       huboCambiosProximos = true;
+      repositorioPartidos.eliminarPartido(partido.id);
       // Solicitar el partido jugado a la API y anexarlo a partidos_jugados.json
       const eventoActualizado = await servicioFutbol.buscarEventoPorId(
         partido.id,
@@ -118,8 +158,8 @@ export async function inicializarLigas(
     repositorioPartidos.agregarPartidos(nuevosJugados);
   }
 
-  // 5. Conservar todos los partidos vigentes (incluidas competiciones descubiertas desde equipos)
-  // y sumar hasta 3 próximos partidos nuevos por cada una de las 5 ligas principales
+  // 2. Conservar todos los partidos vigentes (incluidas competiciones descubiertas desde equipos)
+  // y sumar hasta 1 próximo partido nuevo por cada una de las 5 ligas principales (5 por inicio)
   const proximosAcumulados = [];
   const idsYaIncluidos = new Set();
 
@@ -210,10 +250,40 @@ export async function inicializarLigas(
     `Repositorio listo con ${repositorioLigas.listarLigas().length} ligas, ${repositorioEquipos.listarEquipos().length} equipos y ${repositorioPartidos.obtenerTodos().length} partidos.`,
   );
 
-  repositorioLigas.repositorioPartidos = repositorioPartidos;
-  repositorioLigas.repositorioEquipos = repositorioEquipos;
-  repositorioLigas.servicioFutbol = servicioFutbol;
   return repositorioLigas;
+}
+
+export async function inicializarLigas(
+  servicioFutbol = new ServicioFutbol(),
+  repositorioPartidos = new RepositorioPartidos(),
+  repositorioEquipos = new RepositorioEquipos(),
+  fechaReferencia = new Date(),
+) {
+  const repositorioLigas = cargarDatosLocales(
+    servicioFutbol,
+    repositorioPartidos,
+    repositorioEquipos,
+    fechaReferencia,
+  );
+  await sincronizarDatosApi(
+    servicioFutbol,
+    repositorioLigas,
+    repositorioPartidos,
+    repositorioEquipos,
+    fechaReferencia,
+  );
+  return repositorioLigas;
+}
+
+function resolverPuertoServidor() {
+  const puertoEnv = Number(process.env.PORT);
+  const puertoNginx = Number(process.env.NGINX_PORT);
+  const puertoDefaultApp = Number(process.env.DEFAULT_APP_PORT) || 3000;
+
+  if (puertoEnv && (!puertoNginx || puertoEnv !== puertoNginx)) {
+    return puertoEnv;
+  }
+  return puertoDefaultApp;
 }
 
 export async function startServer() {
@@ -221,7 +291,7 @@ export async function startServer() {
   const servicioFutbol = new ServicioFutbol();
   const repositorioPartidos = new RepositorioPartidos();
   const repositorioEquipos = new RepositorioEquipos();
-  const repositorioLigas = await inicializarLigas(
+  const repositorioLigas = cargarDatosLocales(
     servicioFutbol,
     repositorioPartidos,
     repositorioEquipos,
@@ -236,11 +306,22 @@ export async function startServer() {
     production: process.env.NODE_ENV === "production",
   });
 
-  const port = Number(process.env.PORT) || 3000;
+  const port = resolverPuertoServidor();
   const host = "localhost";
 
   const server = app.listen(port, host, () => {
-    console.log(`Servidor Ofsai disponible en http://${host}:${port}`);
+    console.log(`Servidor Orsai disponible en http://${host}:${port}`);
+    sincronizarDatosApi(
+      servicioFutbol,
+      repositorioLigas,
+      repositorioPartidos,
+      repositorioEquipos,
+    ).catch((error) => {
+      console.warn(
+        "Aviso al sincronizar partidos en segundo plano:",
+        error.message,
+      );
+    });
   });
 
   server.on("error", (error) => {

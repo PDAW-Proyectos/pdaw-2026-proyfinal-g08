@@ -14,7 +14,7 @@ export class RepositorioPartidos {
 
   agregarPartido(datos) {
     if (!datos || !datos.id) return null;
-    const partidoObj = datos instanceof Partido ? datos : new Partido(datos);
+    const partidoObj = new Partido(datos);
 
     const indice = this.#partidos.findIndex((p) => String(p.id) === String(partidoObj.id));
     if (indice !== -1) {

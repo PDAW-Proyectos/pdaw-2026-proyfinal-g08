@@ -81,6 +81,43 @@
               </div>
               <span class="etiqueta-jornada">Por jugar</span>
             </div>
+            <div class="barra-filtro-fecha" role="group" aria-label="Filtrar próximos partidos por fecha">
+              <div class="filtro-fecha-botones">
+                <button
+                  type="button"
+                  class="boton-filtro-fecha activo"
+                  data-filtro-fecha="todos"
+                  aria-pressed="true"
+                >
+                  Todos
+                </button>
+                <button
+                  type="button"
+                  class="boton-filtro-fecha"
+                  data-filtro-fecha="hoy"
+                  aria-pressed="false"
+                >
+                  Hoy
+                </button>
+                <button
+                  type="button"
+                  class="boton-filtro-fecha"
+                  data-filtro-fecha="manana"
+                  aria-pressed="false"
+                >
+                  Mañana
+                </button>
+              </div>
+              <div class="filtro-fecha-selector">
+                <label class="visually-hidden" for="filtroFechaInicio">Elegir fecha</label>
+                <input
+                  id="filtroFechaInicio"
+                  type="date"
+                  class="form-control form-control-sm control-fecha"
+                  aria-label="Filtrar próximos partidos por fecha del calendario"
+                />
+              </div>
+            </div>
             <div class="lista-partidos-inicio" id="contenedorPartidosProximos">
             </div>
           </section>
