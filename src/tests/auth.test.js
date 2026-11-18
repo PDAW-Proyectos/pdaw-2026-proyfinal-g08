@@ -101,6 +101,82 @@ test("el inicio requiere únicamente correo y contraseña y permite cerrar sesi�
   assert.equal(invalidLogin.status, 401);
 });
 
+test("inicializa un administrador privado y deja un solo rol de administrador", async () => {
+  const filePath = path.join(temporaryDirectory, "users-with-admin.json");
+  await fs.writeFile(
+    filePath,
+    JSON.stringify([
+      {
+        id: "admin-anterior",
+        name: "Admin anterior",
+        email: "anterior@ejemplo.com",
+        passwordHash: "hash",
+        salt: "salt",
+        role: "admin",
+      },
+    ]),
+  );
+  const initialAdmin = {
+    name: "Administradora de prueba",
+    email: "admin-prueba@ejemplo.com",
+    password: "admin-password-test",
+  };
+
+  const users = await createUserStore(filePath, { initialAdmin });
+  const savedUsers = JSON.parse(await fs.readFile(filePath, "utf8"));
+  const admin = await users.verify(initialAdmin.email, initialAdmin.password);
+
+  assert.equal(admin.name, initialAdmin.name);
+  assert.equal(admin.role, "admin");
+  assert.notEqual(admin.passwordHash, initialAdmin.password);
+  assert.equal(
+    savedUsers.filter((user) => user.role === "admin").length,
+    1,
+  );
+  assert.equal(users.findById("admin-anterior").role, "user");
+  await assert.rejects(users.setStatus(admin.id, "suspended"), {
+    code: "protected_admin",
+  });
+  await assert.rejects(users.deleteAccount(admin.id), {
+    code: "protected_admin",
+  });
+
+  const reloadedUsers = await createUserStore(filePath, { initialAdmin });
+  assert.ok(await reloadedUsers.verify(initialAdmin.email, initialAdmin.password));
+});
+
+test("suspende, reactiva y elimina cuentas conservando evidencia sin credenciales", async () => {
+  const filePath = path.join(temporaryDirectory, "users-with-status.json");
+  const users = await createUserStore(filePath);
+  const user = await users.register({
+    name: "Usuario de prueba",
+    email: "usuario-status@ejemplo.com",
+    password: "clave-segura-de-prueba",
+  });
+
+  await users.setStatus(user.id, "suspended");
+  assert.equal(await users.verify(user.email, "clave-segura-de-prueba"), null);
+
+  const reloadedUsers = await createUserStore(filePath);
+  await reloadedUsers.setStatus(user.id, "active");
+  assert.ok(await reloadedUsers.verify(user.email, "clave-segura-de-prueba"));
+
+  const deletedUser = await reloadedUsers.deleteAccount(user.id);
+  assert.equal(deletedUser.name, "Cuenta borrada");
+  assert.equal(deletedUser.email, user.email);
+  assert.equal(deletedUser.status, "deleted");
+  assert.equal("passwordHash" in deletedUser, false);
+  assert.equal("salt" in deletedUser, false);
+  assert.equal(
+    (await reloadedUsers.list()).find((item) => item.id === user.id).email,
+    user.email,
+  );
+  assert.equal(await reloadedUsers.verify(user.email, "clave-segura-de-prueba"), null);
+  await assert.rejects(reloadedUsers.setStatus(user.id, "active"), {
+    code: "deleted_account",
+  });
+});
+
 test("el equipo favorito es opcional y las cuentas siguen disponibles al recargar el almacén", async () => {
   const response = await jsonRequest("/api/register", {
     name: "Luis",

@@ -5,6 +5,7 @@ import { RepositorioLigas } from "./Futbol/RepositorioLigas.js";
 import ServicioFutbol, {
   LIGAS_UTILIZADAS_IDS,
 } from "./Futbol/ServicioFutbol.js";
+import { crearRepositorioComunidad } from "./Comunidad/RepositorioComunidad.js";
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -57,17 +58,46 @@ export async function inicializarLigas(servicioFutbol = new ServicioFutbol()) {
 }
 
 export async function startServer() {
+  const adminSettings = [
+    process.env.ADMIN_NAME,
+    process.env.ADMIN_EMAIL,
+    process.env.ADMIN_PASSWORD,
+  ];
+  const configuredAdminSettings = adminSettings.filter(
+    (value) => value !== undefined,
+  );
+  if (
+    configuredAdminSettings.length !== 0 &&
+    configuredAdminSettings.length !== adminSettings.length
+  ) {
+    throw new Error(
+      "La configuración privada del administrador debe incluir nombre, correo y contraseña.",
+    );
+  }
+  const initialAdmin =
+    configuredAdminSettings.length === adminSettings.length
+      ? {
+          name: process.env.ADMIN_NAME,
+          email: process.env.ADMIN_EMAIL,
+          password: process.env.ADMIN_PASSWORD,
+        }
+      : undefined;
+
   // 1. Inicializa la base de datos de usuarios
   const users = await createUserStore(
     process.env.USER_STORE_PATH || "./usuarios.json",
+    { initialAdmin },
   );
-
+  const comunidad = await crearRepositorioComunidad(
+    process.env.COMMUNITY_STORE_PATH || "./data/comunidad.json",
+  );
   // 2. Inicializa los datos de la API de fútbol
   const repositorioLigas = await inicializarLigas();
 
   // 3. Crea la aplicación Express inyectando las dependencias
   const app = createApp({
     users,
+    comunidad,
     repositorioLigas,
     production: process.env.NODE_ENV === "production",
   });

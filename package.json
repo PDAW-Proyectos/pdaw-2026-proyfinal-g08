@@ -6,7 +6,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "start": "node src/js/server.js",
+    "start": "node --env-file-if-exists=.env src/js/server.js",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "devDependencies": {

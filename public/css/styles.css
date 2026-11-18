@@ -25,6 +25,15 @@
         color: #055c3c;
       }
 
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid var(--grada-verde);
+        outline-offset: 3px;
+      }
+
       .encabezado-sitio,
       .pie-sitio {
         background: #fff;
@@ -1233,6 +1242,248 @@
         font-weight: 650;
       }
 
+      .publicacion-foro {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 0.45rem;
+        border-bottom: 1px solid #edf1ee;
+      }
+
+      .publicacion-foro:last-child {
+        border-bottom: 0;
+      }
+
+      .publicacion-foro > .btn {
+        align-self: flex-start;
+      }
+
+      .titulo-publicacion {
+        margin: 0;
+        color: var(--grada-oscuro);
+        font-size: clamp(1.05rem, 2vw, 1.35rem);
+        font-weight: 750;
+        letter-spacing: -0.035em;
+        overflow-wrap: anywhere;
+      }
+
+      .meta-publicacion,
+      .fecha-publicacion {
+        margin: 0;
+        color: var(--grada-atenuado);
+        font-size: 0.78rem;
+      }
+
+      .texto-publicacion,
+      .texto-comentario {
+        margin: 0;
+        line-height: 1.55;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .comentarios-publicacion {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--grada-borde);
+      }
+
+      .titulo-comentarios {
+        margin: 0;
+        color: var(--grada-oscuro);
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .lista-comentarios {
+        display: grid;
+        gap: 0.65rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .comentario-foro {
+        display: grid;
+        gap: 0.25rem;
+        min-width: 0;
+        padding: 0.7rem 0.85rem;
+        border-left: 3px solid #d8e9df;
+        border-radius: 0 8px 8px 0;
+        background: #f7faf8;
+      }
+
+      .formulario-comentario {
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .formulario-comentario textarea {
+        width: 100%;
+        min-height: 5rem;
+        resize: vertical;
+      }
+
+      .formulario-comentario .btn {
+        justify-self: start;
+      }
+
+      .linea-carrito {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(150px, 190px) auto;
+        align-items: end;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--grada-borde);
+      }
+
+      .linea-carrito:first-child {
+        padding-top: 0.25rem;
+      }
+
+      .linea-carrito:last-child {
+        border-bottom: 0;
+      }
+
+      .nombre-producto-carrito {
+        margin: 0 0 0.25rem;
+        color: var(--grada-oscuro);
+        font-size: 1rem;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .precio-producto-carrito {
+        margin: 0;
+        color: var(--grada-atenuado);
+        font-size: 0.86rem;
+      }
+
+      .cantidad-carrito {
+        display: grid;
+        gap: 0.35rem;
+        color: var(--grada-oscuro);
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+
+      .cantidad-carrito .form-control {
+        max-width: 7rem;
+      }
+
+      .acciones-linea-carrito {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      #total-carrito {
+        margin: 0.5rem 0 1rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--grada-borde);
+        color: var(--grada-oscuro);
+      }
+
+      .admin-seccion {
+        border: 1px solid var(--grada-borde);
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .admin-seccion > summary {
+        color: var(--grada-oscuro);
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 750;
+        list-style: none;
+      }
+
+      .admin-seccion > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .admin-seccion > summary::after {
+        float: right;
+        color: var(--grada-verde);
+        content: "+";
+      }
+
+      .admin-seccion[open] > summary::after {
+        content: "−";
+      }
+
+      .admin-seccion-contenido {
+        margin-top: 1.1rem;
+      }
+
+      .admin-lista {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .admin-item {
+        display: grid;
+        gap: 0.5rem;
+        min-width: 0;
+        padding: 1rem;
+        border: 1px solid var(--grada-borde);
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .admin-item-encabezado {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .admin-item-titulo {
+        margin: 0;
+        color: var(--grada-oscuro);
+        font-size: 1rem;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .admin-item-detalle {
+        margin: 0;
+        color: var(--grada-atenuado);
+        font-size: 0.86rem;
+      }
+
+      .admin-item-texto {
+        margin: 0;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .admin-acciones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+      }
+
+      .admin-estado {
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        background: var(--grada-menta);
+        color: var(--grada-verde);
+        font-size: 0.76rem;
+        font-weight: 700;
+      }
+
+      .admin-estado-suspended,
+      .admin-estado-deleted {
+        background: #f7eeee;
+        color: #963b36;
+      }
+
       @media (max-width: 991.98px) {
         .cuadricula-productos {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1353,6 +1604,16 @@
 
         .etiquetas-foro {
           grid-column: auto;
+        }
+
+        .linea-carrito {
+          grid-template-columns: minmax(0, 1fr);
+          align-items: stretch;
+          gap: 0.75rem;
+        }
+
+        .cantidad-carrito .form-control {
+          max-width: 100%;
         }
       }
 
