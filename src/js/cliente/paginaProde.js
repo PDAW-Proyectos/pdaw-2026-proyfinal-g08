@@ -281,3 +281,4 @@ export async function inicializarProde() {
     etiquetaConteo.textContent = "No hay pronósticos cargados";
   }
 }
+
