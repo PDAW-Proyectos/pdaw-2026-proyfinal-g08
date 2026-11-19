@@ -7,6 +7,12 @@ import { randomBytes, randomUUID, scrypt, timingSafeEqual } from "node:crypto";
 const deriveKey = promisify(scrypt);
 const passwordKeyLength = 64;
 const normalizeEmail = (email) => email.trim().toLowerCase();
+const restoreUser = (user, snapshot) => {
+  for (const key of Object.keys(user)) {
+    if (!(key in snapshot)) delete user[key];
+  }
+  Object.assign(user, snapshot);
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,6 +51,7 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
 
 export async function createUserStore(
   filePath = path.join(__dirname, "..", "..", "..", "data", "users.json"),
+  { initialAdmin } = {},
 ) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   let users;
@@ -85,6 +92,70 @@ export async function createUserStore(
     }
   };
 
+  if (initialAdmin) {
+    const { name, email, password } = initialAdmin;
+    if (
+      typeof name !== "string" ||
+      name.trim().length < 2 ||
+      name.trim().length > 80 ||
+      typeof email !== "string" ||
+      email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
+      typeof password !== "string" ||
+      password.length === 0 ||
+      password.length > 128
+    ) {
+      throw new Error("La configuración privada del administrador no es válida.");
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    const existingAdmin = users.find(
+      (user) => user.email === normalizedEmail,
+    );
+    if (existingAdmin && existingAdmin.role !== "admin") {
+      throw new Error(
+        "La cuenta configurada para administración ya existe con otro rol.",
+      );
+    }
+
+    const originalUsers = users.map((user) => ({ ...user }));
+    try {
+      let admin = existingAdmin;
+      if (!admin) {
+        const salt = randomBytes(16);
+        const passwordHash = await deriveKey(
+          password,
+          salt,
+          passwordKeyLength,
+        );
+        admin = {
+          id: randomUUID(),
+          name: name.trim(),
+          email: normalizedEmail,
+          passwordHash: passwordHash.toString("hex"),
+          salt: salt.toString("hex"),
+          role: "admin",
+          favoriteTeam: null,
+        };
+        users.push(admin);
+      }
+
+      let changed = !existingAdmin;
+      for (const user of users) {
+        if (user !== admin && user.role === "admin") {
+          user.role = "user";
+          changed = true;
+        }
+      }
+      if (changed) {
+        await persist();
+      }
+    } catch (error) {
+      users.splice(0, users.length, ...originalUsers);
+      throw error;
+    }
+  }
+
   return {
     findById(id) {
       return users.find((user) => user.id === id) || null;
@@ -95,7 +166,7 @@ export async function createUserStore(
       const user = users.find(
         (candidate) => candidate.email === normalizeEmail(email),
       );
-      if (!user) return null;
+      if (!user || ["suspended", "deleted"].includes(user.status)) return null;
       const candidate = await deriveKey(
         password,
         Buffer.from(user.salt, "hex"),
@@ -136,13 +207,102 @@ export async function createUserStore(
           email: normalizedEmail,
           passwordHash: passwordHash.toString("hex"),
           salt: salt.toString("hex"),
+          role: "user",
           favoriteTeam: favoriteTeam?.trim() || null,
+          status: "active",
+          createdAt: new Date().toISOString(),
         };
         users.push(user);
         try {
           await persist();
         } catch (error) {
           users.pop();
+          throw error;
+        }
+        return user;
+      });
+    },
+    list() {
+      return users.map(
+        ({
+          id,
+          name,
+          email,
+          favoriteTeam,
+          role,
+          status,
+          createdAt,
+          statusChangedAt,
+          deletedAt,
+        }) => ({
+          id,
+          name,
+          email,
+          favoriteTeam,
+          role: role || "user",
+          status: status || "active",
+          createdAt: createdAt || null,
+          statusChangedAt: statusChangedAt || null,
+          deletedAt: deletedAt || null,
+        }),
+      );
+    },
+    async setStatus(id, status) {
+      if (!["active", "suspended"].includes(status)) {
+        const error = new Error("El estado solicitado no es válido.");
+        error.code = "invalid_status";
+        throw error;
+      }
+
+      return serializeWrite(async () => {
+        const user = users.find((candidate) => candidate.id === id);
+        if (!user) return null;
+        if (user.role === "admin") {
+          const error = new Error("No se puede suspender al administrador.");
+          error.code = "protected_admin";
+          throw error;
+        }
+        if (user.status === "deleted") {
+          const error = new Error("La cuenta eliminada no se puede reactivar.");
+          error.code = "deleted_account";
+          throw error;
+        }
+        if ((user.status || "active") === status) return user;
+
+        const snapshot = { ...user };
+        user.status = status;
+        user.statusChangedAt = new Date().toISOString();
+        try {
+          await persist();
+        } catch (error) {
+          restoreUser(user, snapshot);
+          throw error;
+        }
+        return user;
+      });
+    },
+    async deleteAccount(id) {
+      return serializeWrite(async () => {
+        const user = users.find((candidate) => candidate.id === id);
+        if (!user) return null;
+        if (user.role === "admin") {
+          const error = new Error("No se puede eliminar al administrador.");
+          error.code = "protected_admin";
+          throw error;
+        }
+        if (user.status === "deleted") return user;
+
+        const snapshot = { ...user };
+        user.name = "Cuenta borrada";
+        user.status = "deleted";
+        user.statusChangedAt = new Date().toISOString();
+        user.deletedAt = user.statusChangedAt;
+        delete user.passwordHash;
+        delete user.salt;
+        try {
+          await persist();
+        } catch (error) {
+          restoreUser(user, snapshot);
           throw error;
         }
         return user;
