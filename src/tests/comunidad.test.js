@@ -128,6 +128,40 @@ describe("funciones de foro y tienda", () => {
     await fs.rm(carpetaTemporal, { recursive: true, force: true });
   });
 
+  test("inicializa una comunidad nueva con datos de muestra sin sobrescribir una existente", async () => {
+    const archivo = path.join(carpetaTemporal, "comunidad-demo.json");
+    const datosDemo = {
+      publicaciones: [
+        {
+          id: "publicacion-demo",
+          autorId: "usuario-demo",
+          autorNombre: "Aficionada de muestra",
+          titulo: "Debate de muestra",
+          texto: "Una publicación inicial.",
+          creadaEn: "2026-11-18T12:00:00.000Z",
+        },
+      ],
+      comentarios: [],
+      productos: [],
+      carritos: {},
+      pedidos: [],
+    };
+
+    const nuevaComunidad = await crearRepositorioComunidad(archivo, datosDemo);
+    expect(nuevaComunidad.listarPublicaciones()).toEqual(
+      datosDemo.publicaciones,
+    );
+    expect(JSON.parse(await fs.readFile(archivo, "utf8"))).toEqual(datosDemo);
+
+    const datosExistentes = { ...datosDemo, publicaciones: [] };
+    await fs.writeFile(archivo, JSON.stringify(datosExistentes), "utf8");
+    const comunidadExistente = await crearRepositorioComunidad(
+      archivo,
+      datosDemo,
+    );
+    expect(comunidadExistente.listarPublicaciones()).toEqual([]);
+  });
+
   test("solo un administrador puede borrar publicaciones, comentarios y productos", async () => {
     const usuarioCookie = await iniciarSesion("usuario@example.com");
     const adminCookie = await iniciarSesion("admin@example.com");

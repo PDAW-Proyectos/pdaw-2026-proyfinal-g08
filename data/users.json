@@ -1,0 +1,57 @@
+[
+  {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "name": "Equipo Orsai",
+    "email": "admin@orsai.demo",
+    "passwordHash": "54aa11d9e1ca9f6702538d12d2baffafad716a6fc7168cf79bbe5837d7d550140f0b31aa97ab16d9b890f211355e1e166c13e9cb1f6af61bec06b381a9d28462",
+    "salt": "efdcea8a7fe0e5937f7b50bfd6155af2",
+    "role": "admin",
+    "favoriteTeam": null,
+    "status": "active",
+    "createdAt": "2026-11-01T12:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "name": "Lucía Fernández",
+    "email": "lucia@orsai.demo",
+    "passwordHash": "93474d9a6ee406760eab2dd05d294ca75edb7479bd5c7f6c2316ea7c70b45a2746100ce445ff8f17bd02c96e000cf49e5c4e5f7354e23e247664252e26a7468e",
+    "salt": "c39e1e254939d87240690e01dc66d7a1",
+    "role": "user",
+    "favoriteTeam": "River Plate",
+    "status": "active",
+    "createdAt": "2026-11-02T09:30:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000003",
+    "name": "Marcos Varela",
+    "email": "marcos@orsai.demo",
+    "passwordHash": "0dee4e78c91eceafe2575ae77bbfce2fa93fda1c1c39e1ed882413d39a6317699d161c931df33d722cacecec1a42c0ed8ec874308eae302f8d90f7d5f0c6c20f",
+    "salt": "9d479297065d6719afa073c33003c59c",
+    "role": "user",
+    "favoriteTeam": "Real Madrid",
+    "status": "active",
+    "createdAt": "2026-11-03T10:15:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000004",
+    "name": "Nacho Suárez",
+    "email": "nacho@orsai.demo",
+    "passwordHash": "3bca1bf55726a3d61ed2cf73c9b69389d33ca2de6357e5f425a8cce34d457c0c405fe291dfb11ef3b6bf939f3fbb9601eadeeb3336006fb9b7e1ab0e36f2542e",
+    "salt": "890006e095115c1e692ae95c242ee5b4",
+    "role": "user",
+    "favoriteTeam": "Boca Juniors",
+    "status": "active",
+    "createdAt": "2026-11-04T17:20:00.000Z"
+  },
+  {
+    "id": "bd69d393-f9df-4afd-878e-504a51fa8ef5",
+    "name": "tomas",
+    "email": "tomasjuanes@hotmail.com",
+    "passwordHash": "55fbb63da88124a1da6057d393ee5465e10d214464261963323c292c6fad0bf6da2411be5f3c7f32fcf41bd60fcad3b718c3440f252c99f284e1b9e762e1ddf2",
+    "salt": "2fcad6a49a0ddfc4eb816836e8e30543",
+    "role": "user",
+    "favoriteTeam": null,
+    "status": "active",
+    "createdAt": "2026-11-19T20:46:24.036Z"
+  }
+]

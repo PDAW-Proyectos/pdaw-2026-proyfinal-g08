@@ -1,6 +1,7 @@
 const formularioPublicacion = document.querySelector("#form-publicacion");
 const listaPublicaciones = document.querySelector("#lista-publicaciones");
 const estadoForo = document.querySelector("#estado-foro");
+const avisoInicioSesion = document.querySelector("#aviso-inicio-sesion");
 const busquedaPublicaciones = document.querySelector("#busqueda-publicaciones");
 
 let usuarioActual = null;
@@ -16,7 +17,11 @@ async function solicitar(url, opciones = {}) {
 
   const resultado = await respuesta.json();
   if (!respuesta.ok) {
-    throw new Error(resultado.error || "No se pudo completar la solicitud.");
+    const error = new Error(
+      resultado.error || "No se pudo completar la solicitud.",
+    );
+    error.status = respuesta.status;
+    throw error;
   }
 
   return resultado;
@@ -229,6 +234,8 @@ async function cargarPublicaciones() {
 
 formularioPublicacion.addEventListener("submit", async (evento) => {
   evento.preventDefault();
+  estadoForo.textContent = "";
+  avisoInicioSesion.hidden = true;
   const datos = new FormData(formularioPublicacion);
 
   try {
@@ -243,6 +250,10 @@ formularioPublicacion.addEventListener("submit", async (evento) => {
     estadoForo.textContent = "Publicación creada.";
     await cargarPublicaciones();
   } catch (error) {
+    if (error.status === 401) {
+      avisoInicioSesion.hidden = false;
+      return;
+    }
     estadoForo.textContent = error.message;
   }
 });
@@ -255,6 +266,9 @@ busquedaPublicaciones.addEventListener("input", () => {
 
 window.addEventListener("auth:changed", (evento) => {
   usuarioActual = evento.detail.user;
+  if (usuarioActual) {
+    avisoInicioSesion.hidden = true;
+  }
   cargarPublicaciones().catch((error) => {
     estadoForo.textContent = error.message;
   });

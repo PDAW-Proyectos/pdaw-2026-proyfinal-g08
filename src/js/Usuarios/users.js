@@ -51,10 +51,15 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
 
 export async function createUserStore(
   filePath = path.join(__dirname, "..", "..", "..", "data", "users.json"),
-  { initialAdmin } = {},
+  { initialAdmin, initialUsers = [] } = {},
 ) {
+  if (!Array.isArray(initialUsers)) {
+    throw new Error("Los usuarios iniciales deben tener un formato válido.");
+  }
+
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   let users;
+  let usersFileMissing = false;
   try {
     users = JSON.parse(await fs.readFile(filePath, "utf8"));
   } catch (error) {
@@ -63,7 +68,8 @@ export async function createUserStore(
         cause: error,
       });
     }
-    users = [];
+    users = initialUsers.map((user) => ({ ...user }));
+    usersFileMissing = true;
   }
   if (!Array.isArray(users)) {
     throw new Error("El archivo de usuarios tiene un formato inválido.");
@@ -92,6 +98,7 @@ export async function createUserStore(
     }
   };
 
+  let persistedDuringInitialization = false;
   if (initialAdmin) {
     const { name, email, password } = initialAdmin;
     if (
@@ -149,11 +156,20 @@ export async function createUserStore(
       }
       if (changed) {
         await persist();
+        persistedDuringInitialization = true;
       }
     } catch (error) {
       users.splice(0, users.length, ...originalUsers);
       throw error;
     }
+  }
+
+  if (
+    usersFileMissing &&
+    users.length > 0 &&
+    !persistedDuringInitialization
+  ) {
+    await persist();
   }
 
   return {
