@@ -125,6 +125,23 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
   assert.equal(page.status, 200);
   assert.match(await page.text(), /data-auth-open="register"/);
 
+  for (const route of [
+    "/",
+    "/ligas.html",
+    "/liga.html",
+    "/equipo.html",
+    "/tienda.html",
+    "/foro.html",
+  ]) {
+    const response = await request(route);
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /href="prode\.html"/);
+  }
+
+  const prodePage = await request("/prode.html");
+  assert.equal(prodePage.status, 200);
+  assert.match(await prodePage.text(), /id="prodeFormulario"/);
+
   const leaguesPage = await request("/ligas.html");
   assert.equal(leaguesPage.status, 200);
   const leagueHtml = await leaguesPage.text();
@@ -138,7 +155,11 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
 
   const mainScript = await request("/js/main.js");
   assert.equal(mainScript.status, 200);
-  assert.match(await mainScript.text(), /inicializarBuscadores/);
+  assert.match(await mainScript.text(), /inicializarProde/);
+
+  const prodeScript = await request("/cliente/paginaProde.js");
+  assert.equal(prodeScript.status, 200);
+  assert.match(await prodeScript.text(), /orsai-prode-pronosticos/);
 
   const controlsScript = await request("/cliente/controlesGenerales.js");
   assert.equal(controlsScript.status, 200);

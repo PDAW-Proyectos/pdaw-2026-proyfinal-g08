@@ -304,5 +304,29 @@
     "descripcion": "",
     "esJugado": true,
     "esProximo": false
+  },
+  {
+    "id": "2398534",
+    "idLiga": "4351",
+    "nombreLiga": "Brazilian Serie A",
+    "escudoLiga": "https://r2.thesportsdb.com/images/media/league/badge/lywv7t1766787179.png",
+    "temporada": "2026",
+    "jornada": "35",
+    "idEquipoLocal": "134287",
+    "nombreEquipoLocal": "Flamengo",
+    "escudoEquipoLocal": "https://r2.thesportsdb.com/images/media/team/badge/syptwx1473538074.png",
+    "idEquipoVisitante": "134297",
+    "nombreEquipoVisitante": "Athletico Paranaense",
+    "escudoEquipoVisitante": "https://r2.thesportsdb.com/images/media/team/badge/irzu1u1554237406.png",
+    "golesLocal": "2",
+    "golesVisitante": "1",
+    "fecha": "2026-11-18",
+    "hora": "23:30:00",
+    "timestamp": "2026-11-18T23:30:00",
+    "estado": "FT",
+    "estadio": "Estádio do Maracanã",
+    "descripcion": "",
+    "esJugado": true,
+    "esProximo": false
   }
 ]

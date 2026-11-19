@@ -4,6 +4,7 @@ import { inicializarInicio } from "/cliente/paginaInicio.js";
 import { inicializarLigas } from "/cliente/paginaLigas.js";
 import { inicializarLiga } from "/cliente/paginaLiga.js";
 import { inicializarEquipo } from "/cliente/paginaEquipo.js";
+import { inicializarProde } from "/cliente/paginaProde.js";
 
 function iniciarAplicacion() {
   inicializarBuscadores();
@@ -25,6 +26,10 @@ function iniciarAplicacion() {
 
   if (document.querySelectorAll("[data-liga-tabla]").length > 0) {
     inicializarLigas();
+  }
+
+  if (pagina === "prode") {
+    inicializarProde();
   }
 }
 

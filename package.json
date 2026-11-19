@@ -6,7 +6,7 @@
     "dev": "node src/js/server.js",
     "start": "node src/js/server.js",
     "build": "echo 'Build OK'",
-    "lint": "node --check src/js/app.js src/js/server.js src/js/Routes/ligas.routes.js src/js/Routes/partidos.routes.js src/js/Routes/equipos.routes.js src/js/Futbol/Posicion.js src/js/Futbol/Liga.js src/js/Futbol/RepositorioLigas.js src/js/Futbol/Equipo.js src/js/Futbol/RepositorioEquipos.js src/js/Futbol/Partido.js src/js/Futbol/RepositorioPartidos.js src/js/Futbol/ServicioFutbol.js src/js/Futbol/formatos.js src/js/cliente/api.js src/js/cliente/fechas.js src/js/cliente/modalPartido.js src/js/cliente/buscadorEquipos.js src/js/cliente/tarjetasPartido.js src/js/cliente/controlesGenerales.js src/js/cliente/paginaInicio.js src/js/cliente/paginaLigas.js src/js/cliente/paginaLiga.js src/js/cliente/paginaEquipo.js public/js/main.js server.js",
+    "lint": "node --check src/js/app.js src/js/server.js src/js/Routes/ligas.routes.js src/js/Routes/partidos.routes.js src/js/Routes/equipos.routes.js src/js/Futbol/Posicion.js src/js/Futbol/Liga.js src/js/Futbol/RepositorioLigas.js src/js/Futbol/Equipo.js src/js/Futbol/RepositorioEquipos.js src/js/Futbol/Partido.js src/js/Futbol/RepositorioPartidos.js src/js/Futbol/ServicioFutbol.js src/js/Futbol/formatos.js src/js/cliente/api.js src/js/cliente/fechas.js src/js/cliente/modalPartido.js src/js/cliente/buscadorEquipos.js src/js/cliente/tarjetasPartido.js src/js/cliente/controlesGenerales.js src/js/cliente/paginaInicio.js src/js/cliente/paginaLigas.js src/js/cliente/paginaLiga.js src/js/cliente/paginaEquipo.js src/js/cliente/paginaProde.js public/js/main.js server.js",
     "test": "node --test"
   },
   "dependencies": {

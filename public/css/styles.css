@@ -2598,3 +2598,225 @@ a.modal-partido-liga-nombre:hover {
     max-width: none;
   }
 }
+
+.encabezado-prode {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.encabezado-prode .titulo-pagina {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+}
+
+.prode-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #deeee4;
+  border-radius: 12px;
+  background: var(--grada-menta);
+  color: var(--grada-oscuro);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.prode-resumen span {
+  color: var(--grada-atenuado);
+  font-size: 0.7rem;
+}
+
+.panel-prode {
+  overflow: hidden;
+}
+
+.prode-estado {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #edf1ee;
+  color: var(--grada-atenuado);
+  font-size: 0.82rem;
+}
+
+.lista-prode {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.prode-partido {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid var(--grada-borde);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.prode-partido-cabecera {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--grada-atenuado);
+  font-size: 0.72rem;
+}
+
+.prode-partido-cabecera span {
+  color: var(--grada-verde);
+  font-weight: 750;
+}
+
+.prode-partido-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3rem auto 3rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.prode-equipo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--grada-oscuro);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.prode-equipo:last-child {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.prode-equipo img {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  object-fit: contain;
+}
+
+.prode-vs {
+  color: var(--grada-atenuado);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.prode-goles {
+  width: 3rem;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0.25rem;
+  border: 1px solid var(--grada-borde);
+  border-radius: 8px;
+  background: #f7faf8;
+  color: var(--grada-oscuro);
+  font-size: 1rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.prode-goles:focus {
+  border-color: #8fc7a8;
+  outline: 0;
+  background: #fff;
+  box-shadow: 0 0 0 0.2rem rgb(8 123 80 / 14%);
+}
+
+.prode-goles.prode-goles-invalido {
+  border-color: #dc3545;
+  background: #fff3f3;
+  box-shadow: 0 0 0 0.15rem rgb(220 53 69 / 14%);
+}
+
+.prode-goles.prode-goles-invalido:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgb(220 53 69 / 18%);
+}
+
+.prode-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid #edf1ee;
+  background: #fbfcfb;
+}
+
+.prode-acciones[hidden] {
+  display: none;
+}
+
+.aviso-prode-inicio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid #deeee4;
+  border-radius: 14px;
+  background: var(--grada-menta);
+}
+
+.aviso-prode-inicio .btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 767.98px) {
+  .encabezado-prode {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .prode-partido {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prode-partido-fila {
+    grid-template-columns: minmax(0, 1fr) 2.75rem auto 2.75rem minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .prode-resumen {
+    white-space: normal;
+  }
+
+  .lista-prode {
+    padding: 0.65rem;
+  }
+
+  .prode-partido {
+    padding: 0.8rem;
+  }
+
+  .prode-equipo {
+    gap: 0.3rem;
+    font-size: 0.76rem;
+  }
+
+  .prode-equipo:last-child {
+    text-align: center;
+  }
+
+  .prode-equipo img {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+  }
+
+  .prode-goles {
+    width: 2.75rem;
+  }
+
+  .aviso-prode-inicio {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
