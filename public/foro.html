@@ -160,6 +160,32 @@
             </div>
             <button class="btn boton-grada" type="submit">Publicar</button>
           </form>
+          <div
+            id="aviso-inicio-sesion"
+            class="alert alert-warning mt-3 mb-0"
+            role="alert"
+            hidden
+          >
+            <p class="mb-2">
+              Para publicar necesitás iniciar sesión. Tu texto sigue guardado.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <button
+                class="btn btn-sm boton-grada"
+                type="button"
+                data-auth-open="login"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                class="btn btn-sm boton-contorno-grada"
+                type="button"
+                data-auth-open="register"
+              >
+                Crear una cuenta
+              </button>
+            </div>
+          </div>
           <p
             id="estado-foro"
             class="mt-3 mb-0"

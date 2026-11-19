@@ -32,7 +32,7 @@ const errorDeRegla = (mensaje) => {
   return error;
 };
 
-export async function crearRepositorioComunidad(archivo) {
+export async function crearRepositorioComunidad(archivo, datosIniciales) {
   await fs.mkdir(path.dirname(archivo), { recursive: true });
 
   let datos;
@@ -46,13 +46,15 @@ export async function crearRepositorioComunidad(archivo) {
       });
     }
 
-    datos = {
-      publicaciones: [],
-      comentarios: [],
-      productos: productosIniciales,
-      carritos: {},
-      pedidos: [],
-    };
+    datos = datosIniciales
+      ? JSON.parse(JSON.stringify(datosIniciales))
+      : {
+          publicaciones: [],
+          comentarios: [],
+          productos: productosIniciales,
+          carritos: {},
+          pedidos: [],
+        };
     await fs.writeFile(archivo, JSON.stringify(datos, null, 2), "utf8");
   }
 

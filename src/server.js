@@ -1,4 +1,6 @@
+import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { createApp } from "./app.js";
 import { createApp as createCommunityApp } from "./js/app.js";
 import { createUserStore } from "./js/Usuarios/users.js";
@@ -15,6 +17,12 @@ import {
   cargarDatosLocales,
   sincronizarDatosApi,
 } from "./services/sincronizacion.service.js";
+
+const dataDirectory = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "data",
+);
 
 function resolverPuertoServidor() {
   const puertoEnv = Number(process.env.PORT);
@@ -52,12 +60,28 @@ export async function startServer() {
           password: process.env.ADMIN_PASSWORD,
         }
       : undefined;
+  const initialUsers =
+    process.env.NODE_ENV !== "production" && !process.env.USER_STORE_PATH
+      ? JSON.parse(
+          await fs.readFile(path.join(dataDirectory, "demo-users.json"), "utf8"),
+        )
+      : undefined;
+  const initialCommunityData =
+    process.env.NODE_ENV !== "production" && !process.env.COMMUNITY_STORE_PATH
+      ? JSON.parse(
+          await fs.readFile(
+            path.join(dataDirectory, "demo-comunidad.json"),
+            "utf8",
+          ),
+        )
+      : undefined;
   const users = await createUserStore(
     process.env.USER_STORE_PATH || "./data/users.json",
-    { initialAdmin },
+    { initialAdmin, initialUsers },
   );
   const comunidad = await crearRepositorioComunidad(
     process.env.COMMUNITY_STORE_PATH || "./data/comunidad.json",
+    initialCommunityData,
   );
   const configuracion = await crearRepositorioConfiguracion(
     process.env.ADMIN_SETTINGS_PATH || "./data/admin-settings.json",

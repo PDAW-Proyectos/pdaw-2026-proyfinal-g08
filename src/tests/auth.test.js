@@ -145,6 +145,50 @@ test("inicializa un administrador privado y deja un solo rol de administrador", 
   assert.ok(await reloadedUsers.verify(initialAdmin.email, initialAdmin.password));
 });
 
+test("inicializa usuarios de demostración solo cuando el archivo aún no existe", async () => {
+  const filePath = path.join(temporaryDirectory, "users-with-demo.json");
+  const usuarioDemo = {
+    id: "usuario-demo",
+    name: "Aficionada de muestra",
+    email: "demo@example.com",
+    passwordHash: "hash-demo",
+    salt: "salt-demo",
+    role: "user",
+    favoriteTeam: null,
+    status: "active",
+  };
+  const usuarios = await createUserStore(filePath, {
+    initialUsers: [usuarioDemo],
+  });
+  assert.equal(usuarios.findById(usuarioDemo.id).email, usuarioDemo.email);
+  assert.deepEqual(JSON.parse(await fs.readFile(filePath, "utf8")), [
+    usuarioDemo,
+  ]);
+
+  const recargados = await createUserStore(filePath, {
+    initialUsers: [{ ...usuarioDemo, id: "otro-usuario" }],
+  });
+  assert.equal(recargados.list().length, 1);
+  assert.equal(recargados.findById(usuarioDemo.id).email, usuarioDemo.email);
+});
+
+test("las cuentas de demostración permiten iniciar sesión con credenciales conocidas", async () => {
+  const filePath = path.join(temporaryDirectory, "users-demo-accounts.json");
+  const initialUsers = JSON.parse(
+    await fs.readFile(new URL("../../data/demo-users.json", import.meta.url), "utf8"),
+  );
+  const usuarios = await createUserStore(filePath, { initialUsers });
+
+  const administrador = await usuarios.verify(
+    "admin@orsai.demo",
+    "OrsaiExpo2026!",
+  );
+  expect(administrador.role).toBe("admin");
+  expect(await usuarios.verify("lucia@orsai.demo", "OrsaiExpo2026!")).not.toBe(
+    null,
+  );
+});
+
 test("suspende, reactiva y elimina cuentas conservando evidencia sin credenciales", async () => {
   const filePath = path.join(temporaryDirectory, "users-with-status.json");
   const users = await createUserStore(filePath);

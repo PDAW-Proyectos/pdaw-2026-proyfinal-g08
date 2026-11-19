@@ -1,0 +1,154 @@
+{
+  "publicaciones": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "autorId": "10000000-0000-4000-8000-000000000001",
+      "autorNombre": "Equipo Orsai",
+      "titulo": "¡Bienvenidos a Orsai: acá jugamos en equipo!",
+      "texto": "Este es el espacio para compartir análisis, debatir los partidos y conocer otras aficiones. ¿Qué tema futbolero te gustaría conversar primero?",
+      "creadaEn": "2026-11-18T12:00:00.000Z"
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000002",
+      "autorId": "10000000-0000-4000-8000-000000000003",
+      "autorNombre": "Marcos Varela",
+      "titulo": "El clásico: ¿qué once pondrías sobre el césped?",
+      "texto": "Con el partido tan cerca, tengo dudas en el mediocampo. ¿Priorizamos presión y ritmo o un equipo más paciente con la pelota?",
+      "creadaEn": "2026-11-18T15:40:00.000Z"
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000003",
+      "autorId": "10000000-0000-4000-8000-000000000002",
+      "autorNombre": "Lucía Fernández",
+      "titulo": "¿Presión alta o bloque medio?",
+      "texto": "Me gusta recuperar rápido, pero sostener la presión durante todo el partido cuesta. ¿Qué ajustes harían para no quedar mal parados?",
+      "creadaEn": "2026-11-19T10:25:00.000Z"
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000004",
+      "autorId": "10000000-0000-4000-8000-000000000004",
+      "autorNombre": "Nacho Suárez",
+      "titulo": "Recomendaciones para jugar en césped sintético",
+      "texto": "Estoy buscando botines cómodos para entrenar en cancha sintética. ¿Qué características les resultaron más importantes?",
+      "creadaEn": "2026-11-19T14:10:00.000Z"
+    }
+  ],
+  "comentarios": [
+    {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "publicacionId": "20000000-0000-4000-8000-000000000001",
+      "autorId": "10000000-0000-4000-8000-000000000002",
+      "autorNombre": "Lucía Fernández",
+      "texto": "¡Qué buena iniciativa! Me gustaría arrancar con análisis tácticos de los partidos.",
+      "creadoEn": "2026-11-18T12:35:00.000Z"
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000002",
+      "publicacionId": "20000000-0000-4000-8000-000000000001",
+      "autorId": "10000000-0000-4000-8000-000000000003",
+      "autorNombre": "Marcos Varela",
+      "texto": "Y también estaría bueno compartir cómo vivimos los clásicos desde cada tribuna.",
+      "creadoEn": "2026-11-18T13:05:00.000Z"
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000003",
+      "publicacionId": "20000000-0000-4000-8000-000000000002",
+      "autorId": "10000000-0000-4000-8000-000000000001",
+      "autorNombre": "Equipo Orsai",
+      "texto": "Un mediocampo intenso puede funcionar si los extremos ayudan a cerrar los espacios.",
+      "creadoEn": "2026-11-18T16:10:00.000Z"
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000004",
+      "publicacionId": "20000000-0000-4000-8000-000000000003",
+      "autorId": "10000000-0000-4000-8000-000000000004",
+      "autorNombre": "Nacho Suárez",
+      "texto": "Yo empezaría con bloque medio y activaría la presión alta con una señal clara, como un pase hacia atrás.",
+      "creadoEn": "2026-11-19T11:00:00.000Z"
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000005",
+      "publicacionId": "20000000-0000-4000-8000-000000000004",
+      "autorId": "10000000-0000-4000-8000-000000000002",
+      "autorNombre": "Lucía Fernández",
+      "texto": "Para sintético me funcionaron muy bien los tapones cortos y una suela flexible.",
+      "creadoEn": "2026-11-19T15:00:00.000Z"
+    }
+  ],
+  "productos": [
+    {
+      "id": "4e2c2e4e-30ba-4e14-ae77-5ced7979746b",
+      "nombre": "Camiseta Orsai",
+      "descripcion": "Camiseta verde de la comunidad.",
+      "categoria": "camisetas",
+      "precio": 39.9,
+      "stock": 10,
+      "activo": true
+    },
+    {
+      "id": "0ee0a370-3cd6-4eda-abd6-88b66a5fc60b",
+      "nombre": "Balón Match",
+      "descripcion": "Balón de fútbol talla 5.",
+      "categoria": "balones",
+      "precio": 24.9,
+      "stock": 7,
+      "activo": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000001",
+      "nombre": "Bufanda Orsai",
+      "descripcion": "Bufanda tejida en verde y blanco para alentar en la tribuna.",
+      "categoria": "accesorios",
+      "precio": 12.5,
+      "stock": 14,
+      "activo": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000002",
+      "nombre": "Botines Training",
+      "descripcion": "Botines livianos con tapones cortos, ideales para entrenamientos.",
+      "categoria": "botas",
+      "precio": 58.5,
+      "stock": 5,
+      "activo": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000003",
+      "nombre": "Medias de partido",
+      "descripcion": "Medias deportivas cómodas para entrenar y jugar.",
+      "categoria": "accesorios",
+      "precio": 8.5,
+      "stock": 20,
+      "activo": true
+    }
+  ],
+  "carritos": {
+    "10000000-0000-4000-8000-000000000002": [
+      {
+        "productoId": "4e2c2e4e-30ba-4e14-ae77-5ced7979746b",
+        "cantidad": 1
+      },
+      {
+        "productoId": "50000000-0000-4000-8000-000000000001",
+        "cantidad": 1
+      }
+    ]
+  },
+  "pedidos": [
+    {
+      "id": "40000000-0000-4000-8000-000000000001",
+      "usuarioId": "10000000-0000-4000-8000-000000000003",
+      "lineas": [
+        {
+          "productoId": "0ee0a370-3cd6-4eda-abd6-88b66a5fc60b",
+          "nombre": "Balón Match",
+          "precio": 24.9,
+          "cantidad": 1
+        }
+      ],
+      "total": 24.9,
+      "unidad": "puntos",
+      "creadoEn": "2026-11-17T17:30:00.000Z"
+    }
+  ]
+}

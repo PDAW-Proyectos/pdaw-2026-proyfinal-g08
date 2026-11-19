@@ -46,14 +46,25 @@ npm start
 ```
 
 La aplicación estará disponible en `http://localhost:3000`. Las cuentas se guardan
-localmente en `data/users.json` por defecto (se puede cambiar con `USER_STORE_PATH`);
-ese archivo no se versiona y las contraseñas se almacenan como hashes. Las
-publicaciones, productos, carritos y pedidos se guardan en `data/comunidad.json`
-por defecto; la ubicación se puede cambiar con `COMMUNITY_STORE_PATH`.
+en `data/users.json` por defecto (se puede cambiar con `USER_STORE_PATH`) y las
+contraseñas se almacenan como hashes. Las publicaciones, productos, carritos y
+pedidos se guardan en `data/comunidad.json` por defecto; la ubicación se puede
+cambiar con `COMMUNITY_STORE_PATH`. Estos JSON quedan visibles para versionar los
+datos de demo: revisalos antes de cada commit y no incluyas cuentas ni actividad
+de personas reales.
 La configuración administrativa, incluido el límite de sesión, se guarda en
 `data/admin-settings.json` y se puede reubicar con `ADMIN_SETTINGS_PATH`. Las
 sesiones duran 10 minutos por defecto desde el inicio de sesión; el administrador
 puede ajustar el límite entre 1 y 1440 minutos para sesiones nuevas.
+
+En un primer inicio local, si los archivos de datos aún no existen y
+`NODE_ENV` no es `production`, se cargan los ejemplos de
+`data/demo-users.json` y `data/demo-comunidad.json`. Los archivos de ejecución
+existentes nunca se reemplazan. Para la demo, las cuentas
+`admin@orsai.demo`, `lucia@orsai.demo`, `marcos@orsai.demo` y `nacho@orsai.demo`
+usan la contraseña `OrsaiExpo2026!`. Esas credenciales son solo para exposición
+local; no las uses en un entorno expuesto. Si configuras `ADMIN_NAME`,
+`ADMIN_EMAIL` y `ADMIN_PASSWORD`, esa cuenta toma el rol de administrador.
 
 Para configurar la cuenta administradora inicial, definir `ADMIN_NAME`,
 `ADMIN_EMAIL` y `ADMIN_PASSWORD` en un `.env` local antes de iniciar el servidor.

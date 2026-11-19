@@ -70,8 +70,8 @@ web_modules/
 .env.*
 !.env.example
 usuarios.json
-data/users.json
-data/comunidad.json
+# data/users.json
+# data/comunidad.json
 data/admin-settings.json
 
 # parcel-bundler cache (https://parceljs.org/)
