@@ -120,6 +120,132 @@
       "precio": 8.5,
       "stock": 20,
       "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000001",
+      "nombre": "Camiseta Manchester City",
+      "descripcion": "Diseño celeste de muestra inspirado en los colores del Manchester City. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 74.9,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000002",
+      "nombre": "Bufanda Manchester City",
+      "descripcion": "Bufanda celeste y blanca de muestra inspirada en los colores del Manchester City. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 26.5,
+      "stock": 12,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000003",
+      "nombre": "Camiseta Inter Milan",
+      "descripcion": "Diseño azul y negro de muestra inspirado en los colores del Inter Milan. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 72.5,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000004",
+      "nombre": "Bufanda Inter Milan",
+      "descripcion": "Bufanda azul y negra de muestra inspirada en los colores del Inter Milan. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 25.9,
+      "stock": 12,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000005",
+      "nombre": "Camiseta Liverpool",
+      "descripcion": "Diseño rojo de muestra inspirado en los colores del Liverpool. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 71.9,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000006",
+      "nombre": "Bufanda Liverpool",
+      "descripcion": "Bufanda roja de muestra inspirada en los colores del Liverpool. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 25.5,
+      "stock": 12,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000007",
+      "nombre": "Camiseta Arsenal",
+      "descripcion": "Diseño rojo y blanco de muestra inspirado en los colores del Arsenal. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 73.5,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000008",
+      "nombre": "Bufanda Arsenal",
+      "descripcion": "Bufanda roja y blanca de muestra inspirada en los colores del Arsenal. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 26.0,
+      "stock": 12,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000009",
+      "nombre": "Camiseta Real Madrid",
+      "descripcion": "Diseño blanco de muestra inspirado en los colores del Real Madrid. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 76.9,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000010",
+      "nombre": "Bufanda Real Madrid",
+      "descripcion": "Bufanda blanca de muestra inspirada en los colores del Real Madrid. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 27.5,
+      "stock": 12,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000011",
+      "nombre": "Camiseta Barcelona",
+      "descripcion": "Diseño azul y grana de muestra inspirado en los colores del Barcelona. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 74.5,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000012",
+      "nombre": "Bufanda Barcelona",
+      "descripcion": "Bufanda azul y grana de muestra inspirada en los colores del Barcelona. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 26.5,
+      "stock": 12,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000013",
+      "nombre": "Camiseta Paris Saint-Germain",
+      "descripcion": "Diseño azul marino y rojo de muestra inspirado en los colores del Paris Saint-Germain. Producto no oficial.",
+      "categoria": "camisetas",
+      "precio": 75.9,
+      "stock": 8,
+      "activo": true
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000014",
+      "nombre": "Bufanda Paris Saint-Germain",
+      "descripcion": "Bufanda azul marino y roja de muestra inspirada en los colores del Paris Saint-Germain. Producto no oficial.",
+      "categoria": "accesorios",
+      "precio": 27.0,
+      "stock": 12,
+      "activo": true
     }
   ],
   "carritos": {

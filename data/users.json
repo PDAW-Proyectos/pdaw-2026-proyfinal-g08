@@ -42,5 +42,16 @@
     "favoriteTeam": "Boca Juniors",
     "status": "active",
     "createdAt": "2026-11-04T17:20:00.000Z"
+  },
+  {
+    "id": "bd69d393-f9df-4afd-878e-504a51fa8ef5",
+    "name": "tomas",
+    "email": "tomasjuanes@hotmail.com",
+    "passwordHash": "55fbb63da88124a1da6057d393ee5465e10d214464261963323c292c6fad0bf6da2411be5f3c7f32fcf41bd60fcad3b718c3440f252c99f284e1b9e762e1ddf2",
+    "salt": "2fcad6a49a0ddfc4eb816836e8e30543",
+    "role": "user",
+    "favoriteTeam": null,
+    "status": "active",
+    "createdAt": "2026-11-19T20:46:24.036Z"
   }
 ]
