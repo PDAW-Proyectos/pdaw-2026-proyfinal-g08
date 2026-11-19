@@ -46,13 +46,13 @@ npm start
 ```
 
 La aplicación estará disponible en `http://localhost:3000`. Las cuentas se guardan
-localmente en `usuarios.json` por defecto (se puede cambiar con `USER_STORE_PATH`);
+localmente en `data/users.json` por defecto (se puede cambiar con `USER_STORE_PATH`);
 ese archivo no se versiona y las contraseñas se almacenan como hashes. Las
 publicaciones, productos, carritos y pedidos se guardan en `data/comunidad.json`
 por defecto; la ubicación se puede cambiar con `COMMUNITY_STORE_PATH`.
 La configuración administrativa, incluido el límite de sesión, se guarda en
 `data/admin-settings.json` y se puede reubicar con `ADMIN_SETTINGS_PATH`. Las
-las sesiones duran 10 minutos por defecto desde el inicio de sesión; el administrador
+sesiones duran 10 minutos por defecto desde el inicio de sesión; el administrador
 puede ajustar el límite entre 1 y 1440 minutos para sesiones nuevas.
 
 Para configurar la cuenta administradora inicial, definir `ADMIN_NAME`,
@@ -85,9 +85,10 @@ npm test
 
 ## Documentación
 
-- Diagramas y wireframes: [`docs/`](docs/)
-- Acuerdos de trabajo y convenciones: [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- Riesgos: [`docs/riesgos.md`](docs/riesgos.md)
+- Documentación técnica: [`docs/DOCUMENTACION_TECNICA.md`](docs/DOCUMENTACION_TECNICA.md)
+- Diagramas: [`Diagrama de clases`](<docs/Diagrama de clases.jpg>) y [`Diagrama de contexto`](<docs/Diagrama de contexto.jpg>)
+- Bocetos: [`Inicio`](<docs/Inicio Boceto.png>), [`Foro`](<docs/Foro Boceto.png>) y [`Tienda`](<docs/Tienda Boceto.png>)
+- Requisitos: [`Historias de usuario`](<docs/User Stories.docx>) y [`Tareas técnicas`](<docs/Tareas Tecnicas.docx>)
 
 ## Uso de herramientas de IA
 

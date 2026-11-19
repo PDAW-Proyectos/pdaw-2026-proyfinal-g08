@@ -2,7 +2,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import express from "express";
-import { crearRouterLigas } from "./Routes/ligas.routes.js";
 import {
   MINUTOS_SESION_MAXIMOS,
   MINUTOS_SESION_MINIMOS,
@@ -72,7 +71,6 @@ export function createApp({
   users,
   comunidad,
   configuracion,
-  repositorioLigas = null,
   production = false,
 }) {
   const app = express();
@@ -530,10 +528,6 @@ export function createApp({
     });
     res.status(204).end();
   });
-
-  if (repositorioLigas) {
-    app.use("/api/ligas", crearRouterLigas(repositorioLigas));
-  }
 
   app.get("/auth.js", (req, res) =>
     res.sendFile(path.join(__dirname, "..", "..", "public", "js", "auth.js")),

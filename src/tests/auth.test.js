@@ -211,5 +211,7 @@ test("el servidor entrega las páginas y los scripts de la aplicación", async (
 
   const appScript = await request("/js/main.js");
   assert.equal(appScript.status, 200);
-  assert.match(await appScript.text(), /window\.addEventListener/);
+  const appScriptText = await appScript.text();
+  assert.match(appScriptText, /inicializarAutenticacion/);
+  assert.match(appScriptText, /DOMContentLoaded/);
 });

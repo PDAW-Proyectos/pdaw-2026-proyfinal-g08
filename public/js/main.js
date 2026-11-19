@@ -1,174 +1,87 @@
+import { fechaAValorEntrada } from "./utils.js";
+import { inicializarBuscadores } from "./buscador.js";
 import { inicializarAutenticacion } from "./auth.js";
+import { inicializarInicio } from "./inicio.js";
+import { inicializarLigas, inicializarLiga } from "./ligas.js";
+import { inicializarEquipo } from "./equipo.js";
 
-const contenedorLigas = document.getElementById("contenedorLigas");
-const ESCUDO_LIGA_POR_DEFECTO = "/data/escudoNoEncontrado.png";
+function inicializarControlesGenerales() {
+  const fechaLocal = new Date();
+  const elemAnio = document.querySelector("#anioActual");
+  if (elemAnio) elemAnio.textContent = fechaLocal.getFullYear();
 
+  const entradaFecha = document.querySelector("#fechaPartido");
+  if (entradaFecha) {
+    entradaFecha.value = fechaAValorEntrada(fechaLocal);
+    const desplazar = (dias) => {
+      const f = new Date(`${entradaFecha.value}T12:00:00`);
+      f.setDate(f.getDate() + dias);
+      entradaFecha.value = fechaAValorEntrada(f);
+      entradaFecha.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+    document.querySelector("#diaAnterior")?.addEventListener("click", () => desplazar(-1));
+    document.querySelector("#diaSiguiente")?.addEventListener("click", () => desplazar(1));
+  }
 
-window.addEventListener("load", () => {
+  const botonesFiltro = document.querySelectorAll("[data-filtro]");
+  botonesFiltro.forEach((boton) => {
+    boton.addEventListener("click", () => {
+      const filtro = boton.dataset.filtro;
+      let visibles = 0;
+      botonesFiltro.forEach((b) => b.setAttribute("aria-pressed", String(b === boton)));
+      document.querySelectorAll(".fila-resultado").forEach((fila) => {
+        const visible = filtro === "todos" || fila.dataset.categoria === filtro;
+        fila.hidden = !visible;
+        if (visible) visibles += 1;
+      });
+      const vacios = document.querySelector("#resultadosVacios");
+      if (vacios) vacios.hidden = visibles > 0;
+    });
+  });
+
+  const claveFavoritos = "ofsai-favorite-matches";
+  let listaFavoritos = [];
+  try {
+    const guardados = JSON.parse(localStorage.getItem(claveFavoritos) || "[]");
+    if (Array.isArray(guardados)) listaFavoritos = guardados;
+  } catch {
+    listaFavoritos = [];
+  }
+  const favoritos = new Set(listaFavoritos);
+  document.querySelectorAll("[data-favorito]").forEach((boton) => {
+    const esFav = favoritos.has(boton.dataset.favorito);
+    boton.setAttribute("aria-pressed", String(esFav));
+    boton.textContent = esFav ? "★" : "☆";
+    boton.addEventListener("click", () => {
+      const id = boton.dataset.favorito;
+      const activo = boton.getAttribute("aria-pressed") !== "true";
+      boton.setAttribute("aria-pressed", String(activo));
+      boton.textContent = activo ? "★" : "☆";
+      if (activo) favoritos.add(id);
+      else favoritos.delete(id);
+      try {
+        localStorage.setItem(claveFavoritos, JSON.stringify([...favoritos]));
+      } catch {
+        // Ignora errores de cuota o almacenamiento bloqueado
+      }
+    });
+  });
+}
+
+function iniciarAplicacion() {
+  inicializarBuscadores();
+  inicializarControlesGenerales();
   inicializarAutenticacion();
-  //distingue la pagina con atributo dataset en el body
-  //Sostener esto? Separar en modulos con app.js centralizandolos?
-  let pagina = document.body.dataset.pagina;
-  switch (pagina) {
-    case "index": {
-      cargarLigas();
-      break;
-    }
-    case "liga": {
-      renderizarPaginaLiga();
-      break;
-    }
-  }
-});
 
-//Comportamiento de index.html
-async function cargarLigas() {
-  const respuesta = await fetch("/api/ligas");
-  if (!respuesta.ok) {
-    throw new Error("Error en la respueta: ");
-  }
-  const datos = await respuesta.json();
-  mostrarLigas(datos);
+  const pagina = document.body.dataset.pagina;
+  if (pagina === "index" || document.getElementById("contenedorLigas")) inicializarInicio();
+  if (pagina === "liga" || document.getElementById("cuerpoTablaPosiciones")) inicializarLiga();
+  if (pagina === "equipo" || document.getElementById("tituloEquipo")) inicializarEquipo();
+  if (document.querySelectorAll("[data-liga-tabla]").length > 0) inicializarLigas();
 }
 
-function mostrarLigas(ligas) {
-  contenedorLigas.innerHTML = "";
-  ligas.forEach((liga) => {
-    let elemLiga = crearCardLiga(liga);
-    contenedorLigas.appendChild(elemLiga);
-  });
-}
-
-function crearCardLiga(liga) {
-  const columna = document.createElement("div");
-  columna.className = "col";
-
-  const tarjeta = document.createElement("a");
-  tarjeta.href = `../liga.html?id=${liga.id}`;
-  tarjeta.className = "card shadow-sm";
-  
-
-  const cuerpo = document.createElement("div");
-  cuerpo.className = "card-body p-3 d-flex align-items-center gap-2";
-
-  const escudo = document.createElement("img");
-  escudo.className = "flex-shrink-0";
-  escudo.width = 43;
-  escudo.height = 43;
-  escudo.src = liga.escudo;
-  escudo.style.objectFit = "contain";
-  asignarEscudo(escudo, liga.escudo, `Escudo de ${liga.nombre}`);
-
-  const informacion = document.createElement("div");
-
-  const nombre = document.createElement("h2");
-  nombre.className = "card-title h6 mb-1";
-  nombre.textContent = liga.nombre;
-
-  const pais = document.createElement("p");
-  pais.className = "card-text text-body-secondary mb-0";
-  pais.textContent = liga.pais;
-
-  informacion.append(nombre, pais);
-  cuerpo.append(escudo, informacion);
-  tarjeta.append(cuerpo);
-  columna.append(tarjeta);
-
-  return columna;
-}
-
-function asignarEscudo(imagen, urlEscudo, textoAlternativo) {
-  imagen.alt = textoAlternativo;
-  imagen.onerror = () => {
-    imagen.onerror = null;
-    if (imagen.getAttribute("src") !== ESCUDO_LIGA_POR_DEFECTO) {
-      imagen.src = ESCUDO_LIGA_POR_DEFECTO;
-    }
-  };
-  imagen.src = urlEscudo || ESCUDO_LIGA_POR_DEFECTO;
-}
-
-//Comportamiento de liga.html
-async function renderizarPaginaLiga() {
-  const urlActual = window.location.search;
-  const parametros = new URLSearchParams(urlActual);
-  const respuesta = await fetch(`/api/ligas/${parametros.get("id")}`);
-  if (!respuesta.ok) {
-    throw new Error("Error en la respuesta: ");
-  }
-  const liga = await respuesta.json();
-  renderizarEncabezadoLiga(liga);
-  renderizarTablaLiga(liga);
-}
-async function renderizarEncabezadoLiga(liga) {
-  const escudoLiga = document.getElementById("escudoLiga");
-  const tituloLiga = document.getElementById("tituloLiga");
-  const paisLiga = document.getElementById("paisLiga");
-  const temporadaLiga = document.getElementById("temporadaLiga");
-
-  asignarEscudo(escudoLiga, liga.escudo, `Escudo de ${liga.nombre}`);
-  tituloLiga.textContent = liga.nombre;
-  paisLiga.textContent = liga.pais;
-  temporadaLiga.textContent = liga.temporada;
-}
-function renderizarTablaLiga(liga) {
-  const cuerpoTabla = document.getElementById("cuerpoTablaPosiciones");
-  const tablaDeLiga = liga.tabla;
-  cuerpoTabla.replaceChildren();
-  tablaDeLiga.forEach((posicion) => {
-    let tableRow = agregarPosicionATabla(posicion);
-    cuerpoTabla.appendChild(tableRow);
-  });
-}
-function agregarPosicionATabla(posicion) {
-  const tableRow = document.createElement("tr");
-  const celdaPosicion = document.createElement("th");
-  celdaPosicion.scope = "row";
-  celdaPosicion.className = "text-center";
-  celdaPosicion.textContent = posicion.posicion ?? "—";
-  tableRow.appendChild(celdaPosicion);
-
-  const celdaEquipo = document.createElement("td");
-  const informacionEquipo = document.createElement("a");
-  informacionEquipo.href = `equipo.html?id=${posicion.idEquipo}`;
-  informacionEquipo.className = "d-flex align-items-center gap-2";
-
-  if (posicion.escudoEquipo) {
-    const escudoEquipo = document.createElement("img");
-    escudoEquipo.src = posicion.escudoEquipo;
-    escudoEquipo.alt = "";
-    escudoEquipo.width = 30;
-    escudoEquipo.height = 30;
-    escudoEquipo.className = "flex-shrink-0";
-    escudoEquipo.style.objectFit = "contain";
-    escudoEquipo.loading = "lazy";
-    informacionEquipo.appendChild(escudoEquipo);
-  }
-
-  const nombreEquipo = document.createElement("span");
-  nombreEquipo.className = "nombre-equipo text-truncate d-inline-block";
-  nombreEquipo.textContent = posicion.nombreEquipo ?? "Equipo desconocido";
-  informacionEquipo.appendChild(nombreEquipo);
-  celdaEquipo.appendChild(informacionEquipo);
-  tableRow.appendChild(celdaEquipo);
-
-  const estadisticas = [
-    posicion.partidosJugados,
-    posicion.victorias,
-    posicion.empates,
-    posicion.derrotas,
-    posicion.golesFavor,
-    posicion.golesContra,
-    posicion.diferenciaGol,
-    posicion.puntos,
-  ];
-
-  estadisticas.forEach((estadistica) => {
-    const celdaEstadistica = document.createElement("td");
-    celdaEstadistica.className = "text-center";
-    celdaEstadistica.textContent = estadistica ?? "—";
-    tableRow.appendChild(celdaEstadistica);
-  });
-
-  return tableRow;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", iniciarAplicacion);
+} else {
+  iniciarAplicacion();
 }

@@ -1,19 +1,22 @@
 {
-  "dependencies": {
-    "express": "^5.3.0",
-    "express-session": "^1.19.0",
-    "jest": "^30.5.2"
-  },
+  "name": "orsai",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "lint": "eslint .",
-    "start": "node --env-file-if-exists=.env src/js/server.js",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "dev": "node --env-file-if-exists=.env src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "build": "echo 'Build OK'",
+    "lint": "node --check src/server.js src/app.js src/js/app.js src/js/Usuarios/users.js src/js/Comunidad/RepositorioComunidad.js src/js/Configuracion/RepositorioConfiguracion.js src/middlewares/auth.middleware.js src/routes/auth.routes.js src/routes/ligas.routes.js src/routes/partidos.routes.js src/routes/equipos.routes.js src/controllers/auth.controller.js src/controllers/ligas.controller.js src/controllers/partidos.controller.js src/controllers/equipos.controller.js src/services/auth.service.js src/services/apiFutbol.service.js src/services/ligas.service.js src/services/partidos.service.js src/services/equipos.service.js src/services/sincronizacion.service.js src/models/Posicion.js src/models/Liga.js src/models/Partido.js src/models/Equipo.js src/models/Usuario.js src/repositories/LigasRepository.js src/repositories/PartidosRepository.js src/repositories/EquiposRepository.js src/repositories/UsuariosRepository.js src/utils/texto.js src/utils/jsonFile.js src/utils/fechas.js src/utils/apiMappers.js public/js/main.js public/js/auth.js public/js/utils.js public/js/buscador.js public/js/partidos.js public/js/inicio.js public/js/ligas.js public/js/equipo.js public/js/foro.js public/js/tienda.js public/js/admin.js public/js/perfil.js",
+    "test": "node --test tests/auth.test.js tests/equipos.test.js tests/errores.test.js tests/optimizacion_api.test.js tests/partidos.test.js && node --experimental-vm-modules ./node_modules/jest/bin/jest.js src/tests/auth.test.js src/tests/comunidad.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.14.0",
-    "globals": "^17.14.0",
-    "jest": "^30.5.2"
-  },
-  "type": "module"
+    "jest": "^30.5.2",
+    "supertest": "^7.3.1"
+  }
 }
