@@ -35,6 +35,7 @@ export class UsuariosRepository {
       if (error.code !== "ENOENT") {
         throw new Error(
           `No se pudo leer el archivo de usuarios: ${error.message}`,
+          { cause: error },
         );
       }
       rawUsers = [];
