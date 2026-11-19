@@ -6,6 +6,7 @@ import ServicioFutbol, {
   LIGAS_UTILIZADAS_IDS,
 } from "./Futbol/ServicioFutbol.js";
 import { crearRepositorioComunidad } from "./Comunidad/RepositorioComunidad.js";
+import { crearRepositorioConfiguracion } from "./Configuracion/RepositorioConfiguracion.js";
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -91,6 +92,9 @@ export async function startServer() {
   const comunidad = await crearRepositorioComunidad(
     process.env.COMMUNITY_STORE_PATH || "./data/comunidad.json",
   );
+  const configuracion = await crearRepositorioConfiguracion(
+    process.env.ADMIN_SETTINGS_PATH || "./data/admin-settings.json",
+  );
   // 2. Inicializa los datos de la API de fútbol
   const repositorioLigas = await inicializarLigas();
 
@@ -98,6 +102,7 @@ export async function startServer() {
   const app = createApp({
     users,
     comunidad,
+    configuracion,
     repositorioLigas,
     production: process.env.NODE_ENV === "production",
   });

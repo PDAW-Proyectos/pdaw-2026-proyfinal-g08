@@ -3,12 +3,28 @@ import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import express from "express";
 import { crearRouterLigas } from "./Routes/ligas.routes.js";
+import {
+  MINUTOS_SESION_MAXIMOS,
+  MINUTOS_SESION_MINIMOS,
+  MINUTOS_SESION_PREDETERMINADOS,
+} from "./Configuracion/RepositorioConfiguracion.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const sessionCookieName = "ofsai.sid";
-const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
+const milisegundosPorMinuto = 60 * 1000;
+
+const crearConfiguracionEnMemoria = () => {
+  let minutosTiempoSesion = MINUTOS_SESION_PREDETERMINADOS;
+  return {
+    obtenerMinutosTiempoSesion: () => minutosTiempoSesion,
+    async establecerMinutosTiempoSesion(minutos) {
+      minutosTiempoSesion = minutos;
+      return minutosTiempoSesion;
+    },
+  };
+};
 
 const publicUser = ({ id, name, email, favoriteTeam, role }) => ({
   id,
@@ -55,11 +71,13 @@ const esPrecioValido = (precio) =>
 export function createApp({
   users,
   comunidad,
+  configuracion,
   repositorioLigas = null,
   production = false,
 }) {
   const app = express();
   const sessions = new Map();
+  const configuracionActiva = configuracion || crearConfiguracionEnMemoria();
 
   if (production) app.set("trust proxy", 1);
 
@@ -111,16 +129,19 @@ export function createApp({
   };
 
   const startSession = (res, user) => {
+    const duracionSesionMs =
+      configuracionActiva.obtenerMinutosTiempoSesion() *
+      milisegundosPorMinuto;
     const sessionId = randomBytes(32).toString("hex");
     sessions.set(sessionId, {
       userId: user.id,
-      expiresAt: Date.now() + sessionDurationMs,
+      expiresAt: Date.now() + duracionSesionMs,
     });
     res.cookie(sessionCookieName, sessionId, {
       httpOnly: true,
       sameSite: "lax",
       secure: production,
-      maxAge: sessionDurationMs,
+      maxAge: duracionSesionMs,
       path: "/",
     });
   };
@@ -232,6 +253,34 @@ export function createApp({
   app.get("/api/admin/users", requireAdmin, (req, res) => {
     res.json({ usuarios: users.list().map(adminUser) });
   });
+
+  app.get("/api/admin/settings", requireAdmin, (req, res) => {
+    res.json({
+      sessionTimeoutMinutes: configuracionActiva.obtenerMinutosTiempoSesion(),
+    });
+  });
+
+  app.patch(
+    "/api/admin/settings/session-timeout",
+    requireAdmin,
+    async (req, res) => {
+      const minutos = req.body?.minutes;
+      if (
+        !Number.isInteger(minutos) ||
+        minutos < MINUTOS_SESION_MINIMOS ||
+        minutos > MINUTOS_SESION_MAXIMOS
+      ) {
+        return res.status(400).json({
+          error:
+            `La duración de sesión debe ser un número entero entre ${MINUTOS_SESION_MINIMOS} y ${MINUTOS_SESION_MAXIMOS} minutos.`,
+        });
+      }
+
+      const minutosTiempoSesion =
+        await configuracionActiva.establecerMinutosTiempoSesion(minutos);
+      res.json({ sessionTimeoutMinutes: minutosTiempoSesion });
+    },
+  );
 
   app.patch("/api/admin/users/:id/status", requireAdmin, async (req, res) => {
     try {

@@ -3,12 +3,14 @@ import os from "node:os";
 import path from "node:path";
 import createApp from "../js/app.js";
 import { crearRepositorioComunidad } from "../js/Comunidad/RepositorioComunidad.js";
+import { crearRepositorioConfiguracion } from "../js/Configuracion/RepositorioConfiguracion.js";
 
 describe("funciones de foro y tienda", () => {
   let carpetaTemporal;
   let servidor;
   let baseUrl;
   let comunidad;
+  let configuracion;
 
   const usuariosPrueba = [
     {
@@ -58,6 +60,9 @@ describe("funciones de foro y tienda", () => {
     );
     comunidad = await crearRepositorioComunidad(
       path.join(carpetaTemporal, "comunidad.json"),
+    );
+    configuracion = await crearRepositorioConfiguracion(
+      path.join(carpetaTemporal, "configuracion.json"),
     );
 
     const users = {
@@ -109,7 +114,7 @@ describe("funciones de foro y tienda", () => {
       },
     };
 
-    const app = createApp({ users, comunidad });
+    const app = createApp({ users, comunidad, configuracion });
     await new Promise((resolve) => {
       servidor = app.listen(0, "127.0.0.1", resolve);
     });
@@ -131,6 +136,7 @@ describe("funciones de foro y tienda", () => {
       method: "POST",
       body: JSON.stringify({ titulo: "Debate", texto: "Una publicación." }),
     });
+
     const { publicacion } = await respuestaPublicacion.json();
 
     const respuestaComentario = await pedir(
@@ -202,6 +208,64 @@ describe("funciones de foro y tienda", () => {
         })
       ).status,
     ).toBe(204);
+  });
+
+  test("solo el administrador puede configurar y persistir el timeout de sesión", async () => {
+    const cookieUsuario = await iniciarSesion("usuario@example.com");
+    const cookieAdmin = await iniciarSesion("admin@example.com");
+
+    const sinSesion = await pedir("/api/admin/settings", null);
+    expect(sinSesion.status).toBe(401);
+    const sinPermisos = await pedir("/api/admin/settings", cookieUsuario);
+    expect(sinPermisos.status).toBe(403);
+
+    const lecturaInicial = await pedir("/api/admin/settings", cookieAdmin);
+    expect(await lecturaInicial.json()).toEqual({ sessionTimeoutMinutes: 10 });
+
+    const actualizacionSinPermisos = await pedir(
+      "/api/admin/settings/session-timeout",
+      cookieUsuario,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ minutes: 30 }),
+      },
+    );
+    expect(actualizacionSinPermisos.status).toBe(403);
+
+    const invalido = await pedir(
+      "/api/admin/settings/session-timeout",
+      cookieAdmin,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ minutes: 0 }),
+      },
+    );
+    expect(invalido.status).toBe(400);
+
+    const actualizado = await pedir(
+      "/api/admin/settings/session-timeout",
+      cookieAdmin,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ minutes: 20 }),
+      },
+    );
+    expect(await actualizado.json()).toEqual({ sessionTimeoutMinutes: 20 });
+
+    const configuracionRecargada = await crearRepositorioConfiguracion(
+      path.join(carpetaTemporal, "configuracion.json"),
+    );
+    expect(configuracionRecargada.obtenerMinutosTiempoSesion()).toBe(20);
+
+    const login = await fetch(`${baseUrl}/api/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: "usuario@example.com",
+        password: "clave-de-prueba",
+      }),
+    });
+    expect(login.headers.get("set-cookie")).toMatch(/Max-Age=1200/);
   });
 
   test("guarda los precios en puntos, actualiza el carrito y conserva el historial", async () => {

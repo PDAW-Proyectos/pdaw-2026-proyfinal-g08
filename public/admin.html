@@ -103,6 +103,72 @@
 
       <p id="estado-admin" class="mb-3" role="status" aria-live="polite"></p>
 
+      <details class="panel admin-seccion p-3 p-md-4 mb-3">
+        <summary>Tiempo de sesión</summary>
+        <div class="admin-seccion-contenido">
+          <form id="formulario-tiempo-sesion" class="admin-configuracion-form">
+            <div class="admin-configuracion-descripcion">
+              <h2 class="admin-item-titulo">Límite de sesión</h2>
+              <p class="admin-item-detalle mb-0">
+                Tiempo máximo desde el inicio de sesión. El cambio se aplicará
+                a las sesiones nuevas.
+              </p>
+            </div>
+            <div class="admin-configuracion-campo">
+              <label class="form-label" for="minutos-tiempo-sesion">
+                Duración (minutos)
+              </label>
+              <input
+                class="form-control"
+                id="minutos-tiempo-sesion"
+                name="minutos"
+                type="number"
+                min="1"
+                max="1440"
+                step="1"
+                required
+              />
+            </div>
+            <button class="btn boton-grada" type="submit">
+              Guardar límite
+            </button>
+          </form>
+        </div>
+      </details>
+
+      <details class="panel admin-seccion admin-prode p-3 p-md-4 mb-3">
+        <summary>Prode</summary>
+        <div class="admin-seccion-contenido">
+          <div class="admin-configuracion-form" aria-describedby="ayuda-prode">
+            <div class="admin-configuracion-descripcion">
+              <h2 class="admin-item-titulo">Puntos por acierto exacto</h2>
+              <p id="ayuda-prode" class="admin-item-detalle mb-0">
+                Definí cuántos puntos otorgaría acertar el resultado exacto de
+                un partido. Esta opción es una vista previa y todavía no se
+                guarda ni afecta el sistema.
+              </p>
+            </div>
+            <div class="admin-configuracion-campo">
+              <label class="form-label" for="puntos-prode">
+                Puntos por resultado exacto
+              </label>
+              <input
+                class="form-control"
+                id="puntos-prode"
+                name="points"
+                type="number"
+                min="0"
+                step="1"
+                value="10"
+              />
+            </div>
+            <button class="btn boton-grada" type="button" disabled>
+              Guardar cuando Prode esté disponible
+            </button>
+          </div>
+        </div>
+      </details>
+
       <details class="panel admin-seccion p-3 p-md-4 mb-3" open>
         <summary>Productos de la tienda</summary>
         <div class="admin-seccion-contenido">
