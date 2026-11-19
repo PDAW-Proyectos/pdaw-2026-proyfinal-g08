@@ -947,6 +947,21 @@
         align-items: center;
       }
 
+      .encabezado-foro .texto-toggle-formulario {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .encabezado-foro .texto-toggle-formulario.abierto,
+      .encabezado-foro [aria-expanded="true"] .texto-toggle-formulario.cerrado {
+        display: none;
+      }
+
+      .encabezado-foro [aria-expanded="true"] .texto-toggle-formulario.abierto {
+        display: inline-flex;
+      }
+
       .resumen-foro {
         display: flex;
         align-items: center;

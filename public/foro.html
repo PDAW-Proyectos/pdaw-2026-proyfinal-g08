@@ -107,46 +107,66 @@
             fútbol.
           </p>
         </div>
-        <a class="btn boton-grada px-3" href="#form-publicacion"
-          ><span aria-hidden="true">＋</span> Crear un tema</a
+        <button
+          class="btn boton-grada px-3"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#contenido-form-publicacion"
+          aria-expanded="false"
+          aria-controls="contenido-form-publicacion"
         >
+          <span class="texto-toggle-formulario cerrado">
+            <span aria-hidden="true">＋</span> Crear un tema
+          </span>
+          <span class="texto-toggle-formulario abierto">
+            <span aria-hidden="true">−</span> Cerrar formulario
+          </span>
+        </button>
       </section>
 
       <section
-        class="panel p-3 p-md-4 mb-4"
+        id="contenido-form-publicacion"
+        class="collapse mb-4"
         aria-labelledby="titulo-form-publicacion"
       >
-        <h2 id="titulo-form-publicacion" class="titulo-seccion">
-          Crear una publicación
-        </h2>
-        <p>Tenés que iniciar sesión para publicar o comentar.</p>
-        <form id="form-publicacion">
-          <div class="mb-3">
-            <label class="form-label" for="titulo-publicacion">Título</label>
-            <input
-              class="form-control"
-              id="titulo-publicacion"
-              name="titulo"
-              type="text"
-              minlength="3"
-              maxlength="120"
-              required
-            />
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="texto-publicacion">Mensaje</label>
-            <textarea
-              class="form-control"
-              id="texto-publicacion"
-              name="texto"
-              rows="4"
-              maxlength="2000"
-              required
-            ></textarea>
-          </div>
-          <button class="btn boton-grada" type="submit">Publicar</button>
-        </form>
-        <p id="estado-foro" class="mt-3 mb-0" role="status" aria-live="polite"></p>
+        <div class="panel p-3 p-md-4">
+          <h2 id="titulo-form-publicacion" class="titulo-seccion">
+            Crear una publicación
+          </h2>
+          <p>Tenés que iniciar sesión para publicar o comentar.</p>
+          <form id="form-publicacion">
+            <div class="mb-3">
+              <label class="form-label" for="titulo-publicacion">Título</label>
+              <input
+                class="form-control"
+                id="titulo-publicacion"
+                name="titulo"
+                type="text"
+                minlength="3"
+                maxlength="120"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="texto-publicacion">Mensaje</label>
+              <textarea
+                class="form-control"
+                id="texto-publicacion"
+                name="texto"
+                rows="4"
+                maxlength="2000"
+                required
+              ></textarea>
+            </div>
+            <button class="btn boton-grada" type="submit">Publicar</button>
+          </form>
+          <p
+            id="estado-foro"
+            class="mt-3 mb-0"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
       </section>
 
       <section class="resumen-foro mb-3" aria-label="Actividad de la comunidad">
@@ -428,6 +448,9 @@
         <span>© 2026 Orsai</span>
       </div>
     </footer>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    ></script>
     <script type="module" src="js/main.js" defer></script>
     <script type="module" src="js/foro.js"></script>
   </body>
