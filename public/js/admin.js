@@ -2,6 +2,10 @@ const listaProductos = document.querySelector("#lista-productos-admin");
 const listaPublicaciones = document.querySelector("#lista-publicaciones-admin");
 const listaUsuarios = document.querySelector("#lista-usuarios-admin");
 const formularioProducto = document.querySelector("#form-producto");
+const formularioTiempoSesion = document.querySelector(
+  "#formulario-tiempo-sesion",
+);
+const campoMinutosSesion = document.querySelector("#minutos-tiempo-sesion");
 const estadoAdmin = document.querySelector("#estado-admin");
 
 const formatoPuntos = new Intl.NumberFormat("es-AR", {
@@ -249,6 +253,32 @@ async function cargarUsuarios() {
   }
 }
 
+async function cargarConfiguracion() {
+  const configuracion = await solicitar("/api/admin/settings");
+  campoMinutosSesion.value = configuracion.sessionTimeoutMinutes;
+}
+
+formularioTiempoSesion.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const minutos = Number(
+    new FormData(formularioTiempoSesion).get("minutos"),
+  );
+
+  try {
+    const configuracion = await solicitar(
+      "/api/admin/settings/session-timeout",
+      {
+        method: "PATCH",
+        body: JSON.stringify({ minutes: minutos }),
+      },
+    );
+    campoMinutosSesion.value = configuracion.sessionTimeoutMinutes;
+    estadoAdmin.textContent = "Límite de sesión actualizado.";
+  } catch (error) {
+    estadoAdmin.textContent = error.message;
+  }
+});
+
 formularioProducto.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const datos = new FormData(formularioProducto);
@@ -272,8 +302,11 @@ formularioProducto.addEventListener("submit", async (evento) => {
   }
 });
 
-Promise.all([cargarProductos(), cargarPublicaciones(), cargarUsuarios()]).catch(
-  (error) => {
-    estadoAdmin.textContent = error.message;
-  },
-);
+Promise.all([
+  cargarConfiguracion(),
+  cargarProductos(),
+  cargarPublicaciones(),
+  cargarUsuarios(),
+]).catch((error) => {
+  estadoAdmin.textContent = error.message;
+});

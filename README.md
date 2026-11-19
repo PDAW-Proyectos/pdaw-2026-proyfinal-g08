@@ -50,6 +50,10 @@ localmente en `usuarios.json` por defecto (se puede cambiar con `USER_STORE_PATH
 ese archivo no se versiona y las contraseñas se almacenan como hashes. Las
 publicaciones, productos, carritos y pedidos se guardan en `data/comunidad.json`
 por defecto; la ubicación se puede cambiar con `COMMUNITY_STORE_PATH`.
+La configuración administrativa, incluido el límite de sesión, se guarda en
+`data/admin-settings.json` y se puede reubicar con `ADMIN_SETTINGS_PATH`. Las
+las sesiones duran 10 minutos por defecto desde el inicio de sesión; el administrador
+puede ajustar el límite entre 1 y 1440 minutos para sesiones nuevas.
 
 Para configurar la cuenta administradora inicial, definir `ADMIN_NAME`,
 `ADMIN_EMAIL` y `ADMIN_PASSWORD` en un `.env` local antes de iniciar el servidor.
