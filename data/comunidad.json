@@ -73,6 +73,14 @@
       "autorNombre": "Lucía Fernández",
       "texto": "Para sintético me funcionaron muy bien los tapones cortos y una suela flexible.",
       "creadoEn": "2026-11-19T15:00:00.000Z"
+    },
+    {
+      "id": "ce548c7d-dd67-406e-995e-54636ab57d24",
+      "publicacionId": "20000000-0000-4000-8000-000000000003",
+      "autorId": "73d48668-0a03-44fb-b5f6-3a05af0438ce",
+      "autorNombre": "seba",
+      "texto": "mmh no banco",
+      "creadoEn": "2026-11-19T22:24:03.806Z"
     }
   ],
   "productos": [
@@ -91,7 +99,7 @@
       "descripcion": "Balón de fútbol talla 5.",
       "categoria": "balones",
       "precio": 24.9,
-      "stock": 7,
+      "stock": 6,
       "activo": true
     },
     {
@@ -235,7 +243,7 @@
       "descripcion": "Diseño azul marino y rojo de muestra inspirado en los colores del Paris Saint-Germain. Producto no oficial.",
       "categoria": "camisetas",
       "precio": 75.9,
-      "stock": 8,
+      "stock": 7,
       "activo": true
     },
     {
@@ -262,7 +270,7 @@
       "descripcion": "Bufanda azul y amarilla de muestra inspirada en los colores de Boca Juniors. Producto no oficial.",
       "categoria": "accesorios",
       "precio": 24.9,
-      "stock": 11,
+      "stock": 10,
       "activo": true
     }
   ],
@@ -277,7 +285,18 @@
         "cantidad": 1
       }
     ],
-    "bd69d393-f9df-4afd-878e-504a51fa8ef5": []
+    "bd69d393-f9df-4afd-878e-504a51fa8ef5": [],
+    "10000000-0000-4000-8000-000000000001": [
+      {
+        "productoId": "60000000-0000-4000-8000-000000000016",
+        "cantidad": 1
+      },
+      {
+        "productoId": "60000000-0000-4000-8000-000000000013",
+        "cantidad": 2
+      }
+    ],
+    "10000000-0000-4000-8000-000000000003": []
   },
   "pedidos": [
     {
@@ -309,6 +328,33 @@
       "total": 24.9,
       "unidad": "puntos",
       "creadoEn": "2026-11-19T20:46:30.897Z"
+    },
+    {
+      "id": "53435d37-38f7-41a5-b372-70a76ee945b7",
+      "usuarioId": "10000000-0000-4000-8000-000000000003",
+      "lineas": [
+        {
+          "productoId": "0ee0a370-3cd6-4eda-abd6-88b66a5fc60b",
+          "nombre": "Balón Match",
+          "precio": 24.9,
+          "cantidad": 1
+        },
+        {
+          "productoId": "60000000-0000-4000-8000-000000000016",
+          "nombre": "Bufanda Boca Juniors",
+          "precio": 24.9,
+          "cantidad": 1
+        },
+        {
+          "productoId": "60000000-0000-4000-8000-000000000013",
+          "nombre": "Camiseta Paris Saint-Germain",
+          "precio": 75.9,
+          "cantidad": 1
+        }
+      ],
+      "total": 125.7,
+      "unidad": "puntos",
+      "creadoEn": "2026-11-20T00:20:44.038Z"
     }
   ]
 }

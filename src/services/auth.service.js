@@ -1,30 +1,23 @@
-import { promisify } from "node:util";
-import { randomBytes, randomUUID, scrypt, timingSafeEqual } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { MINUTOS_SESION_PREDETERMINADOS } from "../models/Configuracion.js";
 import { crearError } from "../utils/errores.js";
-
-const deriveKey = promisify(scrypt);
-const PASSWORD_KEY_LENGTH = 64;
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
-
-const normalizeEmail = (email) => email.trim().toLowerCase();
+import {
+  generarHashContrasena,
+  verificarContrasena,
+} from "../utils/criptografia.js";
+import { esCorreoValido, normalizarCorreo } from "../utils/texto.js";
 
 function validateRegistration({ name, email, password, favoriteTeam }) {
-  if (
-    typeof name !== "string" ||
-    name.trim().length < 2 ||
-    name.trim().length > 80
-  ) {
+  const nombreLimpio = name?.trim?.();
+  if (!nombreLimpio || nombreLimpio.length < 2 || nombreLimpio.length > 80) {
     return "Ingresá un nombre de entre 2 y 80 caracteres.";
   }
-  if (
-    typeof email !== "string" ||
-    email.length > 254 ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-  ) {
+  if (!esCorreoValido(email)) {
     return "Ingresá un correo electrónico válido.";
   }
   if (
-    typeof password !== "string" ||
+    !password ||
+    String(password) !== password ||
     password.length < 8 ||
     password.length > 128
   ) {
@@ -33,7 +26,7 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
   if (
     favoriteTeam !== undefined &&
     favoriteTeam !== null &&
-    (typeof favoriteTeam !== "string" || favoriteTeam.length > 80)
+    (String(favoriteTeam) !== favoriteTeam || favoriteTeam.length > 80)
   ) {
     return "El equipo seleccionado no es válido.";
   }
@@ -42,22 +35,27 @@ function validateRegistration({ name, email, password, favoriteTeam }) {
 
 export class AuthService {
   #usuariosRepo;
+  #configuracionRepo;
   #sessions;
 
-  constructor(usuariosRepo) {
+  constructor(usuariosRepo, configuracionRepo = null) {
     this.#usuariosRepo = usuariosRepo;
+    this.#configuracionRepo = configuracionRepo;
     this.#sessions = new Map();
   }
 
   get sessionDurationMs() {
-    return SESSION_DURATION_MS;
+    const minutos =
+      this.#configuracionRepo?.obtenerMinutosTiempoSesion?.() ??
+      MINUTOS_SESION_PREDETERMINADOS;
+    return minutos * 60 * 1000;
   }
 
   #crearSesion(userId) {
     const sessionId = randomBytes(32).toString("hex");
     this.#sessions.set(sessionId, {
       userId,
-      expiresAt: Date.now() + SESSION_DURATION_MS,
+      expiresAt: Date.now() + this.sessionDurationMs,
     });
     return sessionId;
   }
@@ -73,16 +71,18 @@ export class AuthService {
       throw crearError(400, "invalid_registration", validationError);
     }
 
-    const salt = randomBytes(16);
-    const passwordHash = await deriveKey(password, salt, PASSWORD_KEY_LENGTH);
+    const { passwordHash, salt } = await generarHashContrasena(password);
 
     const usuario = await this.#usuariosRepo.create({
       id: randomUUID(),
       name: name.trim(),
-      email: normalizeEmail(email),
-      passwordHash: passwordHash.toString("hex"),
-      salt: salt.toString("hex"),
+      email: normalizarCorreo(email),
+      passwordHash,
+      salt,
+      role: "user",
       favoriteTeam: favoriteTeam?.trim() || null,
+      status: "active",
+      createdAt: new Date().toISOString(),
     });
 
     return {
@@ -92,22 +92,22 @@ export class AuthService {
   }
 
   async iniciarSesion(email, password) {
-    if (typeof email !== "string" || typeof password !== "string") return null;
-    const usuario = this.#usuariosRepo?.findByEmail(normalizeEmail(email));
-    if (!usuario) return null;
-
-    const candidate = await deriveKey(
-      password,
-      Buffer.from(usuario.salt, "hex"),
-      PASSWORD_KEY_LENGTH,
-    );
-    const expected = Buffer.from(usuario.passwordHash, "hex");
     if (
-      candidate.length !== expected.length ||
-      !timingSafeEqual(candidate, expected)
-    ) {
+      !email ||
+      !password ||
+      String(email) !== email ||
+      String(password) !== password
+    )
       return null;
-    }
+    const usuario = this.#usuariosRepo?.findByEmail(email);
+    if (!usuario || !usuario.autenticable()) return null;
+
+    const esValida = await verificarContrasena(
+      password,
+      usuario.salt,
+      usuario.passwordHash,
+    );
+    if (!esValida) return null;
 
     return {
       user: usuario.toPublicJSON(),
@@ -119,11 +119,15 @@ export class AuthService {
     if (!sessionId) return null;
     const session = this.#sessions.get(sessionId);
     if (!session || session.expiresAt <= Date.now()) {
-      if (sessionId) this.#sessions.delete(sessionId);
+      this.#sessions.delete(sessionId);
       return null;
     }
     const usuario = this.#usuariosRepo?.findById(session.userId);
-    return usuario ? usuario.toPublicJSON() : null;
+    if (!usuario || !usuario.autenticable()) {
+      this.#sessions.delete(sessionId);
+      return null;
+    }
+    return usuario;
   }
 
   cerrarSesion(sessionId) {

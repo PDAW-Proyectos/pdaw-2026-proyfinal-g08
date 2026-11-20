@@ -25,14 +25,9 @@ export function crearAuthController(authService, { production = false } = {}) {
 
     async iniciarSesion(req, res, next) {
       try {
-        const email = req.body?.email;
+        const email = req.body?.email?.trim?.();
         const password = req.body?.password;
-        if (
-          typeof email !== "string" ||
-          !email.trim() ||
-          typeof password !== "string" ||
-          !password
-        ) {
+        if (!email || !password || String(password) !== password) {
           return next(
             crearError(
               400,

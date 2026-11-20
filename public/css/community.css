@@ -1844,6 +1844,43 @@
         font-size: 0.82rem;
       }
 
+      .dialogo-admin-confirmacion {
+        width: min(100% - 2rem, 440px);
+        padding: 1.5rem;
+        border: 1px solid var(--grada-borde);
+        border-radius: 16px;
+        background: #fff;
+        color: #20352d;
+        box-shadow: 0 20px 70px rgb(21 58 46 / 22%);
+      }
+
+      .dialogo-admin-confirmacion::backdrop {
+        background: rgb(17 37 29 / 55%);
+        backdrop-filter: blur(2px);
+      }
+
+      .admin-confirmacion-titulo {
+        margin: 0 0 0.65rem;
+        color: var(--grada-oscuro);
+        font-size: 1.2rem;
+        font-weight: 750;
+      }
+
+      .admin-confirmacion-descripcion {
+        margin: 0;
+        color: var(--grada-atenuado);
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
+
+      .admin-confirmacion-acciones {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        margin-top: 1.25rem;
+      }
+
       @media (max-width: 767.98px) {
         .navbar .auth-controls {
           align-items: flex-start;

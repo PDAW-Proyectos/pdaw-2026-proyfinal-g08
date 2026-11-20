@@ -1,312 +1,408 @@
-const listaProductos = document.querySelector("#lista-productos-admin");
+import {
+  cambiarEstadoUsuarioAdmin,
+  darDeBajaUsuarioAdmin,
+  editarPublicacionAdmin,
+  eliminarPublicacionAdmin,
+  listarPublicacionesAdmin,
+  listarUsuariosAdmin,
+} from "./admin-api.js";
+
 const listaPublicaciones = document.querySelector("#lista-publicaciones-admin");
 const listaUsuarios = document.querySelector("#lista-usuarios-admin");
-const formularioProducto = document.querySelector("#form-producto");
-const formularioTiempoSesion = document.querySelector(
-  "#formulario-tiempo-sesion",
-);
-const campoMinutosSesion = document.querySelector("#minutos-tiempo-sesion");
 const estadoAdmin = document.querySelector("#estado-admin");
+let dialogoConfirmacion;
+let resolverConfirmacion;
 
-const formatoPuntos = new Intl.NumberFormat("es-AR", {
-  maximumFractionDigits: 2,
-});
-
-async function solicitar(url, opciones = {}) {
-  const respuesta = await fetch(url, {
-    headers: { "content-type": "application/json" },
-    ...opciones,
-  });
-
-  if (respuesta.status === 204) return null;
-
-  const resultado = await respuesta.json();
-  if (!respuesta.ok) {
-    throw new Error(resultado.error || "No se pudo completar la solicitud.");
-  }
-  return resultado;
+function crearElemento(etiqueta, clase, texto = "") {
+  const elemento = document.createElement(etiqueta);
+  elemento.className = clase;
+  elemento.textContent = texto;
+  return elemento;
 }
 
-function mostrarVacio(contenedor, mensaje) {
-  const aviso = document.createElement("p");
-  aviso.className = "mb-0 atenuado";
-  aviso.textContent = mensaje;
-  contenedor.replaceChildren(aviso);
-}
-
-async function cargarProductos() {
-  const { productos } = await solicitar("/api/products");
-  listaProductos.replaceChildren();
-
-  if (productos.length === 0) {
-    mostrarVacio(listaProductos, "Todavía no hay productos en el catálogo.");
-    return;
-  }
-
-  for (const producto of productos) {
-    const tarjeta = document.createElement("article");
-    const encabezado = document.createElement("div");
-    const nombre = document.createElement("h3");
-    const detalle = document.createElement("p");
-    const botonEliminar = document.createElement("button");
-
-    tarjeta.className = "admin-item";
-    encabezado.className = "admin-item-encabezado";
-    nombre.className = "admin-item-titulo";
-    nombre.textContent = producto.nombre;
-    detalle.className = "admin-item-detalle";
-    detalle.textContent =
-      `${producto.categoria} · ${formatoPuntos.format(producto.precio)} puntos · ` +
-      `${producto.stock} unidades en stock`;
-    botonEliminar.type = "button";
-    botonEliminar.className = "btn btn-sm boton-contorno-grada";
-    botonEliminar.textContent = "Eliminar producto";
-    botonEliminar.addEventListener("click", async () => {
-      if (!window.confirm(`¿Eliminar ${producto.nombre} del catálogo?`)) return;
-      try {
-        await solicitar(`/api/products/${producto.id}`, { method: "DELETE" });
-        estadoAdmin.textContent = "Producto eliminado.";
-        await cargarProductos();
-      } catch (error) {
-        estadoAdmin.textContent = error.message;
-      }
-    });
-
-    encabezado.append(nombre, botonEliminar);
-    tarjeta.append(encabezado, detalle);
-    listaProductos.append(tarjeta);
-  }
-}
-
-async function cargarPublicaciones() {
-  const { publicaciones } = await solicitar("/api/admin/posts");
-  listaPublicaciones.replaceChildren();
-
-  if (publicaciones.length === 0) {
-    mostrarVacio(listaPublicaciones, "Todavía no hay publicaciones.");
-    return;
-  }
-
-  for (const publicacion of publicaciones) {
-    const tarjeta = document.createElement("article");
-    const encabezado = document.createElement("div");
-    const titulo = document.createElement("h3");
-    const autor = document.createElement("p");
-    const texto = document.createElement("p");
-    const respuestas = document.createElement("p");
-    const botonEliminar = document.createElement("button");
-
-    tarjeta.className = "admin-item";
-    encabezado.className = "admin-item-encabezado";
-    titulo.className = "admin-item-titulo";
-    titulo.textContent = publicacion.titulo;
-    autor.className = "admin-item-detalle";
-    autor.textContent =
-      `Por ${publicacion.autorNombre} · ` +
-      new Date(publicacion.creadaEn).toLocaleString("es-AR");
-    texto.className = "admin-item-texto";
-    texto.textContent = publicacion.texto;
-    respuestas.className = "admin-item-detalle";
-    respuestas.textContent = `${publicacion.comentarios.length} comentarios`;
-    botonEliminar.type = "button";
-    botonEliminar.className = "btn btn-sm boton-contorno-grada";
-    botonEliminar.textContent = "Eliminar publicación";
-    botonEliminar.addEventListener("click", async () => {
-      if (!window.confirm(`¿Eliminar la publicación "${publicacion.titulo}"?`))
-        return;
-      try {
-        await solicitar(`/api/forum/posts/${publicacion.id}`, {
-          method: "DELETE",
-        });
-        estadoAdmin.textContent = "Publicación eliminada.";
-        await cargarPublicaciones();
-      } catch (error) {
-        estadoAdmin.textContent = error.message;
-      }
-    });
-
-    encabezado.append(titulo, botonEliminar);
-    tarjeta.append(encabezado, autor, texto, respuestas);
-    listaPublicaciones.append(tarjeta);
-  }
-}
-
-function crearControlEstado(usuario) {
+function crearBoton(texto, clase, accion) {
   const boton = document.createElement("button");
-  const nuevoEstado = usuario.status === "suspended" ? "active" : "suspended";
   boton.type = "button";
-  boton.className = "btn btn-sm boton-contorno-grada";
-  boton.textContent =
-    nuevoEstado === "active" ? "Quitar suspensión" : "Suspender cuenta";
-  boton.addEventListener("click", async () => {
-    const mensaje =
-      nuevoEstado === "active"
-        ? `¿Reactivar la cuenta de ${usuario.name}?`
-        : `¿Suspender temporalmente la cuenta de ${usuario.name}?`;
-    if (!window.confirm(mensaje)) return;
-
-    try {
-      await solicitar(`/api/admin/users/${usuario.id}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: nuevoEstado }),
-      });
-      estadoAdmin.textContent =
-        nuevoEstado === "active" ? "Cuenta reactivada." : "Cuenta suspendida.";
-      await cargarUsuarios();
-    } catch (error) {
-      estadoAdmin.textContent = error.message;
-    }
-  });
+  boton.className = clase;
+  boton.textContent = texto;
+  boton.addEventListener("click", accion);
   return boton;
 }
 
-function crearControlEliminacion(usuario) {
-  const boton = document.createElement("button");
-  boton.type = "button";
-  boton.className = "btn btn-sm btn-outline-danger";
-  boton.textContent = "Eliminar cuenta";
-  boton.addEventListener("click", async () => {
-    if (
-      !window.confirm(
-        `¿Eliminar la cuenta de ${usuario.name}? Su nombre se reemplazará por ` +
-          '"Cuenta borrada", se conservará su correo para administración y su ' +
-          "contenido dejará de ser público.",
-      )
-    ) {
-      return;
-    }
-
-    try {
-      await solicitar(`/api/admin/users/${usuario.id}`, { method: "DELETE" });
-      estadoAdmin.textContent = "Cuenta eliminada de la vista pública.";
-      await cargarUsuarios();
-    } catch (error) {
-      estadoAdmin.textContent = error.message;
-    }
-  });
-  return boton;
+function mostrarEstado(mensaje, esError = false) {
+  if (!estadoAdmin) return;
+  estadoAdmin.textContent = mensaje;
+  estadoAdmin.classList.toggle("text-danger", esError);
 }
 
-async function cargarUsuarios() {
-  const { usuarios } = await solicitar("/api/admin/users");
-  listaUsuarios.replaceChildren();
-
-  if (usuarios.length === 0) {
-    mostrarVacio(listaUsuarios, "Todavía no hay usuarios registrados.");
-    return;
-  }
-
-  for (const usuario of usuarios) {
-    const tarjeta = document.createElement("article");
-    const encabezado = document.createElement("div");
-    const nombre = document.createElement("h3");
-    const estado = document.createElement("span");
-    const correo = document.createElement("p");
-    const equipo = document.createElement("p");
-    const alta = document.createElement("p");
-    const cambioEstado = document.createElement("p");
-    const acciones = document.createElement("div");
-
-    tarjeta.className = "admin-item";
-    encabezado.className = "admin-item-encabezado";
-    nombre.className = "admin-item-titulo";
-    nombre.textContent = usuario.name;
-    estado.className = `admin-estado admin-estado-${usuario.status}`;
-    estado.textContent =
-      usuario.status === "suspended"
-        ? "Suspendida"
-        : usuario.status === "deleted"
-          ? "Eliminada"
-          : usuario.role === "admin"
-            ? "Administrador"
-            : "Activa";
-    correo.className = "admin-item-detalle";
-    correo.textContent = `Correo: ${usuario.email}`;
-    equipo.className = "admin-item-detalle";
-    equipo.textContent = usuario.favoriteTeam
-      ? `Equipo favorito: ${usuario.favoriteTeam}`
-      : "Sin equipo favorito";
-    alta.className = "admin-item-detalle";
-    alta.textContent = usuario.createdAt
-      ? `Alta: ${new Date(usuario.createdAt).toLocaleString("es-AR")}`
-      : "Fecha de alta no disponible";
-    cambioEstado.className = "admin-item-detalle";
-    cambioEstado.textContent =
-      usuario.status === "deleted" && usuario.deletedAt
-        ? `Eliminada: ${new Date(usuario.deletedAt).toLocaleString("es-AR")}`
-        : usuario.statusChangedAt
-          ? `Estado actualizado: ${new Date(usuario.statusChangedAt).toLocaleString("es-AR")}`
-          : "";
-    acciones.className = "admin-acciones";
-
-    encabezado.append(nombre, estado);
-    tarjeta.append(encabezado, correo, equipo, alta);
-    if (cambioEstado.textContent) tarjeta.append(cambioEstado);
-    if (usuario.role !== "admin" && usuario.status !== "deleted") {
-      acciones.append(
-        crearControlEstado(usuario),
-        crearControlEliminacion(usuario),
-      );
-      tarjeta.append(acciones);
-    }
-    listaUsuarios.append(tarjeta);
-  }
+function obtenerMensajeError(error) {
+  return error instanceof Error ? error.message : "Error desconocido.";
 }
 
-async function cargarConfiguracion() {
-  const configuracion = await solicitar("/api/admin/settings");
-  campoMinutosSesion.value = configuracion.sessionTimeoutMinutes;
-}
+function obtenerDialogoConfirmacion() {
+  if (dialogoConfirmacion) return dialogoConfirmacion;
 
-formularioTiempoSesion.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const minutos = Number(
-    new FormData(formularioTiempoSesion).get("minutos"),
+  const dialogo = document.createElement("dialog");
+  const titulo = crearElemento("h2", "admin-confirmacion-titulo");
+  const descripcion = crearElemento("p", "admin-confirmacion-descripcion");
+  const acciones = crearElemento("div", "admin-confirmacion-acciones");
+  const botonCancelar = crearBoton(
+    "Cancelar",
+    "btn btn-sm boton-contorno-grada",
+    () => dialogo.close("cancel"),
+  );
+  const botonConfirmar = crearBoton(
+    "Confirmar",
+    "btn btn-sm boton-grada",
+    () => dialogo.close("confirm"),
   );
 
-  try {
-    const configuracion = await solicitar(
-      "/api/admin/settings/session-timeout",
-      {
-        method: "PATCH",
-        body: JSON.stringify({ minutes: minutos }),
+  dialogo.className = "dialogo-admin-confirmacion";
+  dialogo.setAttribute("aria-labelledby", "admin-confirmacion-titulo");
+  dialogo.setAttribute("aria-describedby", "admin-confirmacion-descripcion");
+  titulo.id = "admin-confirmacion-titulo";
+  descripcion.id = "admin-confirmacion-descripcion";
+  acciones.append(botonCancelar, botonConfirmar);
+  dialogo.append(titulo, descripcion, acciones);
+  dialogo.addEventListener("close", () => {
+    const resolver = resolverConfirmacion;
+    resolverConfirmacion = null;
+    resolver?.(dialogo.returnValue === "confirm");
+  });
+  document.body.append(dialogo);
+
+  dialogoConfirmacion = {
+    dialogo,
+    titulo,
+    descripcion,
+    botonCancelar,
+    botonConfirmar,
+  };
+  return dialogoConfirmacion;
+}
+
+function confirmarAccion({
+  titulo,
+  mensaje,
+  textoConfirmar = "Confirmar",
+  destructiva = false,
+}) {
+  const modal = obtenerDialogoConfirmacion();
+  modal.titulo.textContent = titulo;
+  modal.descripcion.textContent = mensaje;
+  modal.botonConfirmar.textContent = textoConfirmar;
+  modal.botonConfirmar.className = destructiva
+    ? "btn btn-sm btn-outline-danger"
+    : "btn btn-sm boton-grada";
+
+  return new Promise((resolve) => {
+    resolverConfirmacion = resolve;
+    modal.dialogo.returnValue = "";
+    modal.dialogo.showModal();
+    modal.botonCancelar.focus();
+  });
+}
+
+function formatearFecha(valor) {
+  const fecha = new Date(valor);
+  return Number.isNaN(fecha.getTime())
+    ? "Fecha desconocida"
+    : fecha.toLocaleString("es-AR");
+}
+
+function crearFormularioEdicion(publicacion) {
+  const formulario = crearElemento("form", "admin-item");
+  const etiquetaTitulo = crearElemento("label", "form-label", "Título");
+  const campoTitulo = document.createElement("input");
+  const etiquetaTexto = crearElemento("label", "form-label", "Texto");
+  const campoTexto = document.createElement("textarea");
+  const acciones = crearElemento("div", "admin-acciones");
+  const botonGuardar = crearElemento(
+    "button",
+    "btn btn-sm boton-grada",
+    "Guardar cambios",
+  );
+  const botonCancelar = crearBoton(
+    "Cancelar",
+    "btn btn-sm boton-contorno-grada",
+    () => formulario.replaceWith(crearTarjetaPublicacion(publicacion)),
+  );
+  const mensaje = crearElemento("p", "admin-item-detalle");
+
+  campoTitulo.id = `titulo-${publicacion.id}`;
+  campoTitulo.className = "form-control";
+  campoTitulo.name = "titulo";
+  campoTitulo.value = publicacion.titulo;
+  campoTitulo.minLength = 3;
+  campoTitulo.maxLength = 120;
+  campoTitulo.required = true;
+  etiquetaTitulo.htmlFor = campoTitulo.id;
+
+  campoTexto.id = `texto-${publicacion.id}`;
+  campoTexto.className = "form-control";
+  campoTexto.name = "texto";
+  campoTexto.value = publicacion.texto;
+  campoTexto.maxLength = 2000;
+  campoTexto.required = true;
+  etiquetaTexto.htmlFor = campoTexto.id;
+
+  botonGuardar.type = "submit";
+  mensaje.setAttribute("role", "status");
+  mensaje.setAttribute("aria-live", "polite");
+  acciones.append(botonGuardar, botonCancelar);
+  formulario.append(
+    etiquetaTitulo,
+    campoTitulo,
+    etiquetaTexto,
+    campoTexto,
+    mensaje,
+    acciones,
+  );
+
+  formulario.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    if (!formulario.reportValidity()) return;
+
+    botonGuardar.disabled = true;
+    botonCancelar.disabled = true;
+    try {
+      await editarPublicacionAdmin(publicacion.id, {
+        titulo: campoTitulo.value.trim(),
+        texto: campoTexto.value.trim(),
+      });
+      mostrarEstado("Publicación actualizada.");
+      await cargarPublicaciones();
+    } catch (error) {
+      mensaje.textContent = obtenerMensajeError(error);
+      botonGuardar.disabled = false;
+      botonCancelar.disabled = false;
+    }
+  });
+
+  return formulario;
+}
+
+function crearTarjetaPublicacion(publicacion) {
+  const tarjeta = crearElemento("article", "admin-item");
+  const encabezado = crearElemento("div", "admin-item-encabezado");
+  const titulo = crearElemento(
+    "h2",
+    "admin-item-titulo",
+    publicacion.titulo || "Publicación sin título",
+  );
+  const detalle = crearElemento(
+    "p",
+    "admin-item-detalle",
+    `Por ${publicacion.autorNombre || "Usuario"} · ${formatearFecha(publicacion.creadaEn)} · ${(publicacion.comentarios || []).length} comentarios`,
+  );
+  const texto = crearElemento("p", "admin-item-texto", publicacion.texto || "");
+  const acciones = crearElemento("div", "admin-acciones");
+  const botonEditar = crearBoton(
+    "Editar",
+    "btn btn-sm boton-contorno-grada",
+    () => tarjeta.replaceWith(crearFormularioEdicion(publicacion)),
+  );
+  const botonEliminar = crearBoton(
+    "Eliminar publicación",
+    "btn btn-sm btn-outline-danger",
+    async () => {
+      const confirmado = await confirmarAccion({
+        titulo: "Eliminar publicación",
+        mensaje:
+          `Se eliminará «${publicacion.titulo}» y sus comentarios. ` +
+          "Esta acción no se puede deshacer.",
+        textoConfirmar: "Eliminar publicación",
+        destructiva: true,
+      });
+      if (!confirmado) {
+        return;
+      }
+
+      botonEliminar.disabled = true;
+      try {
+        await eliminarPublicacionAdmin(publicacion.id);
+        mostrarEstado("Publicación eliminada.");
+        await cargarPublicaciones();
+      } catch (error) {
+        mostrarEstado(obtenerMensajeError(error), true);
+        botonEliminar.disabled = false;
+      }
+    },
+  );
+
+  encabezado.append(titulo);
+  acciones.append(botonEditar, botonEliminar);
+  tarjeta.append(encabezado, detalle, texto, acciones);
+  return tarjeta;
+}
+
+function crearTarjetaUsuario(usuario) {
+  const tarjeta = crearElemento("article", "admin-item");
+  const encabezado = crearElemento("div", "admin-item-encabezado");
+  const titulo = crearElemento("h2", "admin-item-titulo", usuario.name);
+  const estados = {
+    active: ["Activa", ""],
+    suspended: ["Suspendida", " admin-estado-suspended"],
+    deleted: ["De baja", " admin-estado-deleted"],
+  };
+  const [textoEstado, claseEstado] = estados[usuario.status] || [
+    "Estado desconocido",
+    "",
+  ];
+  const etiquetaEstado = crearElemento(
+    "span",
+    `admin-estado${claseEstado}`,
+    textoEstado,
+  );
+  const detalle = crearElemento(
+    "p",
+    "admin-item-detalle",
+    `Correo: ${usuario.email}`,
+  );
+  const equipo = crearElemento(
+    "p",
+    "admin-item-detalle",
+    usuario.favoriteTeam
+      ? `Equipo favorito: ${usuario.favoriteTeam}`
+      : "Sin equipo favorito",
+  );
+  const acciones = crearElemento("div", "admin-acciones");
+
+  encabezado.append(titulo, etiquetaEstado);
+  tarjeta.append(encabezado, detalle, equipo);
+
+  if (usuario.createdAt) {
+    tarjeta.append(
+      crearElemento(
+        "p",
+        "admin-item-detalle",
+        `Registrado: ${formatearFecha(usuario.createdAt)}`,
+      ),
+    );
+  }
+
+  if (usuario.role !== "admin" && usuario.status !== "deleted") {
+    const nuevoEstado = usuario.status === "suspended" ? "active" : "suspended";
+    const textoBoton =
+      nuevoEstado === "active" ? "Reactivar cuenta" : "Suspender cuenta";
+    const botonEstado = crearBoton(
+      textoBoton,
+      "btn btn-sm boton-contorno-grada",
+      async () => {
+        const confirmacion =
+          nuevoEstado === "active"
+            ? {
+                titulo: "Reactivar cuenta",
+                mensaje: `¿Querés reactivar la cuenta de ${usuario.name}?`,
+                textoConfirmar: "Reactivar",
+              }
+            : {
+                titulo: "Suspender cuenta",
+                mensaje: `¿Querés suspender la cuenta de ${usuario.name}?`,
+                textoConfirmar: "Suspender",
+                destructiva: true,
+              };
+        if (!(await confirmarAccion(confirmacion))) return;
+
+        botonEstado.disabled = true;
+        try {
+          await cambiarEstadoUsuarioAdmin(usuario.id, nuevoEstado);
+          mostrarEstado(
+            nuevoEstado === "active"
+              ? "Cuenta reactivada."
+              : "Cuenta suspendida.",
+          );
+          await cargarUsuarios();
+        } catch (error) {
+          mostrarEstado(obtenerMensajeError(error), true);
+          botonEstado.disabled = false;
+        }
       },
     );
-    campoMinutosSesion.value = configuracion.sessionTimeoutMinutes;
-    estadoAdmin.textContent = "Límite de sesión actualizado.";
-  } catch (error) {
-    estadoAdmin.textContent = error.message;
+    const botonBaja = crearBoton(
+      "Dar de baja",
+      "btn btn-sm btn-outline-danger",
+      async () => {
+        const confirmado = await confirmarAccion({
+          titulo: "Dar de baja usuario",
+          mensaje:
+            `${usuario.name} dejará de estar visible, pero sus datos se ` +
+            "conservarán.",
+          textoConfirmar: "Dar de baja",
+          destructiva: true,
+        });
+        if (!confirmado) {
+          return;
+        }
+
+        botonBaja.disabled = true;
+        try {
+          await darDeBajaUsuarioAdmin(usuario.id);
+          mostrarEstado("Cuenta dada de baja.");
+          await cargarUsuarios();
+        } catch (error) {
+          mostrarEstado(obtenerMensajeError(error), true);
+          botonBaja.disabled = false;
+        }
+      },
+    );
+    acciones.append(botonEstado, botonBaja);
+    tarjeta.append(acciones);
   }
-});
 
-formularioProducto.addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const datos = new FormData(formularioProducto);
+  return tarjeta;
+}
 
+async function cargarLista(contenedor, cargar, renderizar, mensajeVacio) {
+  if (!contenedor) return;
+
+  contenedor.setAttribute("aria-busy", "true");
+  contenedor.replaceChildren(
+    crearElemento("p", "admin-item-detalle", "Cargando..."),
+  );
   try {
-    await solicitar("/api/products", {
-      method: "POST",
-      body: JSON.stringify({
-        nombre: datos.get("nombre"),
-        descripcion: datos.get("descripcion"),
-        categoria: datos.get("categoria"),
-        precio: Number(datos.get("precio")),
-        stock: Number(datos.get("stock")),
-      }),
-    });
-    formularioProducto.reset();
-    estadoAdmin.textContent = "Producto agregado al catálogo.";
-    await cargarProductos();
-  } catch (error) {
-    estadoAdmin.textContent = error.message;
-  }
-});
+    const elementos = await cargar();
+    if (!Array.isArray(elementos)) {
+      throw new Error("El servidor devolvió datos con un formato inesperado.");
+    }
 
-Promise.all([
-  cargarConfiguracion(),
-  cargarProductos(),
-  cargarPublicaciones(),
-  cargarUsuarios(),
-]).catch((error) => {
-  estadoAdmin.textContent = error.message;
-});
+    const contenido = document.createDocumentFragment();
+    if (elementos.length === 0) {
+      contenido.append(crearElemento("p", "admin-item-detalle", mensajeVacio));
+    } else {
+      elementos.forEach((elemento) => contenido.append(renderizar(elemento)));
+    }
+    contenedor.replaceChildren(contenido);
+  } catch (error) {
+    contenedor.replaceChildren(
+      crearElemento(
+        "p",
+        "admin-item-detalle",
+        `No se pudo cargar la lista: ${obtenerMensajeError(error)}`,
+      ),
+    );
+  } finally {
+    contenedor.setAttribute("aria-busy", "false");
+  }
+}
+
+function cargarPublicaciones() {
+  return cargarLista(
+    listaPublicaciones,
+    listarPublicacionesAdmin,
+    crearTarjetaPublicacion,
+    "Todavía no hay publicaciones.",
+  );
+}
+
+function cargarUsuarios() {
+  return cargarLista(
+    listaUsuarios,
+    listarUsuariosAdmin,
+    crearTarjetaUsuario,
+    "Todavía no hay usuarios registrados.",
+  );
+}
+
+cargarPublicaciones();
+cargarUsuarios();

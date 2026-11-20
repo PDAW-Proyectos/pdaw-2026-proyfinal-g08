@@ -18,8 +18,9 @@
     "salt": "c39e1e254939d87240690e01dc66d7a1",
     "role": "user",
     "favoriteTeam": "River Plate",
-    "status": "active",
-    "createdAt": "2026-11-02T09:30:00.000Z"
+    "status": "suspended",
+    "createdAt": "2026-11-02T09:30:00.000Z",
+    "statusChangedAt": "2026-11-20T03:03:45.637Z"
   },
   {
     "id": "10000000-0000-4000-8000-000000000003",
@@ -53,5 +54,16 @@
     "favoriteTeam": null,
     "status": "active",
     "createdAt": "2026-11-19T20:46:24.036Z"
+  },
+  {
+    "id": "73d48668-0a03-44fb-b5f6-3a05af0438ce",
+    "name": "seba",
+    "email": "seba@seba.com",
+    "passwordHash": "5059c0974c54d31e9dcb4f9914f8f6830b8f42e7c60750ffb2d16c751f7388a63f5b2491210e1746893e54d86423996e4cc4072710fef1f39888ca2f7cbf7930",
+    "salt": "8ecac98a9accbff5c126b7295d017d0e",
+    "role": "user",
+    "favoriteTeam": "Chelsea",
+    "status": "active",
+    "createdAt": "2026-11-19T22:23:34.017Z"
   }
 ]

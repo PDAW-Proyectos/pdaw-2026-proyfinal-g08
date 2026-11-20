@@ -10,9 +10,10 @@ export function cargarSesion(authService) {
 
     const sessionId = sessionCookie?.slice(SESSION_COOKIE_NAME.length + 1);
     if (sessionId && authService) {
-      const user = authService.obtenerUsuarioPorSesion(sessionId);
-      if (user) {
-        req.user = user;
+      const usuario = authService.obtenerUsuarioPorSesion(sessionId);
+      if (usuario) {
+        req.usuario = usuario;
+        req.user = usuario.toPublicJSON();
         req.sessionId = sessionId;
       }
     }
@@ -29,4 +30,20 @@ export function requerirAutenticacion(req, res, next) {
     });
   }
   return next();
+}
+
+export function requerirAdministrador(req, res, next) {
+  if (!req.usuario) {
+    return res.status(401).json({
+      error: "Es necesario iniciar sesión.",
+      status: 401,
+      code: "unauthorized",
+    });
+  }
+  try {
+    req.usuario.verificarAccesoAdmin();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
