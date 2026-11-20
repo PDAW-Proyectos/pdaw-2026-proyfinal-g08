@@ -7,7 +7,7 @@
     "start": "node --env-file-if-exists=.env src/server.js",
     "build": "echo 'Build OK'",
     "lint": "eslint .",
-    "test": "node --test tests/auth.test.js tests/equipos.test.js tests/errores.test.js tests/optimizacion_api.test.js tests/partidos.test.js && node --experimental-vm-modules ./node_modules/jest/bin/jest.js src/tests/auth.test.js src/tests/comunidad.test.js"
+    "test": "node --test tests/auth.test.js tests/equipos.test.js tests/errores.test.js tests/optimizacion_api.test.js tests/partidos.test.js tests/foro-edicion.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
