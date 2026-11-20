@@ -7,19 +7,27 @@ import {
   rutaApiNoEncontrada,
 } from "./middlewares/errores.middleware.js";
 import { crearRouterAuth } from "./routes/auth.routes.js";
+import { crearRouterUsuarios } from "./routes/usuarios.routes.js";
+import { crearRouterForo } from "./routes/foro.routes.js";
+import { crearRouterTienda } from "./routes/tienda.routes.js";
+import { crearRouterAdmin } from "./routes/admin.routes.js";
 import { crearRouterLigas } from "./routes/ligas.routes.js";
 import { crearRouterPartidos } from "./routes/partidos.routes.js";
 import { crearRouterEquipos } from "./routes/equipos.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const publicDirectory = path.join(__dirname, "..", "public");
 
 export function createApp({
   authService = null,
+  usuariosService = null,
+  foroService = null,
+  tiendaService = null,
+  adminService = null,
   ligasService = null,
   partidosService = null,
   equiposService = null,
-  communityApp = null,
   production = false,
 } = {}) {
   const app = express();
@@ -34,16 +42,39 @@ export function createApp({
     app.use("/api", crearRouterAuth(authService, { production }));
   }
 
+  if (usuariosService) {
+    app.use("/api", crearRouterUsuarios(usuariosService));
+  }
+  if (foroService) {
+    app.use("/api/forum", crearRouterForo(foroService));
+  }
+  if (tiendaService) {
+    app.use("/api", crearRouterTienda(tiendaService));
+  }
+  if (adminService) {
+    app.use("/api/admin", crearRouterAdmin(adminService));
+  }
+
   if (ligasService) app.use("/api/ligas", crearRouterLigas(ligasService));
   if (partidosService)
     app.use("/api/partidos", crearRouterPartidos(partidosService));
   if (equiposService)
     app.use("/api/equipos", crearRouterEquipos(equiposService));
 
-  if (communityApp) app.use(communityApp);
-
   app.use("/api", rutaApiNoEncontrada);
-  app.use(express.static(path.join(__dirname, "..", "public")));
+
+  app.get("/auth.js", (req, res) =>
+    res.sendFile(path.join(publicDirectory, "js", "auth.js")),
+  );
+
+  app.get("/admin.html", (req, res, next) => {
+    if (!req.usuario || !req.usuario.puedeAdministrar()) {
+      return res.redirect("/index.html");
+    }
+    return next();
+  });
+
+  app.use(express.static(publicDirectory));
   app.use(manejarErrores);
 
   return app;
